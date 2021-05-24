@@ -3,7 +3,7 @@ package net.axay.pacmc.commands
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.mordant.rendering.TextColors.*
-import com.github.ajalt.mordant.rendering.TextStyles.*
+import com.github.ajalt.mordant.rendering.TextStyles.bold
 import io.ktor.client.request.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -21,7 +21,7 @@ object Search : CliktCommand() {
         withContext(Values.coroutineScope.coroutineContext) {
             ktorClient.get<List<CurseProxy.Project>>("${proxyApi}search?gameId=432&sectionId=6&searchFilter=$searchterm")
         }.forEach {
-            terminal.println("${yellow("curseforge/")}${white(bold(it.name))} by ${it.authors.first().name}")
+            terminal.println("${yellow("curseforge/")}${white(bold(it.name))} by ${it.authors.first().name} ${green(it.latestVersion)}")
             terminal.println("  ${gray(it.summary)}")
         }
     }
