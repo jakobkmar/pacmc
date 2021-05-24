@@ -1,6 +1,7 @@
 package net.axay.pacmc.requests
 
 import kotlinx.serialization.Serializable
+import net.axay.pacmc.data.ReleaseType
 
 object CurseProxy {
     @Serializable
@@ -24,14 +25,25 @@ object CurseProxy {
             val fileType: Int,
         )
 
-        val latestVersion: String?
-            get() {
-                val versionString = kotlin.run {
-                    gameVersionLatestFiles.firstOrNull { it.fileType == 1 }
-                        ?: gameVersionLatestFiles.firstOrNull { it.fileType == 2 }
-                        ?: gameVersionLatestFiles.firstOrNull()
-                }?.projectFileName
-                return versionString?.removeSuffix(".jar")
+        fun getLatestVersion(gameVersion: String?): Pair<String, ReleaseType?>? {
+            val files = gameVersionLatestFiles.let { files ->
+                if (gameVersion != null) {
+                    files.filter { it.gameVersion == gameVersion }.ifEmpty {
+                        val majorVersion = gameVersion.split('.').take(2).joinToString(".")
+                        files.filter { it.gameVersion.startsWith(majorVersion) }
+                    }
+                } else files
             }
+            return kotlin.run {
+                files.firstOrNull { it.fileType == 1 }
+                    ?: files.firstOrNull { it.fileType == 2 }
+                    ?: files.firstOrNull()
+            }?.let { it.projectFileName.removeSuffix(".jar") to ReleaseType.fromInt(it.fileType) }
+        }
     }
+
+    @Serializable
+    data class MinecraftVersion(
+        val versionString: String,
+    )
 }
