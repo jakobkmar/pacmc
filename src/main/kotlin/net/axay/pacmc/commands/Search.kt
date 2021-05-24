@@ -2,6 +2,7 @@ package net.axay.pacmc.commands
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
+import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.mordant.rendering.TextColors.*
 import com.github.ajalt.mordant.rendering.TextStyles.bold
@@ -15,7 +16,8 @@ import net.axay.pacmc.terminal
 
 object Search : CliktCommand() {
     private val searchterm by argument()
-    private val gameversion by option("-g", "--game-version")
+    private val gameversion by option("-g", "--game-version", help = "Set a specific game version")
+    private val fabric by option("-f", "--fabric", help = "Only search for mods in the Fabric category").flag()
 
     private const val proxyApi = "https://addons-ecs.forgesvc.net/api/v2/addon/"
 
@@ -26,6 +28,7 @@ object Search : CliktCommand() {
                 parameter("sectionId", 6) // section: mods
                 parameter("searchFilter", searchterm)
                 if (gameversion != null) parameter("gameVersion", gameversion)
+                if (fabric) parameter("categoryId", 4780)
             }
         }.forEach { project ->
             val repo = yellow("curseforge/")
