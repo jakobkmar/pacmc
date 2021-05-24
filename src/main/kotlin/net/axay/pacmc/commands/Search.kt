@@ -22,7 +22,8 @@ object Search : CliktCommand() {
     override fun run() = runBlocking {
         withContext(Values.coroutineScope.coroutineContext) {
             ktorClient.get<List<CurseProxy.Project>>("${proxyApi}search") {
-                parameter("gameId", 432)
+                parameter("gameId", 432) // game: minecraft
+                parameter("sectionId", 6) // section: mods
                 parameter("searchFilter", searchterm)
                 if (gameversion != null) parameter("gameVersion", gameversion)
             }
