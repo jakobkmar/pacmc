@@ -24,14 +24,14 @@ object CurseProxy {
             val fileType: Int,
         )
 
-        val latestVersion: String
+        val latestVersion: String?
             get() {
                 val versionString = kotlin.run {
                     gameVersionLatestFiles.firstOrNull { it.fileType == 1 }
                         ?: gameVersionLatestFiles.firstOrNull { it.fileType == 2 }
-                        ?: gameVersionLatestFiles.first()
-                }.projectFileName
-                return versionString.removeSuffix(".jar")
+                        ?: gameVersionLatestFiles.firstOrNull()
+                }?.projectFileName
+                return versionString?.removeSuffix(".jar")
             }
     }
 }
