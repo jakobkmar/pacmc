@@ -23,7 +23,6 @@ object Search : CliktCommand(
 ) {
     private val searchTerm by argument()
     private val gameVersion by option("-g", "--game-version", help = "Set a specific game version (latest by default)")
-    private val forge by option("-f", "--forge", help = "Search for Forge mods instead of Fabric mods").flag()
     private val allVersions by option("-i", "--all-versions", help = "Wether to show mods for all Minecraft versions").flag()
     private val allResults by option("-a", "--all", help = "Wether to show all result without any limit").flag()
     private val limit by option("-l", "--limit", help = "The amount of result (defaults to 15)").int().default(15)
@@ -46,9 +45,9 @@ object Search : CliktCommand(
                 parameter("gameId", 432) // game: minecraft
                 parameter("sectionId", 6) // section: mods
                 parameter("searchFilter", searchTerm)
+                parameter("categoryId", 4780)
                 if (gameVersion != null && !allVersions) parameter("gameVersion", gameVersion)
                 if (!allResults) parameter("pageSize", limit)
-                if (!forge) parameter("categoryId", 4780)
             }
         }.forEach { project ->
             val mcVersion = versionRequest.await()
