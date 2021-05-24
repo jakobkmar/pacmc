@@ -7,6 +7,8 @@ plugins {
 group = "net.axay"
 version = "1.0-SNAPSHOT"
 
+description = "An easy to use package manager for Fabric Minecraft mods."
+
 repositories {
     mavenCentral()
 }
