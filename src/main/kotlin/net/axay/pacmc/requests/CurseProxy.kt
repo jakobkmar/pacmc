@@ -6,7 +6,7 @@ import net.axay.pacmc.data.ReleaseType
 object CurseProxy {
     @Serializable
     data class Project(
-        val id: String,
+        val id: Int,
         val name: String,
         val authors: List<Author>,
         val summary: String,
