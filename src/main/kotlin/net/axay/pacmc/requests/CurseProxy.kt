@@ -4,7 +4,7 @@ import io.ktor.client.request.*
 import net.axay.pacmc.ktorClient
 import net.axay.pacmc.requests.data.CurseProxyFile
 import net.axay.pacmc.requests.data.CurseProxyMinecraftVersion
-import net.axay.pacmc.requests.data.CurseProxySearchResult
+import net.axay.pacmc.requests.data.CurseProxyProject
 
 object CurseProxy {
     private const val proxyApi = "https://addons-ecs.forgesvc.net/api/v2/"
@@ -13,7 +13,7 @@ object CurseProxy {
         ktorClient.get<List<CurseProxyMinecraftVersion>>("${proxyApi}minecraft/version")
 
     suspend fun search(searchTerm: String, gameVersion: String?, limit: Int?) =
-        ktorClient.get<List<CurseProxySearchResult>>("${proxyApi}addon/search") {
+        ktorClient.get<List<CurseProxyProject>>("${proxyApi}addon/search") {
             parameter("gameId", 432) // game: minecraft
             parameter("sectionId", 6) // section: mods
             parameter("searchFilter", searchTerm)
