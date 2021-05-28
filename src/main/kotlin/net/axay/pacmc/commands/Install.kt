@@ -22,6 +22,7 @@ import net.axay.pacmc.terminal
 import java.io.File
 import kotlin.collections.set
 import kotlin.math.absoluteValue
+import kotlin.math.roundToInt
 
 object Install : CliktCommand(
     "Installs a minecraft mod"
@@ -124,7 +125,7 @@ object Install : CliktCommand(
         print("bei 0%")
         ktorClient.get<HttpResponse>(file.downloadUrl) {
             onDownload { bytesSentTotal, contentLength ->
-                print("\rbei ${(bytesSentTotal / contentLength) * 100}%")
+                print("\rbei ${((bytesSentTotal.toDouble() / contentLength.toDouble()) * 100).roundToInt()}%")
             }
         }.content.copyAndClose(File(archive.path, "pacmc_curseforge_${modId}.jar").writeChannel())
         println()
