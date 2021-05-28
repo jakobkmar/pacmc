@@ -16,13 +16,13 @@ import net.axay.pacmc.requests.CurseProxy
 import net.axay.pacmc.terminal
 
 object Search : CliktCommand(
-    "Search for "
+    "Search for mods"
 ) {
     private val searchTerm by argument()
     private val gameVersion by option("-g", "--game-version", help = "Set a specific game version (latest by default)")
-    private val allVersions by option("-i", "--all-versions", help = "Wether to show mods for all Minecraft versions").flag()
-    private val allResults by option("-a", "--all", help = "Wether to show all result without any limit").flag()
-    private val limit by option("-l", "--limit", help = "The amount of result (defaults to 15)").int().default(15)
+    private val allVersions by option("-i", "--all-versions", help = "Whether to show mods for all Minecraft versions").flag()
+    private val allResults by option("-a", "--all", help = "Whether to show all result without any limit").flag()
+    private val limit by option("-l", "--limit", help = "The amount of results (defaults to 15)").int().default(15)
 
     private const val proxyApi = "https://addons-ecs.forgesvc.net/api/v2/"
 
