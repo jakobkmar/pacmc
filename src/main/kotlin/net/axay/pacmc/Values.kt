@@ -1,15 +1,17 @@
 package net.axay.pacmc
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import jetbrains.exodus.entitystore.PersistentEntityStoreImpl
+import jetbrains.exodus.entitystore.PersistentEntityStores
 import kotlinx.serialization.json.Json
+import java.io.File
 
 object Values {
-    val coroutineScope = CoroutineScope(Dispatchers.IO)
-
     val json = Json {
         ignoreUnknownKeys = true
         isLenient = true
         encodeDefaults = false
     }
+
+    val archiveStore: PersistentEntityStoreImpl
+        get() = PersistentEntityStores.newInstance(File(System.getProperty("user.home"), ".pacmc/archives"))
 }
