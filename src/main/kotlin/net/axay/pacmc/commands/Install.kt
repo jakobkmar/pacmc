@@ -104,6 +104,7 @@ object Install : CliktCommand(
                     acc.second.absoluteValue == distance.absoluteValue -> when {
                         // prefer the file for the newer version
                         acc.second > 0 && distance < 0 -> acc
+                        acc.second < 0 && distance > 0 -> curseProxyFile to distance
                         // prefer the newer file
                         else -> if (acc.first.releaseDate.isAfter(curseProxyFile.releaseDate))
                             acc else curseProxyFile to distance
