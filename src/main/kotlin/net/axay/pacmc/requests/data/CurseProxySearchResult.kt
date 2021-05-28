@@ -1,4 +1,4 @@
-package net.axay.pacmc.requests
+package net.axay.pacmc.requests.data
 
 import kotlinx.serialization.Serializable
 import net.axay.pacmc.data.ReleaseType
