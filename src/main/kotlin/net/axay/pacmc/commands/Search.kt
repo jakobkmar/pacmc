@@ -51,24 +51,28 @@ object Search : CliktCommand(
             }
         }.forEach { project ->
             val mcVersion = versionRequest.await()
+
             val repo = yellow("curseforge/")
             val id = brightBlue("[${project.id}]")
             val projectName = white(bold(underline(project.name)))
             val author = "by ${project.authors.firstOrNull()?.name ?: italic("unknown author")}"
-            val version = project.getLatestVersion(mcVersion)?.let { latest ->
-                val versionString = latest.first.lowercase().trim { it in versionChars || it.isLetter() }
-                if (versionString.isNotEmpty()) {
-                    green(bold(versionString)).let {
-                        when (latest.second) {
-                            ReleaseType.BETA -> it + cyan(" (beta)")
-                            ReleaseType.ALPHA -> it + magenta(" (alpha)")
-                            else -> it
+            val version = project.getLatestVersion(mcVersion)
+                ?.let { latest ->
+                    val versionString = latest.first.lowercase().trim { it in versionChars || it.isLetter() }
+                    if (versionString.isNotEmpty()) {
+                        green(bold(versionString)).let {
+                            when (latest.second) {
+                                ReleaseType.BETA -> it + cyan(" (beta)")
+                                ReleaseType.ALPHA -> it + magenta(" (alpha)")
+                                else -> it
+                            }
                         }
-                    }
-                } else red(italic("no version info"))
-            } ?: if (mcVersion != null) {
-                if (allVersions) red("not available for $mcVersion") else return@forEach
-            } else red(italic("no file info"))
+                    } else red(italic("no version info"))
+                }
+                ?: if (mcVersion != null)
+                    if (allVersions) red("not available for $mcVersion") else return@forEach
+                else
+                    red(italic("no file info"))
 
             terminal.println("$repo$projectName $id $author $version")
             terminal.println("  ${gray(project.summary)}")
