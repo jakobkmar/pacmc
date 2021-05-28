@@ -24,8 +24,6 @@ object Search : CliktCommand(
     private val allResults by option("-a", "--all", help = "Whether to show all result without any limit").flag()
     private val limit by option("-l", "--limit", help = "The amount of results (defaults to 15)").int().default(15)
 
-    private const val proxyApi = "https://addons-ecs.forgesvc.net/api/v2/"
-
     private val versionChars = arrayOf('.', '-', '+', '_', ' ')
 
     override fun run() = runBlocking(Dispatchers.IO) {
