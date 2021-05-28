@@ -15,7 +15,8 @@ import kotlinx.coroutines.withContext
 import net.axay.pacmc.Values
 import net.axay.pacmc.data.ReleaseType
 import net.axay.pacmc.ktorClient
-import net.axay.pacmc.requests.CurseProxy
+import net.axay.pacmc.requests.CurseProxyMinecraftVersion
+import net.axay.pacmc.requests.CurseProxySearchResult
 import net.axay.pacmc.terminal
 
 object Search : CliktCommand(
@@ -36,12 +37,12 @@ object Search : CliktCommand(
             when {
                 gameVersion != null -> gameVersion
                 allVersions -> null
-                else -> ktorClient.get<List<CurseProxy.MinecraftVersion>>("${proxyApi}minecraft/version")
+                else -> ktorClient.get<List<CurseProxyMinecraftVersion>>("${proxyApi}minecraft/version")
                     .first().versionString
             }
         }
         withContext(Values.coroutineScope.coroutineContext) {
-            ktorClient.get<List<CurseProxy.Project>>("${proxyApi}addon/search") {
+            ktorClient.get<List<CurseProxySearchResult>>("${proxyApi}addon/search") {
                 parameter("gameId", 432) // game: minecraft
                 parameter("sectionId", 6) // section: mods
                 parameter("searchFilter", searchTerm)
