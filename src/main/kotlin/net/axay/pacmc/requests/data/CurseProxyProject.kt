@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 import net.axay.pacmc.data.ReleaseType
 
 @Serializable
-data class CurseProxySearchResult(
+data class CurseProxyProject(
     val id: Int,
     val name: String,
     val authors: List<Author>,
