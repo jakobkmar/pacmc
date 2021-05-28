@@ -3,7 +3,7 @@
 **`pacmc`** is a package manager for Fabric Minecraft mods.
 
 The aim of this project is to massively reduce the effort you have to put in for installing - and most importantly -
-keeping you mods up to date.
+keeping your mods up to date.
 
 ## State
 
