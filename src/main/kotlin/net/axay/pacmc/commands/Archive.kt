@@ -8,8 +8,8 @@ import com.github.ajalt.clikt.parameters.types.file
 import com.github.ajalt.mordant.rendering.TextColors.*
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
-import net.axay.pacmc.Values
 import net.axay.pacmc.requests.CurseProxy
+import net.axay.pacmc.storage.Xodus
 import net.axay.pacmc.terminal
 
 object Archive : CliktCommand(
@@ -31,7 +31,7 @@ object Archive : CliktCommand(
             val minecraftVersion = async {
                 gameVersion ?: CurseProxy.getMinecraftVersions().first().versionString
             }
-            Values.archiveStore.use { store ->
+            Xodus.archiveStore.use { store ->
                 store.executeInTransaction {
                     val existingArchive = it.find("Archive", "name", name).firstOrNull()
                     if (existingArchive != null) {
@@ -49,7 +49,7 @@ object Archive : CliktCommand(
 
     object List : CliktCommand("Lists all archives you have created") {
         override fun run() {
-            Values.archiveStore.use { store ->
+            Xodus.archiveStore.use { store ->
                 store.computeInTransaction {
                     val archives = it.getAll("Archive")
                     archives.forEachIndexed { index, archive ->
@@ -73,7 +73,7 @@ object Archive : CliktCommand(
         private val name by argument()
 
         override fun run() {
-            Values.archiveStore.use { store ->
+            Xodus.archiveStore.use { store ->
                 store.executeInTransaction { ta ->
                     val archive = ta.find("Archive", "name", name).first
                     if (archive == null) {
