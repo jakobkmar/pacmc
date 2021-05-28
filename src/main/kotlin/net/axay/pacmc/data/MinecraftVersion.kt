@@ -29,7 +29,7 @@ data class MinecraftVersion(
             return if (
                 split.size in 2..3 &&
                 split.all { it != null }
-            ) MinecraftVersion(split[0]!!, split[1]!!, split[2] ?: if (major) null else 0) else null
+            ) MinecraftVersion(split[0]!!, split[1]!!, split.getOrNull(2) ?: if (major) null else 0) else null
         }
     }
 }
