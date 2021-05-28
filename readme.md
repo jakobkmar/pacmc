@@ -16,7 +16,7 @@ The main command is `pacmc`. You can add `-h` to any command to get help.
 ### Archives
 
 Archives are the places (folders) where your mods are stored. Your `.minecraft` folder is an archive by default, but you
-can add more (for example to manage mods on a server, which `pacmc` is designed or aswell).
+can add more (for example to manage mods on a server, which `pacmc` is designed for aswell).
 
 #### Add an archive
 
@@ -36,7 +36,7 @@ pacmc archive list
 pacmc archive remove myarchive
 ```
 
-### Searching for mods
+### Search for mods
 
 ```zsh
 pacmc search sodium
@@ -58,13 +58,19 @@ or version independent:
 pacmc search -i "minimap"
 ```
 
-### Installing a mod
+### Install a mod
 
 ```zsh
 # via the mod id
 pacmc install 447425
 # or via a search term
 pacmc install Fabric API
+```
+
+or to a specific archive:
+
+```zsh
+pacmc install -a myarchive 447425
 ```
 
 _when installing using a search term, you may be prompted to select a mod from a couple of options_
