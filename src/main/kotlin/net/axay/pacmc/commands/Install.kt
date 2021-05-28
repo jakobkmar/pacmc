@@ -64,7 +64,7 @@ object Install : CliktCommand(
                     }
                     echo()
 
-                    echo("Which mod do you want to install? (${options.keys.joinToString()}) ")
+                    print("Which mod do you want to install? (${options.keys.joinToString()}) ")
                     var choice: Int? = null
                     while (choice == null) {
                         val readLine = (readLine() ?: return@runBlocking).toIntOrNull()
@@ -75,7 +75,7 @@ object Install : CliktCommand(
                         }
                     }
 
-                    choice
+                    options[choice]?.id
                 }
                 // just take the one matching mod
                 searchResults.size == 1 -> searchResults.first().id
@@ -126,7 +126,7 @@ object Install : CliktCommand(
             onDownload { bytesSentTotal, contentLength ->
                 print("\rbei ${(bytesSentTotal / contentLength) * 100}%")
             }
-        }.content.copyAndClose(File(archive.path, "pacmc_curseforge_$modId").writeChannel())
+        }.content.copyAndClose(File(archive.path, "pacmc_curseforge_${modId}.jar").writeChannel())
         println()
 
         echo("Finishing")
