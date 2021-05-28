@@ -17,7 +17,7 @@ object CurseProxy {
             parameter("gameId", 432) // game: minecraft
             parameter("sectionId", 6) // section: mods
             parameter("searchFilter", searchTerm)
-            parameter("categoryId", 4780)
+            parameter("categoryId", 4780) // category: fabric
             if (gameVersion != null) parameter("gameVersion", gameVersion)
             if (limit != null) parameter("pageSize", limit)
         }
