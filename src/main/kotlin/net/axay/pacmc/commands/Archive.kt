@@ -6,6 +6,7 @@ import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
 import com.github.ajalt.mordant.rendering.TextColors.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import net.axay.pacmc.requests.CurseProxy
@@ -27,7 +28,7 @@ object Archive : CliktCommand(
         private val name by argument()
         private val path by argument().file(mustExist = true, canBeFile = false)
 
-        override fun run() = runBlocking {
+        override fun run() = runBlocking(Dispatchers.Default) {
             val minecraftVersion = async {
                 gameVersion ?: CurseProxy.getMinecraftVersions().first().versionString
             }

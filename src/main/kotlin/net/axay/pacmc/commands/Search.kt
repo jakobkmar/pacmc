@@ -22,7 +22,7 @@ object Search : CliktCommand(
     private val allResults by option("-a", "--all", help = "Whether to show all result without any limit").flag()
     private val limit by option("-l", "--limit", help = "The amount of results (defaults to 15)").int().default(15)
 
-    override fun run() = runBlocking(Dispatchers.IO) {
+    override fun run() = runBlocking(Dispatchers.Default) {
         val versionRequest = async {
             when {
                 gameVersion != null -> gameVersion

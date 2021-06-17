@@ -11,6 +11,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.util.cio.*
 import io.ktor.utils.io.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import net.axay.pacmc.ktorClient
 import net.axay.pacmc.logging.printProject
@@ -32,7 +33,7 @@ object Install : CliktCommand(
 
     private val mod by argument()
 
-    override fun run() = runBlocking {
+    override fun run() = runBlocking(Dispatchers.Default) {
         val archive = Xodus.getArchive(archive) ?: return@runBlocking
 
         var modId: Int? = mod.toIntOrNull()
