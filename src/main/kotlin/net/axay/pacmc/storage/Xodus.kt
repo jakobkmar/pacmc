@@ -2,12 +2,13 @@ package net.axay.pacmc.storage
 
 import jetbrains.exodus.entitystore.PersistentEntityStoreImpl
 import jetbrains.exodus.entitystore.PersistentEntityStores
+import net.axay.pacmc.Values
 import net.axay.pacmc.storage.data.Archive
 import java.io.File
 
 object Xodus {
     val archiveStore: PersistentEntityStoreImpl
-        get() = PersistentEntityStores.newInstance(File(System.getProperty("user.home"), ".pacmc/archives"))
+        get() = PersistentEntityStores.newInstance(File(Values.projectDirectories.dataLocalDir, "/archives"))
 
     fun getArchive(name: String): Archive? {
         return archiveStore.use { store ->

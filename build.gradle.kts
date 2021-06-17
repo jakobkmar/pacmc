@@ -30,6 +30,8 @@ dependencies {
     implementation("org.jetbrains.xodus:xodus-entity-store:1.3.232")
 
     implementation("org.slf4j:slf4j-simple:1.7.30")
+
+    implementation("dev.dirs:directories:26")
 }
 
 tasks {
