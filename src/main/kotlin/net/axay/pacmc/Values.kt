@@ -4,12 +4,15 @@ import dev.dirs.ProjectDirectories
 import kotlinx.serialization.json.Json
 
 object Values {
-    val json = Json {
-        ignoreUnknownKeys = true
-        isLenient = true
-        encodeDefaults = false
+    val json by lazy {
+        Json {
+            ignoreUnknownKeys = true
+            isLenient = true
+            encodeDefaults = false
+        }
     }
 
-    val projectDirectories: ProjectDirectories =
+    val projectDirectories: ProjectDirectories by lazy {
         ProjectDirectories.from("net", "axay", "pacmc")
+    }
 }

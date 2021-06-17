@@ -7,8 +7,8 @@ import net.axay.pacmc.storage.data.Archive
 import java.io.File
 
 object Xodus {
-    val archiveStore: PersistentEntityStoreImpl
-        get() = PersistentEntityStores.newInstance(File(Values.projectDirectories.dataLocalDir, "/archives"))
+    val archiveStore: PersistentEntityStoreImpl =
+        PersistentEntityStores.newInstance(File(Values.projectDirectories.dataLocalDir, "/archives"))
 
     fun getArchive(name: String): Archive? {
         return archiveStore.use { store ->
