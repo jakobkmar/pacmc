@@ -6,6 +6,7 @@ import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.mordant.rendering.TextColors
+import com.github.ajalt.mordant.rendering.TextColors.*
 import io.ktor.client.features.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -13,14 +14,25 @@ import io.ktor.util.cio.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import net.axay.pacmc.ktorClient
 import net.axay.pacmc.logging.printProject
 import net.axay.pacmc.requests.CurseProxy
 import net.axay.pacmc.requests.data.CurseProxyFile
 import net.axay.pacmc.requests.data.CurseProxyProject
 import net.axay.pacmc.storage.Xodus
+import net.axay.pacmc.storage.data.PacmcFile
 import net.axay.pacmc.terminal
 import java.io.File
+import kotlin.collections.HashMap
+import kotlin.collections.List
+import kotlin.collections.filterNot
+import kotlin.collections.first
+import kotlin.collections.fold
+import kotlin.collections.forEachIndexed
+import kotlin.collections.joinToString
+import kotlin.collections.mapNotNull
+import kotlin.collections.minOrNull
 import kotlin.collections.set
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
@@ -120,18 +132,40 @@ object Install : CliktCommand(
         }
         val file = fileResult.first
 
-        echo("Found: $file")
-        echo("Installing the mod at ${archive.path}")
+        terminal.println()
+        terminal.println("Installing the mod at ${gray(archive.path)}")
+        terminal.println()
 
         // download the mod file to the given archive (and display progress)
-        print("bei 0%")
-        ktorClient.get<HttpResponse>(file.downloadUrl) {
-            onDownload { bytesSentTotal, contentLength ->
-                print("\rbei ${((bytesSentTotal.toDouble() / contentLength.toDouble()) * 100).roundToInt()}%")
-            }
-        }.content.copyAndClose(File(archive.path, "pacmc_curseforge_${modId}.jar").writeChannel())
+        terminal.println("Downloading " + brightCyan(file.fileName))
+
+        @Suppress("BlockingMethodInNonBlockingContext")
+        val downloadContent = withContext(Dispatchers.IO) {
+            ktorClient.get<HttpResponse>(file.downloadUrl) {
+                onDownload { bytesSentTotal, contentLength ->
+                    val progress = bytesSentTotal.toDouble() / contentLength.toDouble()
+                    val dashCount = (progress * 30).roundToInt()
+                    val string = buildString {
+                        append('[')
+                        repeat(dashCount) {
+                            append(green("─"))
+                        }
+                        append(green(">"))
+                        repeat(30 - dashCount) {
+                            append(' ')
+                        }
+                        append("] ${(progress * 100).roundToInt()}%")
+                    }
+                    terminal.print("\r  $string")
+                }
+            }.content
+        }
         println()
 
-        echo("Finishing")
+        val filename = PacmcFile("curseforge", modId.toString(), file.id.toString()).filename
+        downloadContent.copyAndClose(File(archive.path, filename).writeChannel())
+
+        terminal.println()
+        terminal.println(brightGreen("Successfully installed the given mod."))
     }
 }
