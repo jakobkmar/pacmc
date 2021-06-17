@@ -19,7 +19,7 @@ object Search : CliktCommand(
     private val searchTerm by argument()
     private val gameVersion by option("-g", "--game-version", help = "Set a specific game version (latest by default)")
     private val allVersions by option("-i", "--all-versions", help = "Whether to show mods for all Minecraft versions").flag()
-    private val allResults by option("-a", "--all", help = "Whether to show all result without any limit").flag()
+    private val allResults by option("-a", "--all", help = "Whether to show all results without any limit").flag()
     private val limit by option("-l", "--limit", help = "The amount of results (defaults to 15)").int().default(15)
 
     override fun run() = runBlocking(Dispatchers.Default) {
