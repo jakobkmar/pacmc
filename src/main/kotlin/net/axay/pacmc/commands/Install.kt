@@ -13,8 +13,8 @@ import io.ktor.client.statement.*
 import io.ktor.util.cio.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import net.axay.pacmc.ktorClient
 import net.axay.pacmc.logging.printProject
 import net.axay.pacmc.requests.CurseProxy
@@ -139,12 +139,12 @@ object Install : CliktCommand(
         // download the mod file to the given archive (and display progress)
         terminal.println("Downloading " + brightCyan(file.fileName))
 
-        @Suppress("BlockingMethodInNonBlockingContext")
-        val downloadContent = withContext(Dispatchers.IO) {
-            ktorClient.get<HttpResponse>(file.downloadUrl) {
-                onDownload { bytesSentTotal, contentLength ->
-                    val progress = bytesSentTotal.toDouble() / contentLength.toDouble()
-                    val dashCount = (progress * 30).roundToInt()
+        val downloadContent = ktorClient.get<HttpResponse>(file.downloadUrl) {
+            onDownload { bytesSentTotal, contentLength ->
+                val progress = bytesSentTotal.toDouble() / contentLength.toDouble()
+                val dashCount = (progress * 30).roundToInt()
+                val percentage = (progress * 100).roundToInt()
+                launch(Dispatchers.IO) {
                     val string = buildString {
                         append('[')
                         repeat(dashCount) {
@@ -154,12 +154,12 @@ object Install : CliktCommand(
                         repeat(30 - dashCount) {
                             append(' ')
                         }
-                        append("] ${(progress * 100).roundToInt()}%")
+                        append("] ${percentage}%")
                     }
                     terminal.print("\r  $string")
-                }
-            }.content
-        }
+                }.join()
+            }
+        }.content
         println()
 
         val filename = PacmcFile("curseforge", modId.toString(), file.id.toString()).filename
