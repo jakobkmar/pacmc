@@ -1,5 +1,6 @@
 package net.axay.pacmc.requests
 
+import io.ktor.client.features.*
 import io.ktor.client.request.*
 import net.axay.pacmc.ktorClient
 import net.axay.pacmc.requests.data.CurseProxyFile
@@ -22,6 +23,9 @@ object CurseProxy {
             if (limit != null) parameter("pageSize", limit)
         }
 
-    suspend fun getModFiles(id: Int) =
+    suspend fun getModFiles(id: Int) = try {
         ktorClient.get<List<CurseProxyFile>>("${proxyApi}addon/$id/files")
+    } catch (exc: ClientRequestException) {
+        null
+    }
 }

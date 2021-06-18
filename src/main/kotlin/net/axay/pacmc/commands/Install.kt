@@ -57,11 +57,7 @@ object Install : CliktCommand(
 
         suspend fun updateFiles() {
             if (modId != null)
-                files = try {
-                    CurseProxy.getModFiles(modId!!)
-                } catch (exc: ClientRequestException) {
-                    null
-                }
+                files = CurseProxy.getModFiles(modId!!)
         }
 
         updateFiles()
