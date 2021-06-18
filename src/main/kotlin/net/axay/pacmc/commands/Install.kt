@@ -26,7 +26,9 @@ import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 import kotlin.collections.List
 import kotlin.collections.Set
+import kotlin.collections.any
 import kotlin.collections.emptyList
+import kotlin.collections.filter
 import kotlin.collections.filterNot
 import kotlin.collections.first
 import kotlin.collections.flatMapTo
@@ -162,6 +164,19 @@ object Install : CliktCommand(
             // download the mod file to the given archive (and display progress)
             terminal.println("Downloading " + brightCyan(file.fileName))
 
+            val alreadyInstalled = (File(archive.path).listFiles() ?: emptyArray())
+                .filter { it.name.startsWith("pacmc_") }
+                .map { PacmcFile(it.name) }
+                .any { it.modId == modId.toString() }
+
+            if (alreadyInstalled) {
+                terminal.println("  already installed ${green("✔")}")
+                return
+            }
+
+            val filename = PacmcFile("curseforge", modId.toString(), file.id.toString()).filename
+            val localFile = File(archive.path, filename)
+
             val downloadContent = ktorClient.get<HttpResponse>(file.downloadUrl) {
                 onDownload { bytesSentTotal, contentLength ->
                     val progress = bytesSentTotal.toDouble() / contentLength.toDouble()
@@ -185,8 +200,7 @@ object Install : CliktCommand(
             }.content
             terminal.println()
 
-            val filename = PacmcFile("curseforge", modId.toString(), file.id.toString()).filename
-            downloadContent.copyAndClose(File(archive.path, filename).writeChannel())
+            downloadContent.copyAndClose(localFile.writeChannel())
         }
 
         downloadFile(modId!!, file)
