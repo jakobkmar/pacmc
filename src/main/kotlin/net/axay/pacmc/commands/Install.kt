@@ -41,12 +41,16 @@ object Install : CliktCommand(
     "Installs a minecraft mod"
 ) {
     private val local by option("-l", "--local").flag()
-    private val archive by option("-a", "--archive").default(".minecraft")
+    private val archiveName by option("-a", "--archive").default(".minecraft")
 
     private val mod by argument()
 
     override fun run() = runBlocking(Dispatchers.Default) {
-        val archive = Xodus.getArchive(archive) ?: return@runBlocking
+        val archive = Xodus.getArchive(archiveName)
+        if (archive == null) {
+            terminal.danger("The given archive '$archiveName' does not exist!")
+            return@runBlocking
+        }
 
         var modId: Int? = mod.toIntOrNull()
         var files: List<CurseProxyFile>? = null
@@ -76,9 +80,9 @@ object Install : CliktCommand(
                         terminal.print(TextColors.rgb(50, 255, 236)("${index + 1}) "))
                         terminal.printProject(project, archive.gameVersion, true)
                     }
-                    echo()
+                    terminal.println()
 
-                    print("Which mod do you want to install? (${options.keys.joinToString()}) ")
+                    terminal.print("Which mod do you want to install? (${options.keys.joinToString()}) ")
                     var choice: Int? = null
                     while (choice == null) {
                         val readLine = (readLine() ?: return@runBlocking).toIntOrNull()
@@ -127,7 +131,7 @@ object Install : CliktCommand(
             }
 
         if (fileResult == null) {
-            echo("Could not find anything for the given mod \"$mod\"")
+            terminal.danger("Could not find anything for the given mod \"$mod\"")
             return@runBlocking
         }
         val file = fileResult.first
@@ -160,7 +164,7 @@ object Install : CliktCommand(
                 }.join()
             }
         }.content
-        println()
+        terminal.println()
 
         val filename = PacmcFile("curseforge", modId.toString(), file.id.toString()).filename
         downloadContent.copyAndClose(File(archive.path, filename).writeChannel())
