@@ -15,6 +15,7 @@ import io.ktor.utils.io.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import net.axay.pacmc.data.MinecraftVersion
 import net.axay.pacmc.ktorClient
 import net.axay.pacmc.logging.printProject
 import net.axay.pacmc.requests.CurseProxy
@@ -99,32 +100,7 @@ object Install : CliktCommand(
             updateFiles()
         }
 
-        val fileResult = files
-            ?.filterNot { it.gameVersion.contains("Forge") && !it.gameVersion.contains("Fabric") }
-            ?.fold<CurseProxyFile, Pair<CurseProxyFile, Int>?>(null) { acc, curseProxyFile ->
-                val distance = curseProxyFile.minecraftVersions
-                    .mapNotNull { it.minorDistance(archive.minecraftVersion) }
-                    .minOrNull()
-
-                when {
-                    // this file does not have the same major version
-                    distance == null -> acc
-                    // the previous file is not fitting and this one is
-                    acc == null -> curseProxyFile to distance
-                    // prefer the file closer to the desired version
-                    acc.second.absoluteValue > distance.absoluteValue -> curseProxyFile to distance
-                    // both files are similarly close to the desired version, do additional checks
-                    acc.second.absoluteValue == distance.absoluteValue -> when {
-                        // prefer the file for the newer version
-                        acc.second > 0 && distance < 0 -> acc
-                        acc.second < 0 && distance > 0 -> curseProxyFile to distance
-                        // prefer the newer file
-                        else -> if (acc.first.releaseDate.isAfter(curseProxyFile.releaseDate))
-                            acc else curseProxyFile to distance
-                    }
-                    else -> acc
-                }
-            }
+        val fileResult = files?.findBestFile(archive.minecraftVersion)
 
         if (fileResult == null) {
             terminal.danger("Could not find anything for the given mod \"$mod\"")
@@ -168,4 +144,31 @@ object Install : CliktCommand(
         terminal.println()
         terminal.println(brightGreen("Successfully installed the given mod."))
     }
+
+    private fun List<CurseProxyFile>.findBestFile(minecraftVersion: MinecraftVersion) = this
+        .filterNot { it.gameVersion.contains("Forge") && !it.gameVersion.contains("Fabric") }
+        .fold<CurseProxyFile, Pair<CurseProxyFile, Int>?>(null) { acc, curseProxyFile ->
+            val distance = curseProxyFile.minecraftVersions
+                .mapNotNull { it.minorDistance(minecraftVersion) }
+                .minOrNull()
+
+            when {
+                // this file does not have the same major version
+                distance == null -> acc
+                // the previous file is not fitting and this one is
+                acc == null -> curseProxyFile to distance
+                // prefer the file closer to the desired version
+                acc.second.absoluteValue > distance.absoluteValue -> curseProxyFile to distance
+                // both files are similarly close to the desired version, do additional checks
+                acc.second.absoluteValue == distance.absoluteValue -> when {
+                    // prefer the file for the newer version
+                    acc.second > 0 && distance < 0 -> acc
+                    acc.second < 0 && distance > 0 -> curseProxyFile to distance
+                    // prefer the newer file
+                    else -> if (acc.first.releaseDate.isAfter(curseProxyFile.releaseDate))
+                        acc else curseProxyFile to distance
+                }
+                else -> acc
+            }
+        }
 }
