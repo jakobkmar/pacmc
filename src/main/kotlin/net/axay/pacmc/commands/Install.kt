@@ -12,10 +12,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.util.cio.*
 import io.ktor.utils.io.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import net.axay.pacmc.data.MinecraftVersion
+import kotlinx.coroutines.*
 import net.axay.pacmc.ktorClient
 import net.axay.pacmc.logging.printProject
 import net.axay.pacmc.requests.CurseProxy
@@ -26,15 +23,24 @@ import net.axay.pacmc.storage.data.PacmcFile
 import net.axay.pacmc.terminal
 import java.io.File
 import kotlin.collections.HashMap
+import kotlin.collections.HashSet
 import kotlin.collections.List
+import kotlin.collections.Set
+import kotlin.collections.emptyList
 import kotlin.collections.filterNot
 import kotlin.collections.first
+import kotlin.collections.flatMapTo
 import kotlin.collections.fold
+import kotlin.collections.forEach
 import kotlin.collections.forEachIndexed
+import kotlin.collections.isNotEmpty
 import kotlin.collections.joinToString
+import kotlin.collections.map
 import kotlin.collections.mapNotNull
 import kotlin.collections.minOrNull
+import kotlin.collections.plus
 import kotlin.collections.set
+import kotlin.collections.setOf
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 
@@ -100,7 +106,34 @@ object Install : CliktCommand(
             updateFiles()
         }
 
-        val fileResult = files?.findBestFile(archive.minecraftVersion)
+        fun List<CurseProxyFile>.findBestFile() = this
+            .filterNot { it.gameVersion.contains("Forge") && !it.gameVersion.contains("Fabric") }
+            .fold<CurseProxyFile, Pair<CurseProxyFile, Int>?>(null) { acc, curseProxyFile ->
+                val distance = curseProxyFile.minecraftVersions
+                    .mapNotNull { it.minorDistance(archive.minecraftVersion) }
+                    .minOrNull()
+
+                when {
+                    // this file does not have the same major version
+                    distance == null -> acc
+                    // the previous file is not fitting and this one is
+                    acc == null -> curseProxyFile to distance
+                    // prefer the file closer to the desired version
+                    acc.second.absoluteValue > distance.absoluteValue -> curseProxyFile to distance
+                    // both files are similarly close to the desired version, do additional checks
+                    acc.second.absoluteValue == distance.absoluteValue -> when {
+                        // prefer the file for the newer version
+                        acc.second > 0 && distance < 0 -> acc
+                        acc.second < 0 && distance > 0 -> curseProxyFile to distance
+                        // prefer the newer file
+                        else -> if (acc.first.releaseDate.isAfter(curseProxyFile.releaseDate))
+                            acc else curseProxyFile to distance
+                    }
+                    else -> acc
+                }
+            }
+
+        val fileResult = files?.findBestFile()
 
         if (fileResult == null) {
             terminal.danger("Could not find anything for the given mod \"$mod\"")
@@ -108,67 +141,68 @@ object Install : CliktCommand(
         }
         val file = fileResult.first
 
+        suspend fun findDependencies(file: CurseProxyFile): Set<Pair<CurseProxyFile, Int>> {
+            return file.dependencies.map {
+                async {
+                    val dependencyFile = CurseProxy.getModFiles(it.addonId)?.findBestFile()?.first
+                        ?: return@async emptyList()
+                    // save the addonId, because it is not part of the response
+                    setOf(dependencyFile to it.addonId) + findDependencies(dependencyFile)
+                }
+            }.awaitAll().flatMapTo(HashSet()) { it }
+        }
+
+        val dependenciesDeferred = async { findDependencies(file) }
+
         terminal.println()
         terminal.println("Installing the mod at ${gray(archive.path)}")
         terminal.println()
 
-        // download the mod file to the given archive (and display progress)
-        terminal.println("Downloading " + brightCyan(file.fileName))
+        suspend fun downloadFile(modId: Int, file: CurseProxyFile) {
+            // download the mod file to the given archive (and display progress)
+            terminal.println("Downloading " + brightCyan(file.fileName))
 
-        val downloadContent = ktorClient.get<HttpResponse>(file.downloadUrl) {
-            onDownload { bytesSentTotal, contentLength ->
-                val progress = bytesSentTotal.toDouble() / contentLength.toDouble()
-                val dashCount = (progress * 30).roundToInt()
-                val percentage = (progress * 100).roundToInt()
-                launch(Dispatchers.IO) {
-                    val string = buildString {
-                        append('[')
-                        repeat(dashCount) {
-                            append(green("─"))
+            val downloadContent = ktorClient.get<HttpResponse>(file.downloadUrl) {
+                onDownload { bytesSentTotal, contentLength ->
+                    val progress = bytesSentTotal.toDouble() / contentLength.toDouble()
+                    val dashCount = (progress * 30).roundToInt()
+                    val percentage = (progress * 100).roundToInt()
+                    launch(Dispatchers.IO) {
+                        val string = buildString {
+                            append('[')
+                            repeat(dashCount) {
+                                append(green("─"))
+                            }
+                            append(green(">"))
+                            repeat(30 - dashCount) {
+                                append(' ')
+                            }
+                            append("] ${percentage}%")
                         }
-                        append(green(">"))
-                        repeat(30 - dashCount) {
-                            append(' ')
-                        }
-                        append("] ${percentage}%")
-                    }
-                    terminal.print("\r  $string")
-                }.join()
+                        terminal.print("\r  $string")
+                    }.join()
+                }
+            }.content
+            terminal.println()
+
+            val filename = PacmcFile("curseforge", modId.toString(), file.id.toString()).filename
+            downloadContent.copyAndClose(File(archive.path, filename).writeChannel())
+        }
+
+        downloadFile(modId!!, file)
+
+        val dependencies = dependenciesDeferred.await()
+        if (dependencies.isNotEmpty()) {
+            terminal.println()
+            terminal.println("Resolving dependencies...")
+            terminal.println()
+
+            dependencies.forEach {
+                downloadFile(it.second, it.first)
             }
-        }.content
-        terminal.println()
-
-        val filename = PacmcFile("curseforge", modId.toString(), file.id.toString()).filename
-        downloadContent.copyAndClose(File(archive.path, filename).writeChannel())
+        }
 
         terminal.println()
         terminal.println(brightGreen("Successfully installed the given mod."))
     }
-
-    private fun List<CurseProxyFile>.findBestFile(minecraftVersion: MinecraftVersion) = this
-        .filterNot { it.gameVersion.contains("Forge") && !it.gameVersion.contains("Fabric") }
-        .fold<CurseProxyFile, Pair<CurseProxyFile, Int>?>(null) { acc, curseProxyFile ->
-            val distance = curseProxyFile.minecraftVersions
-                .mapNotNull { it.minorDistance(minecraftVersion) }
-                .minOrNull()
-
-            when {
-                // this file does not have the same major version
-                distance == null -> acc
-                // the previous file is not fitting and this one is
-                acc == null -> curseProxyFile to distance
-                // prefer the file closer to the desired version
-                acc.second.absoluteValue > distance.absoluteValue -> curseProxyFile to distance
-                // both files are similarly close to the desired version, do additional checks
-                acc.second.absoluteValue == distance.absoluteValue -> when {
-                    // prefer the file for the newer version
-                    acc.second > 0 && distance < 0 -> acc
-                    acc.second < 0 && distance > 0 -> curseProxyFile to distance
-                    // prefer the newer file
-                    else -> if (acc.first.releaseDate.isAfter(curseProxyFile.releaseDate))
-                        acc else curseProxyFile to distance
-                }
-                else -> acc
-            }
-        }
 }
