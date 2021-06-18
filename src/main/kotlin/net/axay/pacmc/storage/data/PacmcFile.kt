@@ -14,7 +14,7 @@ class PacmcFile {
     }
 
     constructor(filename: String) {
-        val splitName = filename.split('_')
+        val splitName = filename.removeSuffix(".jar").split('_')
         if (splitName.size != 4)
             error("The given filename ($filename) is not a valid pacmc file.")
         repository = splitName[1]
