@@ -1,27 +1,28 @@
 package net.axay.pacmc.storage
 
-import jetbrains.exodus.entitystore.PersistentEntityStoreImpl
-import jetbrains.exodus.entitystore.PersistentEntityStores
+import kotlinx.dnq.XdModel
+import kotlinx.dnq.query.eq
+import kotlinx.dnq.query.firstOrNull
+import kotlinx.dnq.query.query
+import kotlinx.dnq.store.container.StaticStoreContainer
+import kotlinx.dnq.util.initMetaData
 import net.axay.pacmc.Values
-import net.axay.pacmc.storage.data.Archive
+import net.axay.pacmc.storage.data.XdArchive
 import java.io.File
 
 object Xodus {
-    val archiveStore: PersistentEntityStoreImpl =
-        PersistentEntityStores.newInstance(File(Values.projectDirectories.dataLocalDir, "/archives"))
+    init {
+        XdModel.registerNodes(XdArchive)
+    }
 
-    fun getArchive(name: String): Archive? {
-        return archiveStore.use { store ->
-            store.computeInTransaction {
-                val archive = it.find("Archive", "name", name).first
-                if (archive != null)
-                    Archive(
-                        archive.getProperty("name").toString(),
-                        archive.getProperty("path").toString(),
-                        archive.getProperty("gameVersion").toString()
-                    )
-                else null
-            }
-        }
+    val store = StaticStoreContainer.init(
+        File(Values.projectDirectories.dataLocalDir, "/db"),
+        "db"
+    ).apply {
+        initMetaData(XdModel.hierarchy, this)
+    }
+
+    fun getArchive(name: String) = store.transactional {
+        XdArchive.query(XdArchive::name eq name).firstOrNull()
     }
 }

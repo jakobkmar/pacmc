@@ -19,7 +19,7 @@ import net.axay.pacmc.requests.CurseProxy
 import net.axay.pacmc.requests.data.CurseProxyFile
 import net.axay.pacmc.requests.data.CurseProxyProject
 import net.axay.pacmc.storage.Xodus
-import net.axay.pacmc.storage.data.Archive
+import net.axay.pacmc.storage.data.XdArchive
 import net.axay.pacmc.storage.data.PacmcFile
 import net.axay.pacmc.terminal
 import java.io.File
@@ -140,7 +140,7 @@ object Install : CliktCommand(
         terminal.println(brightGreen("Successfully installed the given mod."))
     }
 
-    fun List<CurseProxyFile>.findBestFile(archive: Archive) = this
+    fun List<CurseProxyFile>.findBestFile(archive: XdArchive) = this
         .filterNot { it.gameVersion.contains("Forge") && !it.gameVersion.contains("Fabric") }
         .fold<CurseProxyFile, Pair<CurseProxyFile, Int>?>(null) { acc, curseProxyFile ->
             val distance = curseProxyFile.minecraftVersions
@@ -167,7 +167,7 @@ object Install : CliktCommand(
             }
         }
 
-    suspend fun findDependencies(file: CurseProxyFile, archive: Archive): Set<Pair<CurseProxyFile, Int>> =
+    suspend fun findDependencies(file: CurseProxyFile, archive: XdArchive): Set<Pair<CurseProxyFile, Int>> =
         coroutineScope {
             return@coroutineScope file.dependencies.map {
                 async {
@@ -179,7 +179,7 @@ object Install : CliktCommand(
             }.awaitAll().flatMapTo(HashSet()) { it }
         }
 
-    suspend fun downloadFile(modId: Int, file: CurseProxyFile, archive: Archive) = coroutineScope {
+    suspend fun downloadFile(modId: Int, file: CurseProxyFile, archive: XdArchive) = coroutineScope {
         // download the mod file to the given archive (and display progress)
         terminal.println("Downloading " + brightCyan(file.fileName))
 

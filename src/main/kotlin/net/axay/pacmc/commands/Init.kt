@@ -1,12 +1,16 @@
 package net.axay.pacmc.commands
 
 import com.github.ajalt.clikt.core.CliktCommand
-import com.github.ajalt.mordant.rendering.TextColors
+import com.github.ajalt.mordant.rendering.TextColors.gray
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
+import kotlinx.dnq.query.eq
+import kotlinx.dnq.query.firstOrNull
+import kotlinx.dnq.query.query
 import net.axay.pacmc.requests.CurseProxy
 import net.axay.pacmc.storage.Xodus
+import net.axay.pacmc.storage.data.XdArchive
 import net.axay.pacmc.terminal
 import net.axay.pacmc.utils.OperatingSystem
 import java.io.File
@@ -20,42 +24,41 @@ object Init : CliktCommand(
         }
 
         // set the .minecraft archive
-        Xodus.archiveStore.use { store ->
-            store.executeInTransaction {
-                val existingArchive = it.find("Archive", "name", ".minecraft").firstOrNull()
-                if (existingArchive != null) {
-                    echo("The \".minecraft\" archive already exists.")
+        Xodus.store.transactional {
+            val existingArchive = XdArchive.query(XdArchive::name eq ".minecraft").firstOrNull()
+            if (existingArchive != null) {
+                terminal.println("The '.minecraft' archive already exists. (at ${gray(existingArchive.path)})")
+            } else {
+                terminal.println("The '.minecraft' archive does not exist.")
+
+                val minecraftFolder = when (OperatingSystem.current) {
+                    // get the .minecraft folder for the current operating system
+                    OperatingSystem.LINUX -> File(System.getProperty("user.home"), "/.minecraft/")
+                    OperatingSystem.WINDOWS -> File(System.getenv("%APPDATA%"), "/.minecraft/")
+                    OperatingSystem.MACOS -> File(System.getProperty("user.home"), "/Library/Application Support/minecraft/")
+                    // just use the linux path then
+                    else -> File(System.getProperty("user.home"), "/.minecraft/")
+                }
+                val path = if (!minecraftFolder.exists()) {
+                    terminal.danger("There is no .minecraft folder present at the default location!")
+                    return@transactional
                 } else {
-                    terminal.println("The \".minecraft\" archive does not exist.")
+                    File(minecraftFolder, "/mods/").apply {
+                        terminal.println("Found the .minecraft folder at the default location.")
+                        // create the mods folder if it does not exist
+                        if (!exists()) {
+                            terminal.println("Creating the mods folder...")
+                            mkdir()
+                        }
+                    }.canonicalPath
+                }
 
-                    val minecraftFolder = when (OperatingSystem.current) {
-                        // get the .minecraft folder for the current operating system
-                        OperatingSystem.LINUX -> File(System.getProperty("user.home"), "/.minecraft/")
-                        OperatingSystem.WINDOWS -> File(System.getenv("%APPDATA%"), "/.minecraft/")
-                        OperatingSystem.MACOS -> File(System.getProperty("user.home"), "/Library/Application Support/minecraft/")
-                        // just use the linux path then
-                        else -> File(System.getProperty("user.home"), "/.minecraft/")
-                    }
-                    val path = if (!minecraftFolder.exists()) {
-                        terminal.println("There is no .minecraft folder present at the default location!")
-                        return@executeInTransaction
-                    } else {
-                        File(minecraftFolder, "/mods/").apply {
-                            terminal.println("Found the .minecraft folder at the default location.")
-                            // create the mods folder if it does not exist
-                            if (!exists()) {
-                                terminal.println("Creating the mods folder...")
-                                mkdir()
-                            }
-                        }.canonicalPath
-                    }
-
-                    echo("Created the \".minecraft\" archive at:")
-                    terminal.println("  " + TextColors.gray(path))
-                    val archive = it.newEntity("Archive")
-                    archive.setProperty("name", ".minecraft")
-                    archive.setProperty("path", path)
-                    archive.setProperty("gameVersion", runBlocking { latestMinecraftVersion.await() })
+                terminal.success("Created the '.minecraft' archive at:")
+                terminal.println("  " + gray(path))
+                XdArchive.new {
+                    this.name = ".minecraft"
+                    this.path = path
+                    this.gameVersion = runBlocking { latestMinecraftVersion.await() }
                 }
             }
         }
