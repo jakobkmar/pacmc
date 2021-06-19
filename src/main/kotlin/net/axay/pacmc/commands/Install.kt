@@ -13,6 +13,10 @@ import io.ktor.client.statement.*
 import io.ktor.util.cio.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.*
+import kotlinx.dnq.query.eq
+import kotlinx.dnq.query.first
+import kotlinx.dnq.query.firstOrNull
+import kotlinx.dnq.query.query
 import net.axay.pacmc.data.MinecraftVersion
 import net.axay.pacmc.ktorClient
 import net.axay.pacmc.logging.printProject
@@ -21,18 +25,18 @@ import net.axay.pacmc.requests.data.CurseProxyFile
 import net.axay.pacmc.requests.data.CurseProxyProject
 import net.axay.pacmc.storage.Xodus
 import net.axay.pacmc.storage.data.PacmcFile
+import net.axay.pacmc.storage.data.XdArchive
+import net.axay.pacmc.storage.data.XdMod
 import net.axay.pacmc.terminal
 import java.io.File
 import kotlin.collections.HashMap
-import kotlin.collections.HashSet
 import kotlin.collections.List
-import kotlin.collections.Set
 import kotlin.collections.any
 import kotlin.collections.emptyList
 import kotlin.collections.filter
 import kotlin.collections.filterNot
 import kotlin.collections.first
-import kotlin.collections.flatMapTo
+import kotlin.collections.flatten
 import kotlin.collections.fold
 import kotlin.collections.forEach
 import kotlin.collections.forEachIndexed
@@ -56,7 +60,7 @@ object Install : CliktCommand(
     private val mod by argument()
 
     override fun run() = runBlocking(Dispatchers.Default) {
-        val (archivePath, minecraftVersion) = Xodus.getArchive(archiveName) ?: return@runBlocking
+        val (archivePath, minecraftVersion) = Xodus.getArchiveData(archiveName) ?: return@runBlocking
 
         var modId: Int? = mod.toIntOrNull()
         var files: List<CurseProxyFile>? = null
@@ -105,13 +109,19 @@ object Install : CliktCommand(
             updateFiles()
         }
 
-        val fileResult = files?.findBestFile(minecraftVersion)
+        fun notFoundMessage() = terminal.danger("Could not find anything for the given mod '$mod'")
 
-        if (fileResult == null) {
-            terminal.danger("Could not find anything for the given mod \"$mod\"")
+        if (modId == null || files == null) {
+            notFoundMessage()
             return@runBlocking
         }
-        val file = fileResult.first
+
+        val modName = async { CurseProxy.getModName(modId) }
+
+        val file = files?.findBestFile(minecraftVersion)?.first ?: kotlin.run {
+            notFoundMessage()
+            return@runBlocking
+        }
 
         val dependenciesDeferred = async { findDependencies(file, minecraftVersion) }
 
@@ -119,7 +129,8 @@ object Install : CliktCommand(
         terminal.println("Installing the mod at ${gray(archivePath)}")
         terminal.println()
 
-        downloadFile(modId!!, file, archivePath)
+        downloadFile(modId, file, archivePath)
+        addArchiveMod(modId, modName, true)
 
         val dependencies = dependenciesDeferred.await()
         if (dependencies.isNotEmpty()) {
@@ -128,7 +139,8 @@ object Install : CliktCommand(
             terminal.println()
 
             dependencies.forEach {
-                downloadFile(it.second, it.first, archivePath)
+                downloadFile(it.addonId, it.file, archivePath)
+                addArchiveMod(it.addonId, it.name, false)
             }
         }
 
@@ -163,16 +175,26 @@ object Install : CliktCommand(
             }
         }
 
-    suspend fun findDependencies(file: CurseProxyFile, minecraftVersion: MinecraftVersion): Set<Pair<CurseProxyFile, Int>> =
+    class ResolvedDependency(
+        val file: CurseProxyFile,
+        val addonId: Int,
+        val name: Deferred<String>,
+    )
+
+    suspend fun findDependencies(file: CurseProxyFile, minecraftVersion: MinecraftVersion): List<ResolvedDependency> =
         coroutineScope {
-            return@coroutineScope file.dependencies.map {
+            return@coroutineScope file.dependencies.map { dependency ->
                 async {
-                    val dependencyFile = CurseProxy.getModFiles(it.addonId)?.findBestFile(minecraftVersion)?.first
+                    val dependencyFile = CurseProxy.getModFiles(dependency.addonId)?.findBestFile(minecraftVersion)?.first
                         ?: return@async emptyList()
                     // save the addonId, because it is not part of the response
-                    setOf(dependencyFile to it.addonId) + findDependencies(dependencyFile, minecraftVersion)
+                    setOf(ResolvedDependency(
+                        dependencyFile,
+                        dependency.addonId,
+                        async { CurseProxy.getModName(dependency.addonId) }
+                    )) + findDependencies(dependencyFile, minecraftVersion).filterNot { it.addonId == dependency.addonId }
                 }
-            }.awaitAll().flatMapTo(HashSet()) { it }
+            }.awaitAll().flatten()
         }
 
     suspend fun downloadFile(modId: Int, file: CurseProxyFile, archivePath: String) = coroutineScope {
@@ -216,5 +238,21 @@ object Install : CliktCommand(
         terminal.println()
 
         downloadContent.copyAndClose(localFile.writeChannel())
+    }
+
+    suspend fun addArchiveMod(modId: Int, modName: Deferred<String>, persistent: Boolean) {
+        Xodus.ioTransaction {
+            val archiveMods = XdArchive.query(XdArchive::name eq archiveName).first().mods
+            val archiveMod = archiveMods.query(XdMod::id eq modId).firstOrNull()
+            if (archiveMod != null) {
+                if (persistent) archiveMod.persistent = true
+            } else {
+                archiveMods.add(XdMod.new {
+                    this.name = runBlocking { modName.await() }
+                    this.id = modId
+                    this.persistent = persistent
+                })
+            }
+        }
     }
 }

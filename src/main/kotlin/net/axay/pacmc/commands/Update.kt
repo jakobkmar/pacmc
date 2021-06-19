@@ -9,14 +9,10 @@ import com.github.ajalt.mordant.rendering.TextStyles.bold
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
-import kotlinx.dnq.query.eq
-import kotlinx.dnq.query.firstOrNull
-import kotlinx.dnq.query.query
 import net.axay.pacmc.commands.Install.findBestFile
 import net.axay.pacmc.requests.CurseProxy
 import net.axay.pacmc.storage.Xodus
 import net.axay.pacmc.storage.data.PacmcFile
-import net.axay.pacmc.storage.data.XdArchive
 import net.axay.pacmc.terminal
 import java.io.File
 
@@ -26,15 +22,7 @@ object Update : CliktCommand(
     private val archiveName by option("-a", "--archive").default(".minecraft")
 
     override fun run() = runBlocking(Dispatchers.Default) {
-        val (archivePath, minecraftVersion) = Xodus.store.transactional {
-            val archive = XdArchive.query(XdArchive::name eq archiveName).firstOrNull()
-            if (archive == null) {
-                terminal.danger("The given archive '${archiveName}' does not exist!")
-                null
-            } else {
-                archive.path to archive.minecraftVersion
-            }
-        } ?: return@runBlocking
+        val (archivePath, minecraftVersion) = Xodus.getArchiveData(archiveName) ?: return@runBlocking
 
         terminal.println("Checking for updates for the mods at ${gray(archivePath)}")
         terminal.println()
