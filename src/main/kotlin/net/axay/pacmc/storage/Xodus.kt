@@ -8,6 +8,7 @@ import kotlinx.dnq.store.container.StaticStoreContainer
 import kotlinx.dnq.util.initMetaData
 import net.axay.pacmc.Values
 import net.axay.pacmc.storage.data.XdArchive
+import net.axay.pacmc.terminal
 import java.io.File
 
 object Xodus {
@@ -22,7 +23,19 @@ object Xodus {
         initMetaData(XdModel.hierarchy, this)
     }
 
+    /**
+     * Loads archive data from the database.
+     *
+     * @return a pair, where the first element is the path, the second one is
+     * the minecraft version
+     */
     fun getArchive(name: String) = store.transactional {
-        XdArchive.query(XdArchive::name eq name).firstOrNull()
+        val archive = XdArchive.query(XdArchive::name eq name).firstOrNull()
+        if (archive == null) {
+            terminal.danger("The given archive '${name}' does not exist!")
+            null
+        } else {
+            archive.path to archive.minecraftVersion
+        }
     }
 }
