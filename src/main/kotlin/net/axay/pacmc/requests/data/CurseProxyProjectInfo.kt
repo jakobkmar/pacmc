@@ -3,4 +3,4 @@ package net.axay.pacmc.requests.data
 import kotlinx.serialization.Serializable
 
 @Serializable
-class CurseProxyProjectName(val name: String)
+class CurseProxyProjectInfo(val name: String, val description: String)

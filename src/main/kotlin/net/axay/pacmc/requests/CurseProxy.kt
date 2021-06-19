@@ -6,7 +6,7 @@ import net.axay.pacmc.ktorClient
 import net.axay.pacmc.requests.data.CurseProxyFile
 import net.axay.pacmc.requests.data.CurseProxyMinecraftVersion
 import net.axay.pacmc.requests.data.CurseProxyProject
-import net.axay.pacmc.requests.data.CurseProxyProjectName
+import net.axay.pacmc.requests.data.CurseProxyProjectInfo
 
 object CurseProxy {
     private const val proxyApi = "https://addons-ecs.forgesvc.net/api/v2/"
@@ -30,5 +30,5 @@ object CurseProxy {
         null
     }
 
-    suspend fun getModName(id: Int) = ktorClient.get<CurseProxyProjectName>("${proxyApi}addon/$id").name
+    suspend fun getModInfo(id: Int) = ktorClient.get<CurseProxyProjectInfo>("${proxyApi}addon/$id")
 }
