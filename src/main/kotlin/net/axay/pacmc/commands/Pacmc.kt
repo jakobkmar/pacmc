@@ -5,7 +5,7 @@ import com.github.ajalt.clikt.core.subcommands
 
 object Pacmc : CliktCommand() {
     init {
-        subcommands(Install, Update, Search, Archive, Init)
+        subcommands(Install, Update, Search, List, Archive, Init)
     }
 
     override fun run() = Unit

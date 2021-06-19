@@ -23,6 +23,7 @@ import net.axay.pacmc.logging.printProject
 import net.axay.pacmc.requests.CurseProxy
 import net.axay.pacmc.requests.data.CurseProxyFile
 import net.axay.pacmc.requests.data.CurseProxyProject
+import net.axay.pacmc.requests.data.CurseProxyProjectInfo
 import net.axay.pacmc.storage.Xodus
 import net.axay.pacmc.storage.data.PacmcFile
 import net.axay.pacmc.storage.data.XdArchive
@@ -116,7 +117,7 @@ object Install : CliktCommand(
             return@runBlocking
         }
 
-        val modName = async { CurseProxy.getModName(modId) }
+        val modInfo = async { CurseProxy.getModInfo(modId) }
 
         val file = files?.findBestFile(minecraftVersion)?.first ?: kotlin.run {
             notFoundMessage()
@@ -130,7 +131,7 @@ object Install : CliktCommand(
         terminal.println()
 
         downloadFile(modId, file, archivePath)
-        addArchiveMod(modId, modName, true)
+        addArchiveMod("curseforge", modId, modInfo, true)
 
         val dependencies = dependenciesDeferred.await()
         if (dependencies.isNotEmpty()) {
@@ -140,7 +141,7 @@ object Install : CliktCommand(
 
             dependencies.forEach {
                 downloadFile(it.addonId, it.file, archivePath)
-                addArchiveMod(it.addonId, it.name, false)
+                addArchiveMod("curseforge", it.addonId, it.info, false)
             }
         }
 
@@ -178,7 +179,7 @@ object Install : CliktCommand(
     class ResolvedDependency(
         val file: CurseProxyFile,
         val addonId: Int,
-        val name: Deferred<String>,
+        val info: Deferred<CurseProxyProjectInfo>,
     )
 
     suspend fun findDependencies(file: CurseProxyFile, minecraftVersion: MinecraftVersion): List<ResolvedDependency> =
@@ -191,7 +192,7 @@ object Install : CliktCommand(
                     setOf(ResolvedDependency(
                         dependencyFile,
                         dependency.addonId,
-                        async { CurseProxy.getModName(dependency.addonId) }
+                        async { CurseProxy.getModInfo(dependency.addonId) }
                     )) + findDependencies(dependencyFile, minecraftVersion).filterNot { it.addonId == dependency.addonId }
                 }
             }.awaitAll().flatten()
@@ -240,7 +241,7 @@ object Install : CliktCommand(
         downloadContent.copyAndClose(localFile.writeChannel())
     }
 
-    suspend fun addArchiveMod(modId: Int, modName: Deferred<String>, persistent: Boolean) {
+    suspend fun addArchiveMod(repository: String, modId: Int, modInfo: Deferred<CurseProxyProjectInfo>, persistent: Boolean) {
         Xodus.ioTransaction {
             val archiveMods = XdArchive.query(XdArchive::name eq archiveName).first().mods
             val archiveMod = archiveMods.query(XdMod::id eq modId).firstOrNull()
@@ -248,8 +249,15 @@ object Install : CliktCommand(
                 if (persistent) archiveMod.persistent = true
             } else {
                 archiveMods.add(XdMod.new {
-                    this.name = runBlocking { modName.await() }
+                    val resolvedModInfo = runBlocking { modInfo.await() }
+
+                    this.repository = repository
                     this.id = modId
+
+                    this.name = resolvedModInfo.name
+                    if (resolvedModInfo.summary != null)
+                        this.description = resolvedModInfo.summary
+
                     this.persistent = persistent
                 })
             }
