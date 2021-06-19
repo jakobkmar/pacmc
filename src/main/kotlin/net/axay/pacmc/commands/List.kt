@@ -30,14 +30,13 @@ object List : CliktCommand(
             }
 
             fun printMod(mod: XdMod, persistent: Boolean) {
-                val repository = yellow("${mod.repository}/")
                 val name = white(bold(underline(mod.name)))
-                val id = brightBlue("[${mod.id}]")
+                val id = brightBlue("[${mod.repository}/${mod.id}]")
 
                 val type = if (!persistent) " ${cyan("(dependency)")}" else ""
 
-                terminal.println("$repository$name $id$type")
-                terminal.println("  ${gray(mod.description ?: "no description available")}")
+                terminal.println(" → $name $id$type")
+                terminal.println("    ${gray(mod.description ?: "no description available")}")
             }
 
             archive.mods.apply {
