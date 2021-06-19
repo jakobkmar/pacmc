@@ -22,6 +22,8 @@ object Update : CliktCommand(
     private val archiveName by option("-a", "--archive").default(".minecraft")
 
     override fun run() = runBlocking(Dispatchers.Default) {
+        val transaction = Xodus.store.beginReadonlyTransaction()
+
         val archive = Xodus.getArchive(archiveName)
         if (archive == null) {
             terminal.danger("The given archive '${archiveName}' does not exist!")
@@ -67,5 +69,7 @@ object Update : CliktCommand(
 
         terminal.println()
         terminal.println("Summary: $updateCounter updated, $upToDateCounter are up to date, $unsureCounter checks failed")
+
+        transaction.commit()
     }
 }

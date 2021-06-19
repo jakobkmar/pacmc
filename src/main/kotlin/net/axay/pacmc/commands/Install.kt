@@ -56,6 +56,8 @@ object Install : CliktCommand(
     private val mod by argument()
 
     override fun run() = runBlocking(Dispatchers.Default) {
+        val transaction = Xodus.store.beginReadonlyTransaction()
+
         val archive = Xodus.getArchive(archiveName)
         if (archive == null) {
             terminal.danger("The given archive '$archiveName' does not exist!")
@@ -138,6 +140,8 @@ object Install : CliktCommand(
 
         terminal.println()
         terminal.println(brightGreen("Successfully installed the given mod."))
+
+        transaction.commit()
     }
 
     fun List<CurseProxyFile>.findBestFile(archive: XdArchive) = this
