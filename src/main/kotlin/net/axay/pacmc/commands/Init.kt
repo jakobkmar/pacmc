@@ -16,7 +16,7 @@ import net.axay.pacmc.utils.OperatingSystem
 import java.io.File
 
 object Init : CliktCommand(
-    "Sets the pacmc defaults if they aren't already set"
+    "Sets the pacmc defaults
 ) {
     override fun run() = runBlocking(Dispatchers.Default) {
         val latestMinecraftVersion = async {
