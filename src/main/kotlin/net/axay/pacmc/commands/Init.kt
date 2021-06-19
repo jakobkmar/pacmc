@@ -53,13 +53,14 @@ object Init : CliktCommand(
                     }.canonicalPath
                 }
 
-                terminal.success("Created the '.minecraft' archive at:")
-                terminal.println("  " + gray(path))
                 XdArchive.new {
                     this.name = ".minecraft"
                     this.path = path
                     this.gameVersion = runBlocking { latestMinecraftVersion.await() }
                 }
+
+                terminal.success("Created the '.minecraft' archive at:")
+                terminal.println("  " + gray(path))
             }
         }
     }
