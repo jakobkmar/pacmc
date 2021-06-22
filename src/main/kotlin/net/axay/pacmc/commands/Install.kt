@@ -205,7 +205,7 @@ object Install : CliktCommand(
         val alreadyInstalled = (File(archivePath).listFiles() ?: emptyArray())
             .filter { it.name.startsWith("pacmc_") }
             .map { PacmcFile(it.name) }
-            .any { it.modId == modId.toString() }
+            .any { it.modId == modId }
 
         if (alreadyInstalled) {
             terminal.println("  already installed ${green("✔")}")
@@ -253,6 +253,7 @@ object Install : CliktCommand(
             val archiveMod = archiveMods.query(XdMod::id eq modId).firstOrNull()
             if (archiveMod != null) {
                 if (persistent) archiveMod.persistent = true
+                archiveMod.version = versionId
             } else {
                 archiveMods.add(XdMod.new {
                     val resolvedModInfo = runBlocking { modInfo.await() }
