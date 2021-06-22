@@ -19,7 +19,7 @@ object List : CliktCommand(
     "Lists the installed mods"
 ) {
     private val archiveName by option("-a", "--archive").default(".minecraft")
-    private val showDependencies by option("-v", "--verbose").flag()
+    private val muteDependencies by option("-m", "--mute").flag()
 
     override fun run() {
         Xodus.store.transactional {
@@ -51,7 +51,7 @@ object List : CliktCommand(
                 terminal.println()
                 installedMods.forEach { printMod(it, true) }
 
-                if (showDependencies) {
+                if (!muteDependencies) {
                     terminal.println()
                     filter { it.persistent eq false }.toList().forEach { printMod(it, false) }
                 }
