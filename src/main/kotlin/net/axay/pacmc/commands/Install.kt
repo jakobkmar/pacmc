@@ -130,8 +130,7 @@ object Install : CliktCommand(
         terminal.println("Installing the mod at ${gray(archivePath)}")
         terminal.println()
 
-        downloadFile(modId, file, archivePath)
-        addArchiveMod("curseforge", modId, file.id, modInfo, true)
+        downloadFile(modId, file, archivePath, "curseforge", file.id, modInfo, true)
 
         val dependencies = dependenciesDeferred.await()
         if (dependencies.isNotEmpty()) {
@@ -140,8 +139,7 @@ object Install : CliktCommand(
             terminal.println()
 
             dependencies.forEach {
-                downloadFile(it.addonId, it.file, archivePath)
-                addArchiveMod("curseforge", it.addonId, it.file.id, it.info, false)
+                downloadFile(it.addonId, it.file, archivePath, "curseforge", it.file.id, it.info, false)
             }
         }
 
@@ -198,7 +196,15 @@ object Install : CliktCommand(
             }.awaitAll().flatten()
         }
 
-    suspend fun downloadFile(modId: Int, file: CurseProxyFile, archivePath: String) = coroutineScope {
+    suspend fun downloadFile(
+        modId: Int,
+        file: CurseProxyFile,
+        archivePath: String,
+        repository: String,
+        versionId: Int,
+        modInfo: Deferred<CurseProxyProjectInfo>?,
+        persistent: Boolean,
+    ) = coroutineScope {
         // download the mod file to the given archive (and display progress)
         terminal.println("Downloading " + brightCyan(file.fileName))
 
@@ -239,15 +245,7 @@ object Install : CliktCommand(
         terminal.println()
 
         downloadContent.copyAndClose(localFile.writeChannel())
-    }
 
-    suspend fun addArchiveMod(
-        repository: String,
-        modId: Int,
-        versionId: Int,
-        modInfo: Deferred<CurseProxyProjectInfo>,
-        persistent: Boolean,
-    ) {
         Xodus.ioTransaction {
             val archiveMods = XdArchive.query(XdArchive::name eq archiveName).first().mods
             val archiveMod = archiveMods.query(XdMod::id eq modId).firstOrNull()
@@ -256,16 +254,18 @@ object Install : CliktCommand(
                 archiveMod.version = versionId
             } else {
                 archiveMods.add(XdMod.new {
-                    val resolvedModInfo = runBlocking { modInfo.await() }
+                    val resolvedModInfo = runBlocking { modInfo?.await() }
 
                     this.repository = repository
                     this.id = modId
 
                     this.version = versionId
 
-                    this.name = resolvedModInfo.name
-                    if (resolvedModInfo.summary != null)
-                        this.description = resolvedModInfo.summary
+                    if (resolvedModInfo != null) {
+                        this.name = resolvedModInfo.name
+                        if (resolvedModInfo.summary != null)
+                            this.description = resolvedModInfo.summary
+                    }
 
                     this.persistent = persistent
                 })

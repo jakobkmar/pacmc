@@ -112,7 +112,7 @@ object Update : CliktCommand(
                 terminal.println()
 
                 updateMods.forEach {
-                    Install.downloadFile(it.first.id, it.second, archivePath)
+                    Install.downloadFile(it.first.id, it.second, archivePath, "curseforge", it.second.id, null, true)
                     updateCounter.incrementAndGet()
                 }
             }
@@ -123,7 +123,7 @@ object Update : CliktCommand(
                 terminal.println()
 
                 freshDependencies.forEach {
-                    Install.downloadFile(it.addonId, it.file, archivePath)
+                    Install.downloadFile(it.addonId, it.file, archivePath, "curseforge", it.file.id, it.info, false)
                     updateCounter.incrementAndGet()
                 }
             }
