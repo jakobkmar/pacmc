@@ -55,7 +55,6 @@ import kotlin.math.roundToInt
 object Install : CliktCommand(
     "Installs a minecraft mod"
 ) {
-    private val local by option("-l", "--local").flag()
     private val archiveName by option("-a", "--archive").default(".minecraft")
 
     private val mod by argument()
