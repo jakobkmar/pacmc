@@ -9,6 +9,8 @@ class XdMod(entity: Entity) : XdEntity(entity) {
     var repository by xdRequiredStringProp()
     var id by xdRequiredIntProp()
 
+    var version by xdRequiredIntProp()
+
     var name by xdRequiredStringProp(trimmed = true)
     var description by xdStringProp()
 
