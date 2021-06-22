@@ -56,6 +56,7 @@ object Update : CliktCommand(
 
         val archiveFolder = File(archivePath)
         val archiveFiles = (archiveFolder.listFiles() ?: emptyArray())
+            .filter { it.name.startsWith("pacmc_") }
             .map { it to PacmcFile(it.name) }
 
         val updateMods = Collections.synchronizedList(ArrayList<Pair<UpdateMod, CurseProxyFile>>())
