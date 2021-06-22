@@ -41,12 +41,18 @@ object Xodus {
      * the minecraft version
      */
     fun getArchiveData(name: String) = store.transactional {
-        val archive = XdArchive.query(XdArchive::name eq name).firstOrNull()
-        if (archive == null) {
-            terminal.danger("The given archive '${name}' does not exist!")
-            null
-        } else {
+        val archive = getArchiveOrNull(name)
+        if (archive != null) {
             archive.path to archive.minecraftVersion
+        } else {
+            null
         }
+    }
+
+    fun getArchiveOrNull(name: String): XdArchive? {
+        val archive = XdArchive.query(XdArchive::name eq name).firstOrNull()
+        if (archive == null)
+            terminal.danger("The given archive '${name}' does not exist!")
+        return archive
     }
 }
