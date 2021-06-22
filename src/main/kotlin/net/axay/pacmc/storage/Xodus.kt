@@ -28,6 +28,8 @@ object Xodus {
         initMetaData(XdModel.hierarchy, this)
     }
 
+    fun <T> xodus(block: (TransientStoreSession) -> T) = store.transactional(block = block)
+
     suspend fun ioTransaction(block: (TransientStoreSession) -> Unit) = coroutineScope {
         launch(Dispatchers.IO) {
             store.transactional(block = block)
