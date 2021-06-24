@@ -28,5 +28,6 @@ package() {
   install -D 'pacmc.sh' "$pkgdir/usr/bin/pacmc"
 
   cd "pacmc-${pkgver}" || exit
-  install -D '.' "$pkgdir/usr/share/java/${pkgname}/"
+  mkdir -p "$pkgdir/usr/share/${pkgname}"
+  cp -r '.' "$pkgdir/usr/share/${pkgname}"
 }
