@@ -62,12 +62,13 @@ object Install : CliktCommand(
     override fun run() = runBlocking(Dispatchers.Default) {
         val (archivePath, minecraftVersion) = Xodus.getArchiveData(archiveName) ?: return@runBlocking
 
-        var modId: Int? = mod.toIntOrNull()
+        var modId: String? = mod
         var files: List<CurseProxyFile>? = null
 
         suspend fun updateFiles() {
-            if (modId != null)
-                files = CurseProxy.getModFiles(modId!!)
+            val curseModId = modId?.toIntOrNull()
+            if (curseModId != null)
+                files = CurseProxy.getModFiles(curseModId)
         }
 
         updateFiles()
@@ -99,10 +100,10 @@ object Install : CliktCommand(
                         }
                     }
 
-                    options[choice]?.id
+                    options[choice]?.id.toString()
                 }
                 // just take the one matching mod
-                searchResults.size == 1 -> searchResults.first().id
+                searchResults.size == 1 -> searchResults.first().id.toString()
                 else -> null
             }
 
@@ -116,7 +117,7 @@ object Install : CliktCommand(
             return@runBlocking
         }
 
-        val modInfo = async { CurseProxy.getModInfo(modId) }
+        val modInfo = async { CurseProxy.getModInfo(modId.toInt()) }
 
         val file = files?.findBestFile(minecraftVersion)?.first ?: kotlin.run {
             notFoundMessage()
@@ -129,7 +130,7 @@ object Install : CliktCommand(
         terminal.println("Installing the mod at ${gray(archivePath)}")
         terminal.println()
 
-        downloadFile(modId, file, archivePath, "curseforge", file.id, modInfo, true)
+        downloadFile(modId, file, archivePath, "curseforge", file.id.toString(), modInfo, true)
 
         val dependencies = dependenciesDeferred.await()
         if (dependencies.isNotEmpty()) {
@@ -138,7 +139,7 @@ object Install : CliktCommand(
             terminal.println()
 
             dependencies.forEach {
-                downloadFile(it.addonId, it.file, archivePath, "curseforge", it.file.id, it.info, false)
+                downloadFile(it.addonId, it.file, archivePath, "curseforge", it.file.id.toString(), it.info, false)
             }
         }
 
@@ -175,7 +176,7 @@ object Install : CliktCommand(
 
     class ResolvedDependency(
         val file: CurseProxyFile,
-        val addonId: Int,
+        val addonId: String,
         val info: Deferred<CurseProxyProjectInfo>,
     )
 
@@ -188,19 +189,19 @@ object Install : CliktCommand(
                     // save the addonId, because it is not part of the response
                     setOf(ResolvedDependency(
                         dependencyFile,
-                        dependency.addonId,
+                        dependency.addonId.toString(),
                         async { CurseProxy.getModInfo(dependency.addonId) }
-                    )) + findDependencies(dependencyFile, minecraftVersion).filterNot { it.addonId == dependency.addonId }
+                    )) + findDependencies(dependencyFile, minecraftVersion).filterNot { it.addonId == dependency.addonId.toString() }
                 }
             }.awaitAll().flatten()
         }
 
     suspend fun downloadFile(
-        modId: Int,
+        modId: String,
         file: CurseProxyFile,
         archivePath: String,
         repository: String,
-        versionId: Int,
+        versionId: String,
         modInfo: Deferred<CurseProxyProjectInfo>?,
         persistent: Boolean,
     ) = coroutineScope {

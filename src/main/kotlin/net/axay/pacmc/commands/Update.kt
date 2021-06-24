@@ -32,7 +32,7 @@ object Update : CliktCommand(
 ) {
     private val archiveName by option("-a", "--archive").default(".minecraft")
 
-    private class UpdateMod(val xdMod: XdMod, val id: Int, val name: String)
+    private class UpdateMod(val xdMod: XdMod, val id: String, val name: String)
 
     override fun run() = runBlocking(Dispatchers.Default) {
         val (archivePath, minecraftVersion) = Xodus.getArchiveData(archiveName) ?: return@runBlocking
@@ -64,7 +64,7 @@ object Update : CliktCommand(
 
         mods.map { mod ->
             launch {
-                val modFile = CurseProxy.getModFiles(mod.id)?.findBestFile(minecraftVersion)?.first
+                val modFile = CurseProxy.getModFiles(mod.id.toInt())?.findBestFile(minecraftVersion)?.first
                 if (modFile == null) {
                     terminal.danger("Could not check the following mod: ${mod.name} (has it been deleted by its owner?)")
                     unsureCounter.incrementAndGet()
@@ -73,7 +73,7 @@ object Update : CliktCommand(
                         .filterNot { dep -> freshDependencies.any { it.addonId == dep.addonId } }
 
                     xodus {
-                        if (modFile.id != mod.xdMod.version) {
+                        if (modFile.id.toString() != mod.xdMod.version) {
                             terminal.println("The mod ${bold("${mod.xdMod.repository}/${underline(mod.name)}")} is ${red("outdated")}")
                             updateMods += mod to modFile
                         } else {
@@ -90,7 +90,7 @@ object Update : CliktCommand(
 
         // now remove all dependencies which don't have any update
         freshDependencies.removeIf { dep ->
-            archiveFiles.any { it.second.modId == dep.addonId && it.second.versionId == dep.file.id }
+            archiveFiles.any { it.second.modId == dep.addonId && it.second.versionId == dep.file.id.toString() }
         }
 
         terminal.println()
@@ -113,7 +113,7 @@ object Update : CliktCommand(
                 terminal.println()
 
                 updateMods.forEach {
-                    Install.downloadFile(it.first.id, it.second, archivePath, "curseforge", it.second.id, null, true)
+                    Install.downloadFile(it.first.id, it.second, archivePath, "curseforge", it.second.id.toString(), null, true)
                     updateCounter.incrementAndGet()
                 }
             }
@@ -124,7 +124,7 @@ object Update : CliktCommand(
                 terminal.println()
 
                 freshDependencies.forEach {
-                    Install.downloadFile(it.addonId, it.file, archivePath, "curseforge", it.file.id, it.info, false)
+                    Install.downloadFile(it.addonId, it.file, archivePath, "curseforge", it.file.id.toString(), it.info, false)
                     updateCounter.incrementAndGet()
                 }
             }

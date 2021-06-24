@@ -5,8 +5,8 @@ import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import kotlinx.dnq.query.filter
-import kotlinx.dnq.query.firstOrNull
 import kotlinx.dnq.query.singleOrNull
+import kotlinx.dnq.query.size
 import net.axay.pacmc.storage.Xodus
 import net.axay.pacmc.storage.Xodus.xodus
 import net.axay.pacmc.storage.data.PacmcFile
@@ -18,21 +18,19 @@ object Remove : CliktCommand(
 ) {
     private val archiveName by option("-a", "--archive").default(".minecraft")
 
-    private val mod by argument()
+    private val inputModName by argument()
 
     override fun run() = xodus {
         val archive = Xodus.getArchiveOrNull(archiveName) ?: return@xodus
 
-        val inputModId = mod.toIntOrNull()
-        val mod = if (inputModId != null) {
-            archive.mods.filter { it.id eq inputModId }.firstOrNull()
-        } else {
-            kotlin.runCatching {
-                archive.mods.filter { it.name eq mod }.singleOrNull()
-            }.onFailure {
-                terminal.warning("There are multiple mods matching the given name, please specify the ID")
-            }.getOrNull()
-        }
+        val mod = archive.mods.filter { it.id eq inputModName }.singleOrNull()
+            ?: kotlin.run {
+                val possibleMods = archive.mods.filter { it.name eq inputModName }
+                if (possibleMods.size() > 1) {
+                    terminal.warning("There are multiple mods matching the given name, please specify the ID")
+                    null
+                } else possibleMods.singleOrNull()
+            }
 
         if (mod == null) {
             terminal.danger("You don't have any mod with the given name or ID installed.")

@@ -7,12 +7,12 @@ class XdMod(entity: Entity) : XdEntity(entity) {
     companion object : XdNaturalEntityType<XdMod>()
 
     var repository by xdRequiredStringProp()
-    var id by xdRequiredIntProp()
+    var id by xdRequiredStringProp()
 
-    var version by xdRequiredIntProp()
+    var version by xdRequiredStringProp()
 
     var name by xdRequiredStringProp(trimmed = true)
-    var description by xdStringProp()
+    var description by xdStringProp(trimmed = true)
 
     var persistent by xdBooleanProp()
 
