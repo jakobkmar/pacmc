@@ -15,4 +15,7 @@ class XdMod(entity: Entity) : XdEntity(entity) {
     var description by xdStringProp()
 
     var persistent by xdBooleanProp()
+
+    operator fun component1() = id
+    operator fun component2() = name
 }
