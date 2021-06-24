@@ -208,6 +208,32 @@ object Install : CliktCommand(
         // download the mod file to the given archive (and display progress)
         terminal.println("Downloading " + brightCyan(file.fileName))
 
+        Xodus.ioTransaction {
+            val archiveMods = XdArchive.query(XdArchive::name eq archiveName).first().mods
+            val archiveMod = archiveMods.query(XdMod::id eq modId).firstOrNull()
+            if (archiveMod != null) {
+                if (persistent) archiveMod.persistent = true
+                archiveMod.version = versionId
+            } else {
+                archiveMods.add(XdMod.new {
+                    val resolvedModInfo = runBlocking { modInfo?.await() }
+
+                    this.repository = repository
+                    this.id = modId
+
+                    this.version = versionId
+
+                    if (resolvedModInfo != null) {
+                        this.name = resolvedModInfo.name
+                        if (resolvedModInfo.summary != null)
+                            this.description = resolvedModInfo.summary
+                    }
+
+                    this.persistent = persistent
+                })
+            }
+        }
+
         val alreadyInstalled = (File(archivePath).listFiles() ?: emptyArray())
             .filter { it.name.startsWith("pacmc_") }
             .map { PacmcFile(it.name) }
@@ -245,31 +271,5 @@ object Install : CliktCommand(
         terminal.println()
 
         downloadContent.copyAndClose(localFile.writeChannel())
-
-        Xodus.ioTransaction {
-            val archiveMods = XdArchive.query(XdArchive::name eq archiveName).first().mods
-            val archiveMod = archiveMods.query(XdMod::id eq modId).firstOrNull()
-            if (archiveMod != null) {
-                if (persistent) archiveMod.persistent = true
-                archiveMod.version = versionId
-            } else {
-                archiveMods.add(XdMod.new {
-                    val resolvedModInfo = runBlocking { modInfo?.await() }
-
-                    this.repository = repository
-                    this.id = modId
-
-                    this.version = versionId
-
-                    if (resolvedModInfo != null) {
-                        this.name = resolvedModInfo.name
-                        if (resolvedModInfo.summary != null)
-                            this.description = resolvedModInfo.summary
-                    }
-
-                    this.persistent = persistent
-                })
-            }
-        }
     }
 }
