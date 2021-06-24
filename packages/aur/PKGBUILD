@@ -11,6 +11,7 @@ license=('GPL3')
 depends=('java-runtime=11')
 optdepends=('minecraft-launcher: The game launcher, managing the .minecraft folder')
 source=("https://github.com/bluefireoly/pacmc/releases/download/${pkgver}/pacmc-${pkgver}.tar")
+sha256sums=('f5944b84c3740c32ad0ac57af0f5456a9c74907cf26dcb3d73128284eb6fc13a')
 
 build() {
   # shellcheck disable=SC2154
