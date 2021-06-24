@@ -49,10 +49,13 @@ object List : CliktCommand(
                 }
 
                 terminal.println("The archive '${green(archiveName)}' at ${gray(archive.path)} contains the following mods:")
-                terminal.println()
-                installedMods.forEach { printMod(it, true) }
 
-                if (!muteDependencies) {
+                if (installedMods.isNotEmpty()) {
+                    terminal.println()
+                    installedMods.forEach { printMod(it, true) }
+                }
+
+                if (!muteDependencies && installedDependencies.isNotEmpty()) {
                     terminal.println()
                     installedDependencies.forEach { printMod(it, false) }
                 }
