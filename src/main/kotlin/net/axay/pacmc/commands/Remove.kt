@@ -16,7 +16,7 @@ import java.io.File
 object Remove : CliktCommand(
     "Removes a minecraft mod"
 ) {
-    private val archiveName by option("-a", "--archive").default(".minecraft")
+    private val archiveName by option("-a", "--archive", help = "The name of the archive where you want to remove the mod").default(".minecraft")
 
     private val inputModName by argument()
 

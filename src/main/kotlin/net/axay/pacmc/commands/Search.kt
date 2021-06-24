@@ -14,7 +14,7 @@ import net.axay.pacmc.requests.CurseProxy
 import net.axay.pacmc.terminal
 
 object Search : CliktCommand(
-    "Search for mods"
+    "Searches for mods"
 ) {
     private val searchTerm by argument()
     private val gameVersion by option("-g", "--game-version", help = "Set a specific game version (latest by default)")

@@ -28,9 +28,9 @@ import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 
 object Update : CliktCommand(
-    "Updates the mods in an archive"
+    "Updates the mods inside an archive"
 ) {
-    private val archiveName by option("-a", "--archive").default(".minecraft")
+    private val archiveName by option("-a", "--archive", help = "The name of the archive you want to update the mods of").default(".minecraft")
 
     private class UpdateMod(val xdMod: XdMod, val id: String, val name: String)
 

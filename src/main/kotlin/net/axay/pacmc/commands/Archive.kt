@@ -16,7 +16,7 @@ import net.axay.pacmc.storage.data.XdArchive
 import net.axay.pacmc.terminal
 
 object Archive : CliktCommand(
-    "Manage your mod archives"
+    "Manages your mod archives"
 ) {
     init {
         subcommands(Add, List, Remove)
@@ -27,8 +27,8 @@ object Archive : CliktCommand(
     object Add : CliktCommand("Add a new archive") {
         private val gameVersion by option("-g", "--game-version", help = "Set a specific game version (latest by default)")
 
-        private val name by argument()
-        private val path by argument().file(mustExist = true, canBeFile = false)
+        private val name by argument(help = "The name of the new archive")
+        private val path by argument(help = "The path where all archive specific actions should take place").file(mustExist = true, canBeFile = false)
 
         override fun run() = runBlocking(Dispatchers.Default) {
             val minecraftVersion = async {
@@ -74,7 +74,7 @@ object Archive : CliktCommand(
     }
 
     object Remove : CliktCommand("Remove an existing archive") {
-        private val name by argument()
+        private val name by argument(help = "The name of the archive you want to delete")
 
         override fun run() {
             Xodus.store.transactional {

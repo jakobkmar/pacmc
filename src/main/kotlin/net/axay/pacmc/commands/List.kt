@@ -18,8 +18,8 @@ import net.axay.pacmc.terminal
 object List : CliktCommand(
     "Lists the installed mods"
 ) {
-    private val archiveName by option("-a", "--archive").default(".minecraft")
-    private val muteDependencies by option("-m", "--mute").flag()
+    private val archiveName by option("-a", "--archive", help = "The name of the archive you want to list the mods of").default(".minecraft")
+    private val muteDependencies by option("-m", "--mute", help = "Whether to list mods which are dependencies of other mods").flag()
 
     override fun run() {
         Xodus.store.transactional {
