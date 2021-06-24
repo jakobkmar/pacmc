@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "net.axay"
-version = "1.0-SNAPSHOT"
+version = "0.1.0"
 
 description = "An easy to use package manager for Fabric Minecraft mods."
 
