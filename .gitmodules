@@ -1,0 +1,3 @@
+[submodule "packages/aur/pacmc"]
+	path = packages/aur/pacmc
+	url = ssh://aur@aur.archlinux.org/pacmc.git
