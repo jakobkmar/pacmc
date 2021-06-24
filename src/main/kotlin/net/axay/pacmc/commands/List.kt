@@ -41,8 +41,9 @@ object List : CliktCommand(
 
             archive.mods.apply {
                 val installedMods = filter { it.persistent eq true }.toList()
+                val installedDependencies = filter { it.persistent eq false }.toList()
 
-                if (installedMods.isEmpty()) {
+                if (installedMods.isEmpty() && installedDependencies.isEmpty()) {
                     terminal.warning("The archive '$archiveName' is empty!")
                     return@transactional
                 }
@@ -53,7 +54,7 @@ object List : CliktCommand(
 
                 if (!muteDependencies) {
                     terminal.println()
-                    filter { it.persistent eq false }.toList().forEach { printMod(it, false) }
+                    installedDependencies.forEach { printMod(it, false) }
                 }
             }
 
