@@ -5,9 +5,22 @@
 The aim of this project is to massively reduce the effort you have to put in for installing - and most importantly -
 keeping your mods up to date.
 
-## State
+## Installation
 
-`pacmc` is currently in development. It will be released soon.
+**Arch Linux**
+
+`pacmc` is the name of [the package in the **AUR**](https://aur.archlinux.org/packages/pacmc/).
+
+## Quick start
+
+```bash
+# add the .minecraft folder as an archive
+pacmc init
+# search for mods
+pacmc search minihud
+# install a mod
+pacmc install lithium
+```
 
 ## Usage
 
@@ -17,6 +30,13 @@ The main command is `pacmc`. You can add `-h` to any command to get help.
 
 Archives are the places (folders) where your mods are stored. Your `.minecraft` folder is an archive by default, but you
 can add more (for example to manage mods on a server, which `pacmc` is designed for aswell).
+
+#### Init the default archive
+
+To add the `.minecraft` folder as an archive:
+```zsh
+pacmc init
+```
 
 #### Add an archive
 
@@ -64,7 +84,7 @@ pacmc search -i "minimap"
 # via the mod id
 pacmc install 447425
 # or via a search term
-pacmc install Fabric API
+pacmc install tweakeroo
 ```
 
 or to a specific archive:
