@@ -4,3 +4,6 @@
 [submodule "packages/scoop-extras"]
 	path = packages/scoop-extras
 	url = https://github.com/bluefireoly/scoop-extras.git
+[submodule "packages/scoop-games"]
+	path = packages/scoop-games
+	url = https://github.com/bluefireoly/scoop-games.git
