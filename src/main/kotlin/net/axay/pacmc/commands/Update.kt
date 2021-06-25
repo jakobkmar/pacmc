@@ -12,7 +12,6 @@ import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.dnq.query.filter
-import kotlinx.dnq.query.first
 import kotlinx.dnq.query.toList
 import net.axay.pacmc.commands.Install.findBestFile
 import net.axay.pacmc.requests.CurseProxy
@@ -20,7 +19,6 @@ import net.axay.pacmc.requests.data.CurseProxyFile
 import net.axay.pacmc.storage.Xodus
 import net.axay.pacmc.storage.Xodus.xodus
 import net.axay.pacmc.storage.data.PacmcFile
-import net.axay.pacmc.storage.data.XdArchive
 import net.axay.pacmc.storage.data.XdMod
 import net.axay.pacmc.terminal
 import java.io.File
@@ -35,7 +33,8 @@ object Update : CliktCommand(
     private class UpdateMod(val xdMod: XdMod, val id: String, val name: String)
 
     override fun run() = runBlocking(Dispatchers.Default) {
-        val (archivePath, minecraftVersion) = Xodus.getArchiveData(archiveName) ?: return@runBlocking
+        val archive = xodus { Xodus.getArchiveOrNull(archiveName) } ?: return@runBlocking
+        val (archivePath, minecraftVersion) = xodus { archive.path to archive.minecraftVersion }
 
         terminal.println("Checking for updates for the mods at ${gray(archivePath)}")
         terminal.println()
@@ -44,7 +43,7 @@ object Update : CliktCommand(
         val updateCounter = AtomicInteger(0)
         val unsureCounter = AtomicInteger(0)
 
-        val allMods = xodus { XdArchive.filter { it.name eq archiveName }.first().mods }
+        val allMods = xodus { archive.mods }
 
         val mods = xodus {
             allMods.filter { it.persistent eq true }.toList().map { UpdateMod(it, it.id, it.name) }
@@ -113,7 +112,7 @@ object Update : CliktCommand(
                 terminal.println()
 
                 updateMods.forEach {
-                    Install.downloadFile(it.first.id, it.second, archivePath, "curseforge", it.second.id.toString(), null, true)
+                    Install.downloadFile(it.first.id, it.second, archivePath, "curseforge", it.second.id.toString(), null, true, archive)
                     updateCounter.incrementAndGet()
                 }
             }
@@ -124,7 +123,7 @@ object Update : CliktCommand(
                 terminal.println()
 
                 freshDependencies.forEach {
-                    Install.downloadFile(it.addonId, it.file, archivePath, "curseforge", it.file.id.toString(), it.info, false)
+                    Install.downloadFile(it.addonId, it.file, archivePath, "curseforge", it.file.id.toString(), it.info, false, archive)
                     updateCounter.incrementAndGet()
                 }
             }

@@ -36,21 +36,6 @@ object Xodus {
         }
     }
 
-    /**
-     * Loads archive data from the database.
-     *
-     * @return a pair, where the first element is the path, the second one is
-     * the minecraft version
-     */
-    fun getArchiveData(name: String) = store.transactional {
-        val archive = getArchiveOrNull(name)
-        if (archive != null) {
-            archive.path to archive.minecraftVersion
-        } else {
-            null
-        }
-    }
-
     fun getArchiveOrNull(name: String): XdArchive? {
         val archive = XdArchive.query(XdArchive::name eq name).firstOrNull()
         if (archive == null)

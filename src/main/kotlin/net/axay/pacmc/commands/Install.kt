@@ -3,7 +3,6 @@ package net.axay.pacmc.commands
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.options.default
-import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.mordant.rendering.TextColors
 import com.github.ajalt.mordant.rendering.TextColors.*
@@ -14,7 +13,6 @@ import io.ktor.util.cio.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.*
 import kotlinx.dnq.query.eq
-import kotlinx.dnq.query.first
 import kotlinx.dnq.query.firstOrNull
 import kotlinx.dnq.query.query
 import net.axay.pacmc.data.MinecraftVersion
@@ -25,6 +23,7 @@ import net.axay.pacmc.requests.data.CurseProxyFile
 import net.axay.pacmc.requests.data.CurseProxyProject
 import net.axay.pacmc.requests.data.CurseProxyProjectInfo
 import net.axay.pacmc.storage.Xodus
+import net.axay.pacmc.storage.Xodus.xodus
 import net.axay.pacmc.storage.data.PacmcFile
 import net.axay.pacmc.storage.data.XdArchive
 import net.axay.pacmc.storage.data.XdMod
@@ -60,7 +59,8 @@ object Install : CliktCommand(
     private val mod by argument()
 
     override fun run() = runBlocking(Dispatchers.Default) {
-        val (archivePath, minecraftVersion) = Xodus.getArchiveData(archiveName) ?: return@runBlocking
+        val archive = xodus { Xodus.getArchiveOrNull(archiveName) } ?: return@runBlocking
+        val (archivePath, minecraftVersion) = xodus { archive.path to archive.minecraftVersion }
 
         var modId: String? = mod
         var files: List<CurseProxyFile>? = null
@@ -130,7 +130,7 @@ object Install : CliktCommand(
         terminal.println("Installing the mod at ${gray(archivePath)}")
         terminal.println()
 
-        downloadFile(modId, file, archivePath, "curseforge", file.id.toString(), modInfo, true)
+        downloadFile(modId, file, archivePath, "curseforge", file.id.toString(), modInfo, true, archive)
 
         val dependencies = dependenciesDeferred.await()
         if (dependencies.isNotEmpty()) {
@@ -139,7 +139,7 @@ object Install : CliktCommand(
             terminal.println()
 
             dependencies.forEach {
-                downloadFile(it.addonId, it.file, archivePath, "curseforge", it.file.id.toString(), it.info, false)
+                downloadFile(it.addonId, it.file, archivePath, "curseforge", it.file.id.toString(), it.info, false, archive)
             }
         }
 
@@ -204,12 +204,13 @@ object Install : CliktCommand(
         versionId: String,
         modInfo: Deferred<CurseProxyProjectInfo>?,
         persistent: Boolean,
+        archive: XdArchive,
     ) = coroutineScope {
         // download the mod file to the given archive (and display progress)
         terminal.println("Downloading " + brightCyan(file.fileName))
 
         Xodus.ioTransaction {
-            val archiveMods = XdArchive.query(XdArchive::name eq archiveName).first().mods
+            val archiveMods = archive.mods
             val archiveMod = archiveMods.query(XdMod::id eq modId).firstOrNull()
             if (archiveMod != null) {
                 if (persistent) archiveMod.persistent = true
