@@ -11,8 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.dnq.query.filter
-import kotlinx.dnq.query.toList
+import kotlinx.dnq.query.*
 import net.axay.pacmc.commands.Install.findBestFile
 import net.axay.pacmc.requests.CurseProxy
 import net.axay.pacmc.requests.data.CurseProxyFile
@@ -104,6 +103,14 @@ object Update : CliktCommand(
                     freshDependencies.any { dep -> dep.addonId == it.second.modId } ||
                     updateMods.any { newMod -> newMod.first.id == it.second.modId }
                 ) it.first.delete()
+            }
+            Xodus.ioTransaction {
+                val removeableMods = archive.mods.query(XdMod::id inValues removableDependencies).toList()
+                archive.mods.removeAll(removeableMods)
+                removeableMods.toList().forEach {
+                    terminal.println("Removing the dependency ${red(it.name)} because it is no longer needed")
+                    it.delete()
+                }
             }
 
             if (updateMods.isNotEmpty()) {
