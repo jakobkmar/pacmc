@@ -34,7 +34,7 @@ object Init : CliktCommand(
                 val minecraftFolder = when (OperatingSystem.current) {
                     // get the .minecraft folder for the current operating system
                     OperatingSystem.LINUX -> File(System.getProperty("user.home"), "/.minecraft/")
-                    OperatingSystem.WINDOWS -> File(System.getenv("%APPDATA%"), "/.minecraft/")
+                    OperatingSystem.WINDOWS -> File(File(System.getenv("%APPDATA%")), "/.minecraft/")
                     OperatingSystem.MACOS -> File(System.getProperty("user.home"), "/Library/Application Support/minecraft/")
                     // just use the linux path then
                     else -> File(System.getProperty("user.home"), "/.minecraft/")
