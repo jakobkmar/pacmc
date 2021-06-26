@@ -18,7 +18,7 @@ object Search : CliktCommand(
 ) {
     private val searchTerm by argument()
     private val gameVersion by option("-g", "--game-version", help = "Set a specific game version (latest by default)")
-    private val allVersions by option("-i", "--all-versions", help = "Whether to show mods for all Minecraft versions").flag()
+    private val supressUnavailable by option("-s", "--supress-unavailable", help = "Whether to supress mods which are not available for the given Minecraft version").flag()
     private val allResults by option("-a", "--all", help = "Whether to show all results without any limit").flag()
     private val limit by option("-l", "--limit", help = "The amount of results (defaults to 15)").int().default(15)
 
@@ -26,16 +26,15 @@ object Search : CliktCommand(
         val versionRequest = async {
             when {
                 gameVersion != null -> gameVersion
-                allVersions -> null
                 else -> CurseProxy.getMinecraftVersions().first().versionString
             }
         }
         CurseProxy.search(
             searchTerm,
-            null,
+            if (supressUnavailable) versionRequest.await() else null,
             if (!allResults) limit else null
         ).forEach {
-            terminal.printProject(it, versionRequest.await(), allVersions)
+            terminal.printProject(it, versionRequest.await(), !supressUnavailable)
         }
     }
 }
