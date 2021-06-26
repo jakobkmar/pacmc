@@ -27,9 +27,10 @@ dependencies {
 
     implementation("org.jetbrains.xodus:dnq:1.4.480")
 
-    implementation("org.slf4j:slf4j-simple:1.7.30")
-
     implementation("dev.dirs:directories:26")
+    implementation("org.apache.commons:commons-text:1.9")
+
+    implementation("org.slf4j:slf4j-simple:1.7.30")
 }
 
 tasks {
