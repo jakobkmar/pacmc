@@ -10,6 +10,7 @@ data class CurseProxyProject(
     val authors: List<Author>,
     val summary: String,
     val gameVersionLatestFiles: List<GameVersionLatestFile>,
+    val gamePopularityRank: Long,
     val dateReleased: String,
 ) {
     @Serializable
