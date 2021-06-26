@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "net.axay"
-version = "0.1.1"
+version = "0.1.2"
 
 description = "An easy to use package manager for Fabric Minecraft mods."
 
@@ -40,6 +40,16 @@ tasks {
 
     withType<KotlinCompile> {
         kotlinOptions.jvmTarget = "11"
+    }
+
+    listOf(distZip, distTar).forEach {
+        it.configure {
+            val distFile = archiveFile.get().asFile
+            archiveFileName.set("pacmc.${archiveExtension.get()}")
+            doLast {
+                archiveFile.get().asFile.renameTo(distFile)
+            }
+        }
     }
 }
 
