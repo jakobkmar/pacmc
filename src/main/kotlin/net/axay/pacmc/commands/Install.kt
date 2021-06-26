@@ -182,7 +182,7 @@ object Install : CliktCommand(
 
     suspend fun findDependencies(file: CurseProxyFile, minecraftVersion: MinecraftVersion): List<ResolvedDependency> =
         coroutineScope {
-            return@coroutineScope file.dependencies.map { dependency ->
+            return@coroutineScope file.dependencies.filter { it.type == 3 }.map { dependency ->
                 async {
                     val dependencyFile = CurseProxy.getModFiles(dependency.addonId)?.findBestFile(minecraftVersion)?.first
                         ?: return@async emptyList()
