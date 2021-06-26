@@ -94,7 +94,7 @@ object Update : CliktCommand(
         terminal.println()
         terminal.println("Finished all update checks")
 
-        if (updateMods.isNotEmpty() || freshDependencies.isNotEmpty()) {
+        if (updateMods.isNotEmpty() || freshDependencies.isNotEmpty() || removableDependencies.isNotEmpty()) {
             terminal.println("Deleting old files...")
             archiveFiles.forEach {
                 // delete files which will be updated or aren't needed anymore
