@@ -42,16 +42,6 @@ tasks {
     withType<KotlinCompile> {
         kotlinOptions.jvmTarget = "11"
     }
-
-    listOf(distZip, distTar).forEach {
-        it.configure {
-            val distFile = archiveFile.get().asFile
-            archiveFileName.set("pacmc.${archiveExtension.get()}")
-            doLast {
-                archiveFile.get().asFile.renameTo(distFile)
-            }
-        }
-    }
 }
 
 application {
