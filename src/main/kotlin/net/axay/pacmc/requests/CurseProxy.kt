@@ -22,7 +22,6 @@ object CurseProxy {
             parameter("searchFilter", searchTerm)
             parameter("categoryId", 4780) // category: fabric
             if (gameVersion != null) parameter("gameVersion", gameVersion)
-            if (limit != null) parameter("pageSize", limit)
         }
         .sortedWith { mod1, mod2 ->
             val mod1Similarity = mod1.name.similarity(searchTerm)
@@ -36,6 +35,7 @@ object CurseProxy {
                     .let { if (it == 0) mod1.gamePopularityRank.compareTo(mod2.gamePopularityRank) else it }
             }.inv()
         }
+        .let { if (limit != null) it.take(limit) else it }
 
     suspend fun getModFiles(id: Int) = try {
         ktorClient.get<List<CurseProxyFile>>("${proxyApi}addon/$id/files")
