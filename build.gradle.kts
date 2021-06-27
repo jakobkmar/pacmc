@@ -99,6 +99,8 @@ tasks {
     create<Exec>("commitAurPackage") {
         group = "packages"
 
+        workingDir("packages/aur/pacmc/")
+
         commandLine("git", "add", "PKGBUILD", ".SRCINFO")
         commandLine("git", "commit", "-m", "\"Update pacmc to version $version\"")
     }
