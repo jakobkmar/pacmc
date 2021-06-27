@@ -107,7 +107,7 @@ object Update : CliktCommand(
             Xodus.ioTransaction {
                 val removeableMods = archive.mods.query(XdMod::id inValues removableDependencies).toList()
                 archive.mods.removeAll(removeableMods)
-                removeableMods.toList().forEach {
+                removeableMods.forEach {
                     terminal.println("Removing the dependency ${red(it.name)} because it is no longer needed")
                     it.delete()
                 }
