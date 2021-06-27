@@ -1,5 +1,11 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+buildscript {
+    dependencies {
+        classpath("commons-codec:commons-codec:1.15")
+    }
+}
+
 plugins {
     kotlin("jvm") version "1.5.20"
     kotlin("plugin.serialization") version "1.5.20"
@@ -7,7 +13,7 @@ plugins {
 }
 
 group = "net.axay"
-version = "0.1.2"
+version = "0.1.3"
 
 description = "An easy to use package manager for Fabric Minecraft mods."
 
@@ -33,6 +39,16 @@ dependencies {
     implementation("org.slf4j:slf4j-simple:1.7.30")
 }
 
+application {
+    mainClass.set("net.axay.pacmc.ManagerKt")
+}
+
+sourceSets {
+    create("packages") {
+        output.setResourcesDir(rootDir.resolve("packages/"))
+    }
+}
+
 tasks {
     withType<JavaCompile> {
         options.release.set(11)
@@ -42,8 +58,48 @@ tasks {
     withType<KotlinCompile> {
         kotlinOptions.jvmTarget = "11"
     }
-}
 
-application {
-    mainClass.set("net.axay.pacmc.ManagerKt")
+    val packagesResources = named<ProcessResources>(sourceSets["packages"].processResourcesTaskName) {
+        dependsOn(distTar)
+
+        val distTarOutput = distTar.get().outputs.files.firstOrNull { it.extension == "tar" }
+            ?.let { if (it.exists()) it.inputStream() else null }
+
+        val propertyMap = mapOf(
+            "version" to project.version,
+            "javaVersion" to this@tasks.compileJava.get().options.release.get(),
+            "sha256Hash" to (if (distTarOutput != null) org.apache.commons.codec.digest.DigestUtils.sha256Hex(distTarOutput) else null)
+                .apply { logger.quiet("The distTar file hash is $this") },
+            "description" to project.description
+        )
+
+        inputs.properties(propertyMap)
+
+        filesMatching("aur/pacmc/PKGBUILD") {
+            propertyMap.forEach { (propertyName, propertyValue) ->
+                filter { Regex("\\\${1}\\{{1}($propertyName)\\}{1}").replace(it, propertyValue.toString()) }
+            }
+        }
+    }
+
+    create<Exec>("updateAurPackage") {
+        group = "packages"
+        dependsOn(packagesResources)
+
+        val systemVersion = File("/proc/version").readText().toLowerCase()
+        if (!systemVersion.contains("arch") && !systemVersion.contains("manjaro"))
+            logger.warn("It does not seem like you are on Arch linux, which is required to build the AUR package.")
+
+        workingDir("packages/aur/pacmc/")
+
+        standardOutput = workingDir.resolve(".SRCINFO").outputStream()
+        commandLine("makepkg", "--printsrcinfo")
+    }
+
+    create<Exec>("commitAurPackage") {
+        group = "packages"
+
+        commandLine("git", "add", "PKGBUILD", ".SRCINFO")
+        commandLine("git", "commit", "-m", "\"Update pacmc to version $version\"")
+    }
 }
