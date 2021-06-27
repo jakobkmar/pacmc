@@ -86,7 +86,7 @@ tasks {
         group = "packages"
         dependsOn(packagesResources)
 
-        val systemVersion = File("/proc/version").readText().toLowerCase()
+        val systemVersion = File("/proc/version").let { if (it.exists()) it.readText().toLowerCase() else "" }
         if (!systemVersion.contains("arch") && !systemVersion.contains("manjaro"))
             logger.warn("It does not seem like you are on Arch linux, which is required to build the AUR package.")
 
