@@ -13,6 +13,8 @@ class DbArchive(
 ) {
     val minecraftVersion by lazy { MinecraftVersion.fromString(gameVersion)!! }
 
-    val files get() = (File(path).listFiles() ?: emptyArray()).filter { it.name.startsWith("pacmc_") }
+    val directory get() = File(path)
+
+    val files get() = (directory.listFiles() ?: emptyArray()).filter { it.name.startsWith("pacmc_") }
     val pacmcFiles get() = files.map { PacmcFile(it.name) }
 }
