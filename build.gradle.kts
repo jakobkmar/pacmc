@@ -13,7 +13,7 @@ plugins {
 }
 
 group = "net.axay"
-version = "0.1.3"
+version = "0.2.0"
 
 description = "An easy to use package manager for Fabric Minecraft mods."
 
@@ -27,9 +27,9 @@ dependencies {
     implementation("com.github.ajalt.clikt:clikt:3.2.0")
     implementation("com.github.ajalt.mordant:mordant:2.0.0-beta2")
 
-    implementation("io.ktor:ktor-client-core:1.6.0")
-    implementation("io.ktor:ktor-client-cio:1.6.0")
-    implementation("io.ktor:ktor-client-serialization:1.6.0")
+    implementation("io.ktor:ktor-client-core:1.6.1")
+    implementation("io.ktor:ktor-client-cio:1.6.1")
+    implementation("io.ktor:ktor-client-serialization:1.6.1")
 
     implementation("dev.dirs:directories:26")
     implementation("org.apache.commons:commons-text:1.9")
