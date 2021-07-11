@@ -12,7 +12,6 @@ import net.axay.pacmc.terminal
 import org.kodein.db.delete
 import org.kodein.db.find
 import org.kodein.db.useEntries
-import java.io.File
 
 object Remove : CliktCommand(
     "Removes a minecraft mod"
@@ -51,10 +50,9 @@ object Remove : CliktCommand(
         val (modKey, mod) = modEntry
 
         terminal.println("Deleting all files of that mod...")
-        (File(archive.path).listFiles() ?: emptyArray()).forEach {
-            if (it.name.startsWith("pacmc_") && PacmcFile(it.name).modId == mod.modId) {
+        archive.files.forEach {
+            if (PacmcFile(it.name).modId == mod.modId)
                 it.delete()
-            }
         }
 
         terminal.println("Deleting mod from archive list...")

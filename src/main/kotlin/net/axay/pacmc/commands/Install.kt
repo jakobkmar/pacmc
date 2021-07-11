@@ -226,12 +226,7 @@ object Install : CliktCommand(
             }
         }
 
-        val alreadyInstalled = (File(archive.path).listFiles() ?: emptyArray())
-            .filter { it.name.startsWith("pacmc_") }
-            .map { PacmcFile(it.name) }
-            .any { it.modId == modId }
-
-        if (alreadyInstalled) {
+        if (archive.pacmcFiles.any { it.modId == modId }) {
             terminal.println("  already installed ${green("✔")}")
             return@coroutineScope
         }
