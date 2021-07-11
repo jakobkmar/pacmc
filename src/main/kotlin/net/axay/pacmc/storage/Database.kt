@@ -10,7 +10,7 @@ import java.io.File
 
 val db = DB.open(File(Values.projectDirectories.dataLocalDir, "/db1").canonicalPath)
 
-fun DB.getArchiveOrWarn(name: String) = db.getById<DbArchive>(name).apply {
+fun DB.getArchiveOrWarn(name: String) = getById<DbArchive>(name).apply {
     if (this == null)
         terminal.danger("The given archive '${name}' does not exist!")
 }
