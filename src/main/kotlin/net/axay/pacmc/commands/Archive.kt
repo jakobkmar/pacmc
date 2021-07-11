@@ -9,11 +9,11 @@ import com.github.ajalt.mordant.rendering.TextColors.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
-import kotlinx.dnq.query.*
 import net.axay.pacmc.requests.CurseProxy
-import net.axay.pacmc.storage.Xodus
-import net.axay.pacmc.storage.data.XdArchive
+import net.axay.pacmc.storage.data.DbArchive
+import net.axay.pacmc.storage.db
 import net.axay.pacmc.terminal
+import org.kodein.db.*
 
 object Archive : CliktCommand(
     "Manages your mod archives"
@@ -34,40 +34,32 @@ object Archive : CliktCommand(
             val minecraftVersion = async {
                 gameVersion ?: CurseProxy.getMinecraftVersions().first().versionString
             }
-            Xodus.store.transactional {
-                if (XdArchive.query(XdArchive::name eq name).size() > 0) {
-                    terminal.danger("An archive with the name '$name' already exists!")
-                } else {
-                    XdArchive.new {
-                        name = this@Add.name
-                        path = this@Add.path.canonicalPath
-                        gameVersion = runBlocking { minecraftVersion.await() }
-                    }
-                    terminal.success("Successfully added the new archive '$name'")
-                }
+            if (db.find<DbArchive>().byId(name).use { it.isValid() }) {
+                terminal.danger("An archive with the name '$name' already exists!")
+            } else {
+                db.put(DbArchive(name, path.canonicalPath, runBlocking { minecraftVersion.await() }, listOf()))
+                terminal.success("Successfully added the new archive '$name'")
             }
         }
     }
 
     object List : CliktCommand("Lists all archives you have created") {
         override fun run() {
-            Xodus.store.transactional {
-                val archives = XdArchive.all().toList()
-                if (archives.isEmpty()) {
-                    terminal.warning("You do not have any archives defined on this machine.")
-                } else {
-                    archives.forEachIndexed { index, archive ->
-                        val isLast = index == archives.lastIndex
+            val archives = db.find<DbArchive>().all().use { it.asModelSequence().toList() }
+            if (archives.isEmpty()) {
+                terminal.warning("You do not have any archives defined on this machine.")
+            } else {
+                archives.forEachIndexed { index, archive ->
+                    val isLast = index == archives.lastIndex
 
-                        val name = brightYellow(archive.name)
-                        val gameVersion = cyan(archive.gameVersion)
-                        val path = gray(archive.path)
+                    val name = brightYellow(archive.name)
+                    val gameVersion = cyan(archive.gameVersion)
+                    val path = gray(archive.path)
 
-                        terminal.println("""
+                    terminal.println("""
                             ${if (isLast) '└' else '├'}── $name ($gameVersion)
                             ${if (isLast) ' ' else '│'}     $path
                         """.trimIndent())
-                    }
                 }
             }
         }
@@ -77,30 +69,33 @@ object Archive : CliktCommand(
         private val name by argument(help = "The name of the archive you want to delete")
 
         override fun run() {
-            Xodus.store.transactional {
-                val archive = XdArchive.query(XdArchive::name eq name).firstOrNull()
-                if (archive == null) {
-                    terminal.danger("The given archive '$name' does not exist!")
-                } else {
-                    terminal.println("${red(archive.name)} at ${gray(archive.path)}")
+            val archive = db.getById<DbArchive>(name)
+            if (archive == null) {
+                terminal.danger("The given archive '$name' does not exist!")
+            } else {
+                terminal.println("${red(archive.name)} at ${gray(archive.path)}")
 
-                    var sure: Boolean? = null
-                    while (sure == null) {
-                        terminal.print("Do you really want to delete this archive? (${brightGreen("y")} (yes) / ${brightRed("n")} (no)) ")
-                        sure = when (readLine()) {
-                            "y", "yes" -> true
-                            "n", "no", null -> false
-                            else -> null
-                        }
-                    }
-
-                    if (sure) {
-                        archive.delete()
-                        terminal.println("Deleted archive '${red(name)}'")
-                    } else {
-                        terminal.println("Deletion canceled.")
+                var sure: Boolean? = null
+                while (sure == null) {
+                    terminal.print("Do you really want to delete this archive? (${brightGreen("y")} (yes) / ${brightRed("n")} (no)) ")
+                    sure = when (readLine()) {
+                        "y", "yes" -> true
+                        "n", "no", null -> false
+                        else -> null
                     }
                 }
+
+                if (sure) {
+                    db.execBatch {
+                        deleteById<DbArchive>(name)
+                        archive.mods.forEach { delete(it) }
+                    }
+                    terminal.println("Deleted archive '${red(name)}'")
+                } else {
+                    terminal.println("Deletion canceled.")
+                }
+
+                // TODO: remove the mods on the hard drive
             }
         }
     }
