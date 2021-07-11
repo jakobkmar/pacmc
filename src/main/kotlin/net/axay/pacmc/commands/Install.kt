@@ -56,7 +56,7 @@ object Install : CliktCommand(
 ) {
     private val archiveName by option("-a", "--archive", help = "The archive where the mod should be installed").default(".minecraft")
 
-    private val mod by argument()
+    private val mod by argument(help = "The name or the ID of the mod you want to install")
 
     override fun run() = runBlocking(Dispatchers.Default) {
         terminal.println("Searching for installable mods matching '$mod'")

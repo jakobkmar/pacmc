@@ -18,7 +18,7 @@ object Remove : CliktCommand(
 ) {
     private val archiveName by option("-a", "--archive", help = "The name of the archive where you want to remove the mod").default(".minecraft")
 
-    private val inputModName by argument()
+    private val inputModName by argument("mod", "The mod which you want to remove")
 
     override fun run() {
         val archive = db.getArchiveOrWarn(archiveName) ?: return
