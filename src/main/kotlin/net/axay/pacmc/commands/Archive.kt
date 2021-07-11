@@ -9,6 +9,7 @@ import com.github.ajalt.mordant.rendering.TextColors.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
+import net.axay.pacmc.logging.awaitConfirmation
 import net.axay.pacmc.requests.CurseProxy
 import net.axay.pacmc.storage.data.DbArchive
 import net.axay.pacmc.storage.data.DbMod
@@ -76,17 +77,9 @@ object Archive : CliktCommand(
             } else {
                 terminal.println("${red(archive.name)} at ${gray(archive.path)}")
 
-                var sure: Boolean? = null
-                while (sure == null) {
-                    terminal.print("Do you really want to delete this archive? (${brightGreen("y")} (yes) / ${brightRed("n")} (no)) ")
-                    sure = when (readLine()) {
-                        "y", "yes" -> true
-                        "n", "no", null -> false
-                        else -> null
-                    }
-                }
+                terminal.print("Do you really want to delete this archive?")
 
-                if (sure) {
+                if (awaitConfirmation()) {
                     db.execBatch {
                         deleteById<DbArchive>(name)
                         db.find<DbMod>().byIndex("archive", name).useKeys { modSequence ->
