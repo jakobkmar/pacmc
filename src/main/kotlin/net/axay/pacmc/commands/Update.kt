@@ -22,8 +22,6 @@ import net.axay.pacmc.storage.getArchiveMods
 import net.axay.pacmc.storage.getArchiveOrWarn
 import net.axay.pacmc.terminal
 import org.kodein.db.delete
-import org.kodein.db.deleteAll
-import org.kodein.db.find
 import java.io.File
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
@@ -105,14 +103,8 @@ object Update : CliktCommand(
 
             val removableMods = dependencies.filter { it.modId in removableDependencies }
             if (removableMods.isNotEmpty()) {
-                launch(Dispatchers.IO) {
-                    db.deleteAll(db.find<DbMod>().byIndex(
-                        "archiveRepoIdIndex",
-                        *removableMods.map {
-                            terminal.println("Removing the dependency ${red(it.name)} because it is no longer needed")
-                            listOf(it.repository, it.modId, archiveName)
-                        }.toTypedArray()
-                    ))
+                removableMods.forEach {
+                    terminal.println("Removing the dependency ${red(it.name)} because it is no longer needed")
                 }
                 db.execAsyncBatch {
                     for (removableDependency in removableMods) {
