@@ -42,7 +42,6 @@ import kotlin.collections.forEach
 import kotlin.collections.forEachIndexed
 import kotlin.collections.isNotEmpty
 import kotlin.collections.joinToString
-import kotlin.collections.listOf
 import kotlin.collections.map
 import kotlin.collections.mapNotNull
 import kotlin.collections.minOrNull
@@ -211,7 +210,7 @@ object Install : CliktCommand(
 
         db.execAsyncBatch {
             val existingMod = db.find<DbMod>()
-                .byIndex("archiveRepoIdIndex", listOf(repository, modId, archive.name))
+                .byIndex("archiveRepoIdIndex", repository, modId, archive.name)
                 .useModels { it.firstOrNull() }
             if (existingMod != null) {
                 val newPersistence = if (persistent) true else existingMod.persistent
