@@ -5,11 +5,9 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import net.axay.pacmc.Values
 import net.axay.pacmc.storage.data.DbArchive
+import net.axay.pacmc.storage.data.DbMod
 import net.axay.pacmc.terminal
-import org.kodein.db.DB
-import org.kodein.db.ExecBatch
-import org.kodein.db.execBatch
-import org.kodein.db.getById
+import org.kodein.db.*
 import org.kodein.db.impl.open
 import java.io.File
 
@@ -27,3 +25,6 @@ fun DB.getArchiveOrWarn(name: String) = getById<DbArchive>(name).apply {
     if (this == null)
         terminal.danger("The given archive '${name}' does not exist!")
 }
+
+fun DB.getArchiveMods(archiveName: String) =
+    find<DbMod>().byIndex("archive", archiveName).use { it.asModelSequence() }
