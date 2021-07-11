@@ -13,11 +13,9 @@ import java.io.File
 
 val db = DB.open(File(Values.projectDirectories.dataLocalDir, "/db1").canonicalPath)
 
-suspend fun DB.execAsyncBatch(block: ExecBatch.() -> Unit) {
-    coroutineScope {
-        launch(Dispatchers.IO) {
-            execBatch(block = block)
-        }
+suspend fun DB.execAsyncBatch(block: ExecBatch.() -> Unit) = coroutineScope {
+    launch(Dispatchers.IO) {
+        execBatch(block = block)
     }
 }
 
