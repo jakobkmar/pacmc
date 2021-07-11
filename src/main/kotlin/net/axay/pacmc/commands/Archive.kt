@@ -11,6 +11,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import net.axay.pacmc.requests.CurseProxy
 import net.axay.pacmc.storage.data.DbArchive
+import net.axay.pacmc.storage.data.DbMod
 import net.axay.pacmc.storage.db
 import net.axay.pacmc.terminal
 import org.kodein.db.*
@@ -37,7 +38,7 @@ object Archive : CliktCommand(
             if (db.find<DbArchive>().byId(name).use { it.isValid() }) {
                 terminal.danger("An archive with the name '$name' already exists!")
             } else {
-                db.put(DbArchive(name, path.canonicalPath, runBlocking { minecraftVersion.await() }, listOf()))
+                db.put(DbArchive(name, path.canonicalPath, runBlocking { minecraftVersion.await() }))
                 terminal.success("Successfully added the new archive '$name'")
             }
         }
@@ -88,7 +89,11 @@ object Archive : CliktCommand(
                 if (sure) {
                     db.execBatch {
                         deleteById<DbArchive>(name)
-                        archive.mods.forEach { delete(it) }
+                        db.find<DbMod>().byIndex("archive", name).useKeys { modSequence ->
+                            modSequence.forEach {
+                                delete(it)
+                            }
+                        }
                     }
                     terminal.println("Deleted archive '${red(name)}'")
                 } else {

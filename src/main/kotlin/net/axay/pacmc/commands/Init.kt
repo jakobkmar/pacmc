@@ -49,7 +49,7 @@ object Init : CliktCommand(
                     }
                 }.canonicalPath
 
-                db.put(DbArchive(".minecraft", path, runBlocking { latestMinecraftVersion.await() }, listOf()))
+                db.put(DbArchive(".minecraft", path, runBlocking { latestMinecraftVersion.await() }))
 
                 terminal.success("Created the '.minecraft' archive at:")
                 terminal.println("  " + gray(path))

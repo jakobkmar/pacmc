@@ -26,8 +26,9 @@ import net.axay.pacmc.storage.db
 import net.axay.pacmc.storage.execAsyncBatch
 import net.axay.pacmc.storage.getArchiveOrWarn
 import net.axay.pacmc.terminal
-import org.kodein.db.get
-import org.kodein.memory.util.UUID
+import org.kodein.db.find
+import org.kodein.db.keyById
+import org.kodein.db.useModels
 import java.io.File
 import kotlin.collections.HashMap
 import kotlin.collections.List
@@ -36,13 +37,13 @@ import kotlin.collections.emptyList
 import kotlin.collections.filter
 import kotlin.collections.filterNot
 import kotlin.collections.first
-import kotlin.collections.firstOrNull
 import kotlin.collections.flatten
 import kotlin.collections.fold
 import kotlin.collections.forEach
 import kotlin.collections.forEachIndexed
 import kotlin.collections.isNotEmpty
 import kotlin.collections.joinToString
+import kotlin.collections.listOf
 import kotlin.collections.map
 import kotlin.collections.mapNotNull
 import kotlin.collections.minOrNull
@@ -210,9 +211,9 @@ object Install : CliktCommand(
         terminal.println("Downloading " + brightCyan(file.fileName))
 
         db.execAsyncBatch {
-            val existingMod = archive.mods.mapNotNull { modKey ->
-                db[modKey]?.let { if (it.modId == modId) it else null }
-            }.firstOrNull()
+            val existingMod = db.find<DbMod>()
+                .byIndex("archiveRepoIdIndex", listOf(repository, modId, archive.name))
+                .useModels { it.firstOrNull() }
             if (existingMod != null) {
                 val newPersistence = if (persistent) true else existingMod.persistent
                 put(existingMod.copy(persistent = newPersistence, version = versionId))
@@ -220,7 +221,7 @@ object Install : CliktCommand(
                 val resolvedModInfo = runBlocking { modInfo?.await() }
                     ?: error("Resolved mod info is not provided upon first mod download")
 
-                put(DbMod(UUID.randomUUID().toString(), repository, modId, versionId, resolvedModInfo.name, resolvedModInfo.summary, persistent))
+                put(DbMod(repository, modId, versionId, resolvedModInfo.name, resolvedModInfo.summary, persistent, db.keyById(archive.name)))
             }
         }
 
