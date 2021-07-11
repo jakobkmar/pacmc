@@ -45,7 +45,7 @@ object Update : CliktCommand(
         val updateCounter = AtomicInteger(0)
         val unsureCounter = AtomicInteger(0)
 
-        val allMods = db.getArchiveMods(archiveName).toList()
+        val allMods = db.getArchiveMods(archiveName)
 
         val mods = allMods.filter { it.persistent }
 

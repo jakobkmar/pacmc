@@ -27,4 +27,4 @@ fun DB.getArchiveOrWarn(name: String) = getById<DbArchive>(name).apply {
 }
 
 fun DB.getArchiveMods(archiveName: String) =
-    find<DbMod>().byIndex("archive", archiveName).use { it.asModelSequence() }
+    find<DbMod>().byIndex("archive", archiveName).useModels { it.toList() }

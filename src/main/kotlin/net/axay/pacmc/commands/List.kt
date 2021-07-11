@@ -21,7 +21,7 @@ object List : CliktCommand(
 
     override fun run() {
         val archive = db.getArchiveOrWarn(archiveName) ?: return
-        val mods = db.getArchiveMods(archiveName).toList()
+        val mods = db.getArchiveMods(archiveName)
 
         fun printMod(mod: DbMod, persistent: Boolean) {
             val name = white(bold(underline(mod.name)))
