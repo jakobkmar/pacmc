@@ -1,7 +1,6 @@
 package net.axay.pacmc.storage.data
 
 import kotlinx.serialization.Serializable
-import org.kodein.db.Key
 import org.kodein.db.model.Indexed
 import org.kodein.db.model.orm.Metadata
 
@@ -13,7 +12,7 @@ data class DbMod(
     @Indexed("name") val name: String,
     val description: String?,
     val persistent: Boolean,
-    @Indexed("archive") val archive: Key<DbArchive>,
+    @Indexed("archive") val archive: String,
 ) : Metadata {
     override val id get() = listOf(repository, modId, archive)
 

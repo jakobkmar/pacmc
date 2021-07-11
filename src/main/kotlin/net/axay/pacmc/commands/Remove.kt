@@ -4,7 +4,6 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
-import net.axay.pacmc.storage.data.DbArchive
 import net.axay.pacmc.storage.data.DbMod
 import net.axay.pacmc.storage.data.PacmcFile
 import net.axay.pacmc.storage.db
@@ -12,7 +11,6 @@ import net.axay.pacmc.storage.getArchiveOrWarn
 import net.axay.pacmc.terminal
 import org.kodein.db.delete
 import org.kodein.db.find
-import org.kodein.db.keyById
 import org.kodein.db.useEntries
 import java.io.File
 
@@ -30,10 +28,10 @@ object Remove : CliktCommand(
             .let { if (it.size == 2) it else listOf(null, null) }
 
         val modEntry = db.find<DbMod>()
-            .byIndex("archiveRepoIdIndex", listOf(maybeRepository, maybeModId, db.keyById<DbArchive>(archiveName)))
+            .byIndex("archiveRepoIdIndex", listOf(maybeRepository, maybeModId, archiveName))
             .useEntries { it.firstOrNull() }
             ?: db.find<DbMod>()
-                .byIndex("name", inputModName)
+                .byIndex("archiveNameIndex", listOf(inputModName, archiveName))
                 .useEntries {
                     if (it.firstOrNull() != null) {
                         val mod = it.singleOrNull()

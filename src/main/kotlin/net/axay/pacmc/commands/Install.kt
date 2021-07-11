@@ -27,7 +27,6 @@ import net.axay.pacmc.storage.execAsyncBatch
 import net.axay.pacmc.storage.getArchiveOrWarn
 import net.axay.pacmc.terminal
 import org.kodein.db.find
-import org.kodein.db.keyById
 import org.kodein.db.useModels
 import java.io.File
 import kotlin.collections.HashMap
@@ -221,7 +220,7 @@ object Install : CliktCommand(
                 val resolvedModInfo = runBlocking { modInfo?.await() }
                     ?: error("Resolved mod info is not provided upon first mod download")
 
-                put(DbMod(repository, modId, versionId, resolvedModInfo.name, resolvedModInfo.summary, persistent, db.keyById(archive.name)))
+                put(DbMod(repository, modId, versionId, resolvedModInfo.name, resolvedModInfo.summary, persistent, archive.name))
             }
         }
 
