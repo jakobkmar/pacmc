@@ -9,10 +9,9 @@ import com.github.ajalt.mordant.rendering.TextStyles.bold
 import com.github.ajalt.mordant.rendering.TextStyles.underline
 import net.axay.pacmc.storage.data.DbMod
 import net.axay.pacmc.storage.db
+import net.axay.pacmc.storage.getArchiveMods
 import net.axay.pacmc.storage.getArchiveOrWarn
 import net.axay.pacmc.terminal
-import org.kodein.db.find
-import org.kodein.db.useModels
 
 object List : CliktCommand(
     "Lists the installed mods"
@@ -22,8 +21,7 @@ object List : CliktCommand(
 
     override fun run() {
         val archive = db.getArchiveOrWarn(archiveName) ?: return
-        val mods = db.find<DbMod>().byIndex("archive", archiveName)
-            .useModels { it.toList() }
+        val mods = db.getArchiveMods(archiveName).toList()
 
         fun printMod(mod: DbMod, persistent: Boolean) {
             val name = white(bold(underline(mod.name)))
