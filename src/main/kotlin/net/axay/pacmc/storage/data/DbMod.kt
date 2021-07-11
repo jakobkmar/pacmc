@@ -11,6 +11,6 @@ data class DbMod(
     val modId: String,
     val version: String,
     @Indexed("name") val name: String,
-    val description: String,
+    val description: String?,
     val persistent: Boolean,
 )
