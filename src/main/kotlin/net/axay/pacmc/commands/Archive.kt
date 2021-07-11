@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import net.axay.pacmc.logging.awaitConfirmation
+import net.axay.pacmc.logging.printArchive
 import net.axay.pacmc.requests.CurseProxy
 import net.axay.pacmc.storage.data.DbArchive
 import net.axay.pacmc.storage.data.DbMod
@@ -75,7 +76,7 @@ object Archive : CliktCommand(
             if (archive == null) {
                 terminal.danger("The given archive '$name' does not exist!")
             } else {
-                terminal.println("${red(archive.name)} at ${gray(archive.path)}")
+                terminal.printArchive(archive)
 
                 terminal.print("Do you really want to delete this archive?")
 

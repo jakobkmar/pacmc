@@ -5,6 +5,8 @@ import com.github.ajalt.mordant.rendering.TextStyles.*
 import com.github.ajalt.mordant.terminal.Terminal
 import net.axay.pacmc.data.ReleaseType
 import net.axay.pacmc.requests.data.CurseProxyProject
+import net.axay.pacmc.storage.data.DbArchive
+import net.axay.pacmc.terminal
 
 private val versionChars = arrayOf('.', '-', '+', '_', ' ')
 
@@ -37,4 +39,8 @@ fun Terminal.printProject(
 
     this.println("$repo$projectName $id $author $version")
     this.println("  ${gray(project.summary)}")
+}
+
+fun Terminal.printArchive(archive: DbArchive) {
+    terminal.println("${red(archive.name)} at ${gray(archive.path)}")
 }
