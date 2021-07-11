@@ -31,8 +31,6 @@ dependencies {
     implementation("io.ktor:ktor-client-cio:1.6.0")
     implementation("io.ktor:ktor-client-serialization:1.6.0")
 
-    implementation("org.jetbrains.xodus:dnq:1.4.480")
-
     implementation("dev.dirs:directories:26")
     implementation("org.apache.commons:commons-text:1.9")
 
