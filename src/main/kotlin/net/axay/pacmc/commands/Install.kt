@@ -59,6 +59,8 @@ object Install : CliktCommand(
     private val mod by argument()
 
     override fun run() = runBlocking(Dispatchers.Default) {
+        terminal.println("Searching for installable mods matching '$mod'")
+
         val archive = db.getArchiveOrWarn(archiveName) ?: return@runBlocking
 
         var modId: String? = mod
@@ -80,6 +82,7 @@ object Install : CliktCommand(
                 searchResults.size > 1 -> {
                     val options = HashMap<Int, CurseProxyProject>()
 
+                    terminal.println()
                     searchResults.forEachIndexed { index, project ->
                         options[index + 1] = project
 
@@ -98,6 +101,8 @@ object Install : CliktCommand(
                             else -> null
                         }
                     }
+
+                    terminal.println()
 
                     options[choice]?.id.toString()
                 }
@@ -125,7 +130,6 @@ object Install : CliktCommand(
 
         val dependenciesDeferred = async { findDependencies(file, archive.minecraftVersion) }
 
-        terminal.println()
         terminal.println("Installing the mod at ${gray(archive.path)}")
         terminal.println()
 

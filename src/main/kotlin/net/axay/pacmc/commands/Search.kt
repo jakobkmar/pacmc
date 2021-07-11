@@ -23,6 +23,9 @@ object Search : CliktCommand(
     private val limit by option("-l", "--limit", help = "The amount of results (defaults to 15)").int().default(15)
 
     override fun run() = runBlocking(Dispatchers.Default) {
+        terminal.println("Searching with the given term '$searchTerm'")
+        terminal.println()
+
         val versionRequest = async {
             when {
                 gameVersion != null -> gameVersion
@@ -33,8 +36,13 @@ object Search : CliktCommand(
             searchTerm,
             if (supressUnavailable) versionRequest.await() else null,
             if (!allResults) limit else null
-        ).forEach {
-            terminal.printProject(it, versionRequest.await(), !supressUnavailable)
-        }
+        )
+            .apply {
+                if (isEmpty())
+                    terminal.warning("Could not find anything for the given term '$searchTerm'")
+            }
+            .forEach {
+                terminal.printProject(it, versionRequest.await(), !supressUnavailable)
+            }
     }
 }
