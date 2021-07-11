@@ -7,7 +7,7 @@ object Pacmc : CliktCommand(
     "The root command of pacmc"
 ) {
     init {
-        subcommands(Install, Update, Search, List, Remove, Archive, Init)
+        subcommands(Install, Update, Search, List, Remove, Archive, Init, Refresh)
     }
 
     override fun run() = Unit
