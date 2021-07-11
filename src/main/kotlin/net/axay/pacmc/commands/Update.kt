@@ -11,15 +11,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.dnq.query.*
 import net.axay.pacmc.commands.Install.findBestFile
 import net.axay.pacmc.requests.CurseProxy
 import net.axay.pacmc.requests.data.CurseProxyFile
-import net.axay.pacmc.storage.Xodus
-import net.axay.pacmc.storage.Xodus.xodus
+import net.axay.pacmc.storage.data.DbMod
 import net.axay.pacmc.storage.data.PacmcFile
-import net.axay.pacmc.storage.data.XdMod
+import net.axay.pacmc.storage.db
+import net.axay.pacmc.storage.execAsyncBatch
+import net.axay.pacmc.storage.getArchiveMods
+import net.axay.pacmc.storage.getArchiveOrWarn
 import net.axay.pacmc.terminal
+import org.kodein.db.delete
 import java.io.File
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
@@ -29,55 +31,49 @@ object Update : CliktCommand(
 ) {
     private val archiveName by option("-a", "--archive", help = "The name of the archive you want to update the mods of").default(".minecraft")
 
-    private class UpdateMod(val xdMod: XdMod, val id: String, val name: String)
-
     override fun run() = runBlocking(Dispatchers.Default) {
-        val archive = xodus { Xodus.getArchiveOrNull(archiveName) } ?: return@runBlocking
-        val (archivePath, minecraftVersion) = xodus { archive.path to archive.minecraftVersion }
+        terminal.println("Checking for mod updates for the '$archiveName' archive")
 
-        terminal.println("Checking for updates for the mods at ${gray(archivePath)}")
+        val archive = db.getArchiveOrWarn(archiveName) ?: return@runBlocking
+
+        terminal.println("Will update the mods at ${gray(archive.path)}")
         terminal.println()
 
         val upToDateCounter = AtomicInteger(0)
         val updateCounter = AtomicInteger(0)
         val unsureCounter = AtomicInteger(0)
 
-        val allMods = xodus { archive.mods }
+        val allMods = db.getArchiveMods(archiveName).toList()
 
-        val mods = xodus {
-            allMods.filter { it.persistent eq true }.toList().map { UpdateMod(it, it.id, it.name) }
-        }
+        val mods = allMods.filter { it.persistent }
 
-        val dependencyIds = xodus {
-            allMods.filter { it.persistent eq false }.toList().map { it.id }
-        }
+        val dependencies = allMods.filter { !it.persistent }
+        val dependencyIds = dependencies.map { it.modId }
 
-        val archiveFolder = File(archivePath)
+        val archiveFolder = File(archive.path)
         val archiveFiles = (archiveFolder.listFiles() ?: emptyArray())
             .filter { it.name.startsWith("pacmc_") }
             .map { it to PacmcFile(it.name) }
 
-        val updateMods = Collections.synchronizedList(ArrayList<Pair<UpdateMod, CurseProxyFile>>())
+        val updateMods = Collections.synchronizedList(ArrayList<Pair<DbMod, CurseProxyFile>>())
         val freshDependencies = Collections.synchronizedList(ArrayList<Install.ResolvedDependency>())
 
         mods.map { mod ->
             launch {
-                val modFile = CurseProxy.getModFiles(mod.id.toInt())?.findBestFile(minecraftVersion)?.first
+                val modFile = CurseProxy.getModFiles(mod.modId.toInt())?.findBestFile(archive.minecraftVersion)?.first
                 if (modFile == null) {
                     terminal.danger("Could not check the following mod: ${mod.name} (has it been deleted by its owner?)")
                     unsureCounter.incrementAndGet()
                 } else {
-                    freshDependencies += Install.findDependencies(modFile, minecraftVersion)
+                    freshDependencies += Install.findDependencies(modFile, archive.minecraftVersion)
                         .filterNot { dep -> freshDependencies.any { it.addonId == dep.addonId } }
 
-                    xodus {
-                        if (modFile.id.toString() != mod.xdMod.version) {
-                            terminal.println("The mod ${bold("${mod.xdMod.repository}/${underline(mod.name)}")} is ${red("outdated")}")
-                            updateMods += mod to modFile
-                        } else {
-                            terminal.println("The mod ${bold("${mod.xdMod.repository}/${underline(mod.name)}")} is up to date")
-                            upToDateCounter.incrementAndGet()
-                        }
+                    if (modFile.id.toString() != mod.version) {
+                        terminal.println("The mod ${bold("${mod.repository}/${underline(mod.name)}")} is ${red("outdated")}")
+                        updateMods += mod to modFile
+                    } else {
+                        terminal.println("The mod ${bold("${mod.repository}/${underline(mod.name)}")} is up to date")
+                        upToDateCounter.incrementAndGet()
                     }
                 }
             }
@@ -101,15 +97,19 @@ object Update : CliktCommand(
                 if (
                     it.second.modId in removableDependencies ||
                     freshDependencies.any { dep -> dep.addonId == it.second.modId } ||
-                    updateMods.any { newMod -> newMod.first.id == it.second.modId }
+                    updateMods.any { newMod -> newMod.first.modId == it.second.modId }
                 ) it.first.delete()
             }
-            Xodus.ioTransaction {
-                val removeableMods = archive.mods.query(XdMod::id inValues removableDependencies).toList()
-                archive.mods.removeAll(removeableMods)
-                removeableMods.forEach {
+
+            val removableMods = dependencies.filter { it.modId in removableDependencies }
+            if (removableMods.isNotEmpty()) {
+                removableMods.forEach {
                     terminal.println("Removing the dependency ${red(it.name)} because it is no longer needed")
-                    it.delete()
+                }
+                db.execAsyncBatch {
+                    for (removableDependency in removableMods) {
+                        delete(db.keyFrom(removableDependency))
+                    }
                 }
             }
 
@@ -119,7 +119,7 @@ object Update : CliktCommand(
                 terminal.println()
 
                 updateMods.forEach {
-                    Install.downloadFile(it.first.id, it.second, archivePath, "curseforge", it.second.id.toString(), null, true, archive)
+                    Install.downloadFile(it.first.modId, it.second, archive.path, "curseforge", it.second.id.toString(), null, true, archive)
                     updateCounter.incrementAndGet()
                 }
             }
@@ -130,7 +130,7 @@ object Update : CliktCommand(
                 terminal.println()
 
                 freshDependencies.forEach {
-                    Install.downloadFile(it.addonId, it.file, archivePath, "curseforge", it.file.id.toString(), it.info, false, archive)
+                    Install.downloadFile(it.addonId, it.file, archive.path, "curseforge", it.file.id.toString(), it.info, false, archive)
                     updateCounter.incrementAndGet()
                 }
             }
