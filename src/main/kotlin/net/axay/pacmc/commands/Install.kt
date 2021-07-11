@@ -12,9 +12,6 @@ import io.ktor.client.statement.*
 import io.ktor.util.cio.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.*
-import kotlinx.dnq.query.eq
-import kotlinx.dnq.query.firstOrNull
-import kotlinx.dnq.query.query
 import net.axay.pacmc.data.MinecraftVersion
 import net.axay.pacmc.ktorClient
 import net.axay.pacmc.logging.printProject
@@ -22,12 +19,15 @@ import net.axay.pacmc.requests.CurseProxy
 import net.axay.pacmc.requests.data.CurseProxyFile
 import net.axay.pacmc.requests.data.CurseProxyProject
 import net.axay.pacmc.requests.data.CurseProxyProjectInfo
-import net.axay.pacmc.storage.Xodus
-import net.axay.pacmc.storage.Xodus.xodus
+import net.axay.pacmc.storage.data.DbArchive
+import net.axay.pacmc.storage.data.DbMod
 import net.axay.pacmc.storage.data.PacmcFile
-import net.axay.pacmc.storage.data.XdArchive
-import net.axay.pacmc.storage.data.XdMod
+import net.axay.pacmc.storage.db
+import net.axay.pacmc.storage.execAsyncBatch
+import net.axay.pacmc.storage.getArchiveOrWarn
 import net.axay.pacmc.terminal
+import org.kodein.db.get
+import org.kodein.memory.util.UUID
 import java.io.File
 import kotlin.collections.HashMap
 import kotlin.collections.List
@@ -36,6 +36,7 @@ import kotlin.collections.emptyList
 import kotlin.collections.filter
 import kotlin.collections.filterNot
 import kotlin.collections.first
+import kotlin.collections.firstOrNull
 import kotlin.collections.flatten
 import kotlin.collections.fold
 import kotlin.collections.forEach
@@ -59,8 +60,7 @@ object Install : CliktCommand(
     private val mod by argument()
 
     override fun run() = runBlocking(Dispatchers.Default) {
-        val archive = xodus { Xodus.getArchiveOrNull(archiveName) } ?: return@runBlocking
-        val (archivePath, minecraftVersion) = xodus { archive.path to archive.minecraftVersion }
+        val archive = db.getArchiveOrWarn(archiveName) ?: return@runBlocking
 
         var modId: String? = mod
         var files: List<CurseProxyFile>? = null
@@ -85,7 +85,7 @@ object Install : CliktCommand(
                         options[index + 1] = project
 
                         terminal.print(TextColors.rgb(50, 255, 236)("${index + 1}) "))
-                        terminal.printProject(project, minecraftVersion.versionString, true)
+                        terminal.printProject(project, archive.minecraftVersion.versionString, true)
                     }
                     terminal.println()
 
@@ -119,18 +119,18 @@ object Install : CliktCommand(
 
         val modInfo = async { CurseProxy.getModInfo(modId.toInt()) }
 
-        val file = files?.findBestFile(minecraftVersion)?.first ?: kotlin.run {
+        val file = files?.findBestFile(archive.minecraftVersion)?.first ?: kotlin.run {
             notFoundMessage()
             return@runBlocking
         }
 
-        val dependenciesDeferred = async { findDependencies(file, minecraftVersion) }
+        val dependenciesDeferred = async { findDependencies(file, archive.minecraftVersion) }
 
         terminal.println()
-        terminal.println("Installing the mod at ${gray(archivePath)}")
+        terminal.println("Installing the mod at ${gray(archive.path)}")
         terminal.println()
 
-        downloadFile(modId, file, archivePath, "curseforge", file.id.toString(), modInfo, true, archive)
+        downloadFile(modId, file, archive.path, "curseforge", file.id.toString(), modInfo, true, archive)
 
         val dependencies = dependenciesDeferred.await()
         if (dependencies.isNotEmpty()) {
@@ -139,7 +139,7 @@ object Install : CliktCommand(
             terminal.println()
 
             dependencies.forEach {
-                downloadFile(it.addonId, it.file, archivePath, "curseforge", it.file.id.toString(), it.info, false, archive)
+                downloadFile(it.addonId, it.file, archive.path, "curseforge", it.file.id.toString(), it.info, false, archive)
             }
         }
 
@@ -204,34 +204,23 @@ object Install : CliktCommand(
         versionId: String,
         modInfo: Deferred<CurseProxyProjectInfo>?,
         persistent: Boolean,
-        archive: XdArchive,
+        archive: DbArchive,
     ) = coroutineScope {
         // download the mod file to the given archive (and display progress)
         terminal.println("Downloading " + brightCyan(file.fileName))
 
-        Xodus.ioTransaction {
-            val archiveMods = archive.mods
-            val archiveMod = archiveMods.query(XdMod::id eq modId).firstOrNull()
-            if (archiveMod != null) {
-                if (persistent) archiveMod.persistent = true
-                archiveMod.version = versionId
+        db.execAsyncBatch {
+            val existingMod = archive.mods.mapNotNull { modKey ->
+                db[modKey]?.let { if (it.modId == modId) it else null }
+            }.firstOrNull()
+            if (existingMod != null) {
+                val newPersistence = if (persistent) true else existingMod.persistent
+                put(existingMod.copy(persistent = newPersistence, version = versionId))
             } else {
-                archiveMods.add(XdMod.new {
-                    val resolvedModInfo = runBlocking { modInfo?.await() }
+                val resolvedModInfo = runBlocking { modInfo?.await() }
+                    ?: error("Resolved mod info is not provided upon first mod download")
 
-                    this.repository = repository
-                    this.id = modId
-
-                    this.version = versionId
-
-                    if (resolvedModInfo != null) {
-                        this.name = resolvedModInfo.name
-                        if (resolvedModInfo.summary != null)
-                            this.description = resolvedModInfo.summary
-                    }
-
-                    this.persistent = persistent
-                })
+                put(DbMod(UUID.randomUUID().toString(), repository, modId, versionId, resolvedModInfo.name, resolvedModInfo.summary, persistent))
             }
         }
 
