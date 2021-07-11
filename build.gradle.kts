@@ -37,6 +37,10 @@ dependencies {
     implementation("org.apache.commons:commons-text:1.9")
 
     implementation("org.slf4j:slf4j-simple:1.7.30")
+
+    implementation("org.kodein.db:kodein-db-jvm:0.8.1-beta")
+    implementation("org.kodein.db:kodein-db-serializer-kotlinx:0.8.1-beta")
+    implementation("org.kodein.db:kodein-leveldb-jni-jvm:0.8.1-beta")
 }
 
 application {
