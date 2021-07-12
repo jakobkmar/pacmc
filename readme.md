@@ -7,15 +7,17 @@ keeping your mods up to date.
 
 ## Installation
 
-### Arch Linux
+#### Arch Linux
 
 `pacmc` is the name of [the package in the **AUR**](https://aur.archlinux.org/packages/pacmc/).
 
-### Microsoft Windows ([scoop](https://scoop.sh))
+#### Windows via [scoop](https://scoop.sh)
 
 ```sh
 scoop bucket add games
 scoop install pacmc
+# update later with
+scoop update pacmc
 ```
 
 ## Quick start
