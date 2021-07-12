@@ -20,6 +20,12 @@ scoop install pacmc
 scoop update pacmc
 ```
 
+#### Other
+
+Download one of the released archives from the [releases page](https://github.com/bluefireoly/pacmc/releases).
+Extract the archive. Inside there will be a `bin` directory.
+Run the shell script using `./pacmc`.
+
 ## Quick start
 
 ```bash
