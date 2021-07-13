@@ -232,6 +232,11 @@ object Install : CliktCommand(
             return@coroutineScope
         }
 
+        archive.files.forEach {
+            if (it.second.modId == modId)
+                it.first.delete()
+        }
+
         val filename = PacmcFile("curseforge", modId, versionId).filename
         val localFile = File(archive.path, filename)
 
