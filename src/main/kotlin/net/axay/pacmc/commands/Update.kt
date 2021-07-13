@@ -15,14 +15,12 @@ import net.axay.pacmc.commands.Install.findBestFile
 import net.axay.pacmc.requests.CurseProxy
 import net.axay.pacmc.requests.data.CurseProxyFile
 import net.axay.pacmc.storage.data.DbMod
-import net.axay.pacmc.storage.data.PacmcFile
 import net.axay.pacmc.storage.db
 import net.axay.pacmc.storage.execAsyncBatch
 import net.axay.pacmc.storage.getArchiveMods
 import net.axay.pacmc.storage.getArchiveOrWarn
 import net.axay.pacmc.terminal
 import org.kodein.db.delete
-import java.io.File
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -49,11 +47,6 @@ object Update : CliktCommand(
 
         val dependencies = allMods.filter { !it.persistent }
         val dependencyIds = dependencies.map { it.modId }
-
-        val archiveFolder = File(archive.path)
-        val archiveFiles = (archiveFolder.listFiles() ?: emptyArray())
-            .filter { it.name.startsWith("pacmc_") }
-            .map { it to PacmcFile(it.name) }
 
         val updateMods = Collections.synchronizedList(ArrayList<Pair<DbMod, CurseProxyFile>>())
         val freshDependencies = Collections.synchronizedList(ArrayList<Install.ResolvedDependency>())
@@ -82,6 +75,8 @@ object Update : CliktCommand(
         // figure out which installed dependencies aren't needed anymore
         val removableDependencies = dependencyIds.filter { depId -> !freshDependencies.any { it.addonId == depId } }
 
+        val archiveFiles = archive.files
+
         // now remove all dependencies which don't have any update
         freshDependencies.removeIf { dep ->
             archiveFiles.any { it.second.modId == dep.addonId && it.second.versionId == dep.file.id.toString() }
@@ -96,6 +91,7 @@ object Update : CliktCommand(
                 // delete files which will be updated or aren't needed anymore
                 if (
                     it.second.modId in removableDependencies ||
+                    // may be removed later as old files get removed by the downloadFile function anyways
                     freshDependencies.any { dep -> dep.addonId == it.second.modId } ||
                     updateMods.any { newMod -> newMod.first.modId == it.second.modId }
                 ) it.first.delete()
