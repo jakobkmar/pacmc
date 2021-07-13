@@ -59,10 +59,10 @@ object Load : CliktCommand(
             }
         }
 
-        targetArchive.files.forEach { it.delete() }
+        targetArchive.javaFiles.forEach { it.delete() }
         terminal.println("Deleted old files")
 
-        sourceArchive.files.forEach { it.copyTo(targetArchive.directory.resolve(it.name)) }
+        sourceArchive.javaFiles.forEach { it.copyTo(targetArchive.directory.resolve(it.name)) }
 
         dbJob.join()
         if (copiedModsPrinter.isNotEmpty()) {

@@ -50,7 +50,7 @@ object Remove : CliktCommand(
         val (modKey, mod) = modEntry
 
         terminal.println("Deleting all files of that mod...")
-        archive.files.forEach {
+        archive.javaFiles.forEach {
             if (PacmcFile(it.name).modId == mod.modId)
                 it.delete()
         }

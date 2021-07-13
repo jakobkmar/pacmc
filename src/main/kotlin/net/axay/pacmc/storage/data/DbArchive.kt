@@ -15,6 +15,7 @@ class DbArchive(
 
     val directory get() = File(path)
 
-    val files get() = (directory.listFiles() ?: emptyArray()).filter { it.name.startsWith("pacmc_") }
-    val pacmcFiles get() = files.map { PacmcFile(it.name) }
+    val files get() = javaFiles.map { it to PacmcFile(it.name) }
+    val javaFiles get() = (directory.listFiles() ?: emptyArray()).filter { it.name.startsWith("pacmc_") }
+    val pacmcFiles get() = javaFiles.map { PacmcFile(it.name) }
 }

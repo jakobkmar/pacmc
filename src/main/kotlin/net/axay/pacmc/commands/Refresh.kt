@@ -42,7 +42,7 @@ object Refresh : CliktCommand(
             }
         }
 
-        val oldFiles = archive.files
+        val oldFiles = archive.javaFiles
         terminal.println("Deleting old files")
         if (oldFiles.isNotEmpty()) {
             terminal.println()
