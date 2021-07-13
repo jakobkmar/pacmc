@@ -66,7 +66,7 @@ object Refresh : CliktCommand(
             terminal.println()
 
             freshFiles.forEach {
-                Install.downloadFile(it.first.modId, it.second, it.first.repository, it.second.id.toString(), it.third, true, archive)
+                Install.downloadFile(it.first.modId, it.second, it.first.repository, it.third, true, archive)
             }
         }
 
@@ -76,7 +76,7 @@ object Refresh : CliktCommand(
             terminal.println()
 
             freshDependencies.forEach {
-                Install.downloadFile(it.addonId, it.file, "curseforge", it.file.id.toString(), it.info, false, archive)
+                Install.downloadFile(it.addonId, it.file, "curseforge", it.info, false, archive)
             }
         }
     }

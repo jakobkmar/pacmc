@@ -133,7 +133,7 @@ object Install : CliktCommand(
         terminal.println("Installing the mod at ${gray(archive.path)}")
         terminal.println()
 
-        downloadFile(modId, file, "curseforge", file.id.toString(), modInfo, true, archive)
+        downloadFile(modId, file, "curseforge", modInfo, true, archive)
 
         val dependencies = dependenciesDeferred.await()
         if (dependencies.isNotEmpty()) {
@@ -142,7 +142,7 @@ object Install : CliktCommand(
             terminal.println()
 
             dependencies.forEach {
-                downloadFile(it.addonId, it.file, "curseforge", it.file.id.toString(), it.info, false, archive)
+                downloadFile(it.addonId, it.file, "curseforge", it.info, false, archive)
             }
         }
 
@@ -203,11 +203,12 @@ object Install : CliktCommand(
         modId: String,
         file: CurseProxyFile,
         repository: String,
-        versionId: String,
         modInfo: Deferred<CurseProxyProjectInfo>?,
         persistent: Boolean,
         archive: DbArchive,
     ) = coroutineScope {
+        val versionId = file.id.toString()
+
         // download the mod file to the given archive (and display progress)
         terminal.println("Downloading " + brightCyan(file.fileName))
 
@@ -226,12 +227,12 @@ object Install : CliktCommand(
             }
         }
 
-        if (archive.pacmcFiles.any { it.modId == modId }) {
+        if (archive.pacmcFiles.any { it.modId == modId && it.versionId == versionId }) {
             terminal.println("  already installed ${green("✔")}")
             return@coroutineScope
         }
 
-        val filename = PacmcFile("curseforge", modId, file.id.toString()).filename
+        val filename = PacmcFile("curseforge", modId, versionId).filename
         val localFile = File(archive.path, filename)
 
         val downloadContent = ktorClient.get<HttpResponse>(file.downloadUrl) {
