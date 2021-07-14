@@ -61,6 +61,14 @@ tasks {
         kotlinOptions.jvmTarget = "11"
     }
 
+    processResources {
+        inputs.property("version", version)
+
+        filesMatching("pacmc_version.txt") {
+            expand("version" to version)
+        }
+    }
+
     val packagesResources = named<ProcessResources>(sourceSets["packages"].processResourcesTaskName) {
         dependsOn(distTar)
 
