@@ -19,7 +19,7 @@ object Info : CliktCommand(
             """
                 ${white(bold("pacmc") + " version ") + green(version)}
                 
-                dataLocalDir: ${Values.projectDirectories.dataLocalDir}
+                dataLocalDir: ${Values.dataLocalDir}
                 databaseDir: $dbFile
                 databaseDir (canonical): ${dbFile.canonicalPath}
                 
