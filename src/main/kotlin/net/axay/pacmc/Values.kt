@@ -17,5 +17,10 @@ object Values {
         ProjectDirectories.from("net", "axay", "pacmc")
     }
 
-    val dbFile by lazy { File(projectDirectories.dataLocalDir, "/db1") }
+    val dbFile by lazy {
+        val dataLocalDir = File(projectDirectories.dataLocalDir)
+        if (!dataLocalDir.exists())
+            dataLocalDir.mkdirs()
+        File(dataLocalDir, "/db1")
+    }
 }
