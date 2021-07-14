@@ -82,7 +82,8 @@ object Archive : CliktCommand(
 
                 if (awaitConfirmation()) {
                     db.execBatch {
-                        deleteById<DbArchive>(name)
+                        // TODO: do it this way until https://github.com/Kodein-Framework/Kodein-DB/pull/38 is merged
+                        delete(keyById<DbArchive>(name))
                         db.find<DbMod>().byIndex("archive", name).useKeys { modSequence ->
                             modSequence.forEach {
                                 delete(it)
