@@ -21,6 +21,7 @@ object Info : CliktCommand(
                 
                 dataLocalDir: ${Values.projectDirectories.dataLocalDir}
                 databaseDir: $dbFile
+                databaseDir (canonical): ${dbFile.canonicalPath}
                 
                 Your OS: ${OperatingSystem.current ?: "unknown"}
                 Java version: ${Runtime.version()}
