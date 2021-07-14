@@ -84,26 +84,27 @@ tasks {
         }
     }
 
-    create<Exec>("updateAurPackage") {
-        group = "packages"
-        dependsOn(packagesResources)
+    val systemVersion = File("/proc/version").let { if (it.exists()) it.readText().toLowerCase() else "" }
 
-        val systemVersion = File("/proc/version").let { if (it.exists()) it.readText().toLowerCase() else "" }
-        if (!systemVersion.contains("arch") && !systemVersion.contains("manjaro"))
-            logger.warn("It does not seem like you are on Arch linux, which is required to build the AUR package.")
+    if (systemVersion.contains("arch") || systemVersion.contains("manjaro")) {
+        create<Exec>("updateAurPackage") {
+            group = "packages"
 
-        workingDir("packages/aur/pacmc/")
+            dependsOn(packagesResources)
 
-        standardOutput = workingDir.resolve(".SRCINFO").outputStream()
-        commandLine("makepkg", "--printsrcinfo")
-    }
+            workingDir("packages/aur/pacmc/")
 
-    create<Exec>("commitAurPackage") {
-        group = "packages"
+            standardOutput = workingDir.resolve(".SRCINFO").outputStream()
+            commandLine("makepkg", "--printsrcinfo")
+        }
 
-        workingDir("packages/aur/pacmc/")
+        create<Exec>("commitAurPackage") {
+            group = "packages"
 
-        commandLine("git", "add", "PKGBUILD", ".SRCINFO")
-        commandLine("git", "commit", "-m", "\"Update pacmc to version $version\"")
+            workingDir("packages/aur/pacmc/")
+
+            commandLine("git", "add", "PKGBUILD", ".SRCINFO")
+            commandLine("git", "commit", "-m", "\"Update pacmc to version $version\"")
+        }
     }
 }
