@@ -8,6 +8,7 @@ import net.axay.pacmc.commands.Install.findBestFile
 import net.axay.pacmc.requests.CurseProxy
 import net.axay.pacmc.requests.data.CurseProxyFile
 import net.axay.pacmc.requests.data.CurseProxyProjectInfo
+import net.axay.pacmc.storage.data.DbArchive
 import net.axay.pacmc.storage.data.DbMod
 import net.axay.pacmc.storage.db
 import net.axay.pacmc.storage.getArchiveMods
@@ -21,12 +22,14 @@ object Refresh : CliktCommand(
     private val archiveName by option("-a", "--archive", help = "The name of the archive you want to refresh").default(".minecraft")
 
     override fun run() = runBlocking(Dispatchers.Default) {
-        terminal.println("Refreshing mods for archive '$archiveName'")
+        terminal.println("Refreshing mods for archive '${archiveName}'")
         terminal.println()
 
-        val archive = db.getArchiveOrWarn(archiveName) ?: return@runBlocking
+        refreshArchive(db.getArchiveOrWarn(archiveName) ?: return@runBlocking)
+    }
 
-        val mods = db.getArchiveMods(archiveName).filter { it.persistent }
+    suspend fun refreshArchive(archive: DbArchive) = coroutineScope {
+        val mods = db.getArchiveMods(archive.name).filter { it.persistent }
 
         val freshFiles = Collections.synchronizedList(ArrayList<Triple<DbMod, CurseProxyFile, Deferred<CurseProxyProjectInfo>>>())
         val freshDependencies = Collections.synchronizedList(ArrayList<Install.ResolvedDependency>())
@@ -43,14 +46,11 @@ object Refresh : CliktCommand(
         }
 
         val oldFiles = archive.javaFiles
-        terminal.println("Deleting old files")
         if (oldFiles.isNotEmpty()) {
             terminal.println()
-            oldFiles.forEach {
-                val name = it.name
-                it.delete()
-                terminal.println("Deleted $name")
-            }
+            val fileNames = oldFiles.joinToString { it.name }
+            oldFiles.forEach { it.delete() }
+            terminal.println("Deleted old files: $fileNames")
             terminal.println()
         }
 
