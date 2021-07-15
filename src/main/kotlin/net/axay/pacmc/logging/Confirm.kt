@@ -19,3 +19,8 @@ fun Terminal.awaitConfirmation(): Boolean {
     }
     return sure
 }
+
+fun Terminal.awaitContinueAnyways(): Boolean {
+    print("Do you want to continue anyways?")
+    return awaitConfirmation()
+}
