@@ -114,6 +114,11 @@ object Archive : CliktCommand(
 
             val archive = db.getArchiveOrWarn(name) ?: return@runBlocking
 
+            if (archive.gameVersion == version) {
+                terminal.println("That version is already the current minecraft version of the archive!")
+                return@runBlocking
+            }
+
             if (MinecraftVersion.fromString(version) == null) {
                 terminal.danger("The given minecraft version '$version' follows an invalid format!")
                 return@runBlocking
