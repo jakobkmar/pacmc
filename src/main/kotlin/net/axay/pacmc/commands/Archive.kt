@@ -129,7 +129,7 @@ object Archive : CliktCommand(
 
             terminal.println("Redownloading all mods in the archive for the new version...")
             terminal.println()
-            Refresh.refreshArchive(archive)
+            Refresh.refreshArchive(archive, true)
 
             terminal.println()
             terminal.success("Changed the version of the archive '$name' to '$version'")

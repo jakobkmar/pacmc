@@ -3,7 +3,10 @@ package net.axay.pacmc.commands
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.mordant.rendering.TextColors.white
 import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import net.axay.pacmc.commands.Install.findBestFile
 import net.axay.pacmc.requests.CurseProxy
 import net.axay.pacmc.requests.data.CurseProxyFile
@@ -28,22 +31,38 @@ object Refresh : CliktCommand(
         refreshArchive(db.getArchiveOrWarn(archiveName) ?: return@runBlocking)
     }
 
-    suspend fun refreshArchive(archive: DbArchive) = coroutineScope {
+    suspend fun refreshArchive(archive: DbArchive, changedVersion: Boolean = false) = coroutineScope {
         val mods = db.getArchiveMods(archive.name).filter { it.persistent }
 
         val freshFiles = Collections.synchronizedList(ArrayList<Triple<DbMod, CurseProxyFile, Deferred<CurseProxyProjectInfo>>>())
         val freshDependencies = Collections.synchronizedList(ArrayList<Install.ResolvedDependency>())
 
-        val refreshJobs = mods.map { mod ->
+        terminal.println("Retrieving updated file data...")
+        val warnLock = Mutex()
+        mods.map { mod ->
             launch {
-                val freshFile = CurseProxy.getModFiles(mod.modId.toInt())?.findBestFile(archive.minecraftVersion)?.first ?: return@launch
+                val freshFile = CurseProxy.getModFiles(mod.modId.toInt())?.findBestFile(archive.minecraftVersion)?.first
+                if (freshFile == null) {
+                    warnLock.withLock {
+                        terminal.println()
+                        if (changedVersion) {
+                            terminal.danger("Could not find a release of ${white("${mod.repository}/${mod.name}")} for the new minecraft version!")
+                            terminal.danger("(the archive will remember it, if you decide to switch back to the other version)")
+                        } else {
+                            terminal.danger("Could not find the file for ${white("${mod.repository}/${mod.name}")}!")
+                            terminal.danger("Is it no available for this version? Did the author delete the mod?")
+                        }
+                        terminal.println()
+                    }
+                    return@launch
+                }
                 freshFiles += Triple(mod, freshFile, async { CurseProxy.getModInfo(mod.modId.toInt()) })
                 Install.findDependencies(freshFile, archive.minecraftVersion).forEach { dep ->
                     if (!freshDependencies.any { it.addonId == dep.addonId })
                         freshDependencies += dep
                 }
             }
-        }
+        }.joinAll()
 
         val oldFiles = archive.javaFiles
         if (oldFiles.isNotEmpty()) {
@@ -53,9 +72,6 @@ object Refresh : CliktCommand(
             terminal.println("Deleted old files: $fileNames")
             terminal.println()
         }
-
-        terminal.println("Retrieving updated file data...")
-        refreshJobs.joinAll()
 
         // remove resolved dependencies which are installed mods as well
         freshDependencies.removeIf { dep -> freshFiles.any { it.first.modId == dep.addonId } }
@@ -78,6 +94,11 @@ object Refresh : CliktCommand(
             freshDependencies.forEach {
                 Install.downloadFile(it.addonId, it.file, "curseforge", it.info, false, archive)
             }
+        }
+
+        if (freshFiles.size < mods.size) {
+            terminal.println()
+            terminal.danger("Some mods could not be refreshed! (more information above)")
         }
     }
 }
