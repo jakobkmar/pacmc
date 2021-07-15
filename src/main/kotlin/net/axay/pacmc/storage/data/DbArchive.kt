@@ -6,7 +6,7 @@ import org.kodein.db.model.Id
 import java.io.File
 
 @Serializable
-class DbArchive(
+data class DbArchive(
     @Id val name: String,
     val path: String,
     val gameVersion: String,
