@@ -3,18 +3,22 @@ package net.axay.pacmc.commands
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.subcommands
 import com.github.ajalt.clikt.parameters.arguments.argument
+import com.github.ajalt.clikt.parameters.arguments.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
 import com.github.ajalt.mordant.rendering.TextColors.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
+import net.axay.pacmc.data.MinecraftVersion
 import net.axay.pacmc.logging.awaitConfirmation
+import net.axay.pacmc.logging.awaitContinueAnyways
 import net.axay.pacmc.logging.printArchive
 import net.axay.pacmc.requests.CurseProxy
 import net.axay.pacmc.storage.data.DbArchive
 import net.axay.pacmc.storage.data.DbMod
 import net.axay.pacmc.storage.db
+import net.axay.pacmc.storage.getArchiveOrWarn
 import net.axay.pacmc.terminal
 import org.kodein.db.*
 
@@ -22,12 +26,12 @@ object Archive : CliktCommand(
     "Manages your mod archives"
 ) {
     init {
-        subcommands(Add, List, Remove)
+        subcommands(Add, List, Remove, Version)
     }
 
     override fun run() = Unit
 
-    object Add : CliktCommand("Add a new archive") {
+    object Add : CliktCommand("Adds a new archive") {
         private val gameVersion by option("-g", "--game-version", help = "Set a specific game version (latest by default)")
 
         private val name by argument(help = "The name of the new archive")
@@ -68,7 +72,7 @@ object Archive : CliktCommand(
         }
     }
 
-    object Remove : CliktCommand("Remove an existing archive") {
+    object Remove : CliktCommand("Removes an existing archive") {
         private val name by argument(help = "The name of the archive you want to delete")
 
         override fun run() {
@@ -97,6 +101,30 @@ object Archive : CliktCommand(
 
                 // TODO: remove the mods on the hard drive
             }
+        }
+    }
+
+    object Version : CliktCommand("Changes the version of an archive") {
+        private val version by argument(help = "The new minecraft version you want to migrate the archive to")
+        private val name by argument(help = "The name of the archive you want to change the version of").default(".minecraft")
+
+        override fun run() = runBlocking(Dispatchers.Default) {
+            terminal.println("Trying to change the version of the archive '$name' to '$version'")
+            terminal.println()
+
+            val archive = db.getArchiveOrWarn(name) ?: return@runBlocking
+
+            if (MinecraftVersion.fromString(version) == null) {
+                terminal.danger("The given minecraft version '$version' follows an invalid format!")
+                return@runBlocking
+            }
+
+            if (!CurseProxy.getMinecraftVersions().any { it.versionString == version }) {
+                terminal.warning("The given minecraft version '$version' is probably invalid!")
+                if (!terminal.awaitContinueAnyways()) return@runBlocking
+            }
+
+            db.put(archive.copy(gameVersion = version))
         }
     }
 }
