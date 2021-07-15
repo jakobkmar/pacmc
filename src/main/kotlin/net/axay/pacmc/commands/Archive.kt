@@ -143,7 +143,7 @@ object Archive : CliktCommand(
             Refresh.refreshArchive(newArchive, true)
 
             terminal.println()
-            terminal.success("Changed the version of the archive '$name' to '$version'")
+            terminal.success("Changed the version of the archive '${archive.name}' to '$version'")
         }
     }
 
@@ -158,7 +158,7 @@ object Archive : CliktCommand(
                 }
             }
 
-            terminal.println("Trying to change the version of the archive 'name' to the latest minecraft version")
+            terminal.println("Trying to change the version of the archive '$name' to the latest minecraft version")
             terminal.println()
 
             val archive = db.getArchiveOrWarn(name) ?: return@runBlocking
