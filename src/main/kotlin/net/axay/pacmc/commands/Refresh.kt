@@ -47,12 +47,11 @@ object Refresh : CliktCommand(
                         terminal.println()
                         if (changedVersion) {
                             terminal.danger("Could not find a release of ${white("${mod.repository}/${mod.name}")} for the new minecraft version!")
-                            terminal.danger("(the archive will remember it, if you decide to switch back to the other version)")
+                            terminal.danger(" (you can switch back to the previous version to install this mod again)")
                         } else {
                             terminal.danger("Could not find the file for ${white("${mod.repository}/${mod.name}")}!")
-                            terminal.danger("Is it no available for this version? Did the author delete the mod?")
+                            terminal.danger(" Is it no available for this version? Did the author delete the mod?")
                         }
-                        terminal.println()
                     }
                     return@launch
                 }
