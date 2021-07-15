@@ -124,12 +124,13 @@ object Archive : CliktCommand(
                 if (!terminal.awaitContinueAnyways()) return@runBlocking
             }
 
-            db.put(archive.copy(gameVersion = version))
+            val newArchive = archive.copy(gameVersion = version)
+            db.put(newArchive)
             terminal.println("Changed the version in the database")
 
             terminal.println("Redownloading all mods in the archive for the new version...")
             terminal.println()
-            Refresh.refreshArchive(archive, true)
+            Refresh.refreshArchive(newArchive, true)
 
             terminal.println()
             terminal.success("Changed the version of the archive '$name' to '$version'")

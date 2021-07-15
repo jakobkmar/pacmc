@@ -69,7 +69,6 @@ object Refresh : CliktCommand(
             val fileNames = oldFiles.joinToString { it.name }
             oldFiles.forEach { it.delete() }
             terminal.println("Deleted old files: $fileNames")
-            terminal.println()
         }
 
         // remove resolved dependencies which are installed mods as well
