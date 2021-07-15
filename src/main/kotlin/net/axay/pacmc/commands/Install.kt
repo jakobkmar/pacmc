@@ -151,7 +151,7 @@ object Install : CliktCommand(
     }
 
     fun List<CurseProxyFile>.findBestFile(minecraftVersion: MinecraftVersion) = this
-        .filterNot { it.gameVersion.contains("Forge") && !it.gameVersion.contains("Fabric") }
+        .filterNot { (it.gameVersion.contains("Forge") || it.gameVersion.contains("Rift")) && !it.gameVersion.contains("Fabric") }
         .fold<CurseProxyFile, Pair<CurseProxyFile, Int>?>(null) { acc, curseProxyFile ->
             val distance = curseProxyFile.minecraftVersions
                 .mapNotNull { it.minorDistance(minecraftVersion) }
