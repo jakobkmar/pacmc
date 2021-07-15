@@ -9,6 +9,7 @@ import com.github.ajalt.clikt.parameters.types.file
 import com.github.ajalt.mordant.rendering.TextColors.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import net.axay.pacmc.data.MinecraftVersion
 import net.axay.pacmc.logging.awaitConfirmation
@@ -26,7 +27,7 @@ object Archive : CliktCommand(
     "Manages your mod archives"
 ) {
     init {
-        subcommands(Add, List, Remove, Version)
+        subcommands(Add, List, Remove, Version, Update)
     }
 
     override fun run() = Unit
@@ -114,11 +115,6 @@ object Archive : CliktCommand(
 
             val archive = db.getArchiveOrWarn(name) ?: return@runBlocking
 
-            if (archive.gameVersion == version) {
-                terminal.println("That version is already the current minecraft version of the archive!")
-                return@runBlocking
-            }
-
             if (MinecraftVersion.fromString(version) == null) {
                 terminal.danger("The given minecraft version '$version' follows an invalid format!")
                 return@runBlocking
@@ -127,6 +123,15 @@ object Archive : CliktCommand(
             if (!CurseProxy.getMinecraftVersions().any { it.versionString == version }) {
                 terminal.warning("The given minecraft version '$version' is probably invalid!")
                 if (!terminal.awaitContinueAnyways()) return@runBlocking
+            }
+
+            changeVersion(archive, version)
+        }
+
+        suspend fun changeVersion(archive: DbArchive, version: String) = coroutineScope {
+            if (archive.gameVersion == version) {
+                terminal.println("That version is already the current minecraft version of the archive!")
+                return@coroutineScope
             }
 
             val newArchive = archive.copy(gameVersion = version)
@@ -139,6 +144,26 @@ object Archive : CliktCommand(
 
             terminal.println()
             terminal.success("Changed the version of the archive '$name' to '$version'")
+        }
+    }
+
+    object Update : CliktCommand("Updates an archive to the latest version") {
+        private val name by argument(help = "The name of the archive you want to change the version of").default(".minecraft")
+
+        override fun run() = runBlocking(Dispatchers.Default) {
+            val latestMinecraftVersion = async {
+                CurseProxy.getMinecraftVersions().first().versionString.apply {
+                    terminal.println("The latest version is '$this'")
+                    terminal.println()
+                }
+            }
+
+            terminal.println("Trying to change the version of the archive 'name' to the latest minecraft version")
+            terminal.println()
+
+            val archive = db.getArchiveOrWarn(name) ?: return@runBlocking
+
+            Version.changeVersion(archive, latestMinecraftVersion.await())
         }
     }
 }
