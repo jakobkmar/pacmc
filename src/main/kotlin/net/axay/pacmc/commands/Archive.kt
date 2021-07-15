@@ -125,6 +125,14 @@ object Archive : CliktCommand(
             }
 
             db.put(archive.copy(gameVersion = version))
+            terminal.println("Changed the version in the database")
+
+            terminal.println("Redownloading all mods in the archive for the new version...")
+            terminal.println()
+            Refresh.refreshArchive(archive)
+
+            terminal.println()
+            terminal.success("Changed the version of the archive '$name' to '$version'")
         }
     }
 }
