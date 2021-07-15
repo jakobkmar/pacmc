@@ -80,7 +80,7 @@ object Archive : CliktCommand(
 
                 terminal.print("Do you really want to delete this archive?")
 
-                if (awaitConfirmation()) {
+                if (terminal.awaitConfirmation()) {
                     db.execBatch {
                         // TODO: do it this way until https://github.com/Kodein-Framework/Kodein-DB/pull/38 is merged
                         delete(keyById<DbArchive>(name))

@@ -36,7 +36,7 @@ object Load : CliktCommand(
         terminal.println("This will override all the mods in the following archive:")
         terminal.printArchive(targetArchive)
         terminal.print("Are you sure?")
-        if (!awaitConfirmation()) {
+        if (!terminal.awaitConfirmation()) {
             terminal.println()
             terminal.println("Abort.")
             return@runBlocking
