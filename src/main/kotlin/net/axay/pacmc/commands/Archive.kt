@@ -49,15 +49,19 @@ object Archive : CliktCommand(
             val minecraftVersion = async {
                 gameVersion ?: CurseProxy.getMinecraftVersions().first().versionString
             }
-            if (db.find<DbArchive>().byId(name).use { it.isValid() }) {
-                terminal.danger("An archive with the name '$name' already exists!")
-            } else {
-                val archive = DbArchive(name, path.canonicalPath, runBlocking { minecraftVersion.await() })
-                terminal.println("Will add the following archive to the database:")
-                terminal.printArchive(archive)
-                db.put(archive)
-                terminal.println()
-                terminal.success("Successfully added the new archive '$name'")
+            when {
+                db.find<DbArchive>().byId(name).use { it.isValid() } ->
+                    terminal.danger("An archive with the name '$name' already exists!")
+                db.find<DbArchive>().byIndex("path", path.canonicalPath).use { it.isValid() } ->
+                    terminal.danger("Another archive is already present at that location!")
+                else -> {
+                    val archive = DbArchive(name, path.canonicalPath, runBlocking { minecraftVersion.await() })
+                    terminal.println("Will add the following archive to the database:")
+                    terminal.printArchive(archive)
+                    db.put(archive)
+                    terminal.println()
+                    terminal.success("Successfully added the new archive '$name'")
+                }
             }
         }
     }
