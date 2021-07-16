@@ -4,6 +4,7 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.subcommands
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.arguments.default
+import com.github.ajalt.clikt.parameters.arguments.defaultLazy
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
 import com.github.ajalt.mordant.rendering.TextColors.*
@@ -11,6 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
+import net.axay.pacmc.Values
 import net.axay.pacmc.data.MinecraftVersion
 import net.axay.pacmc.logging.awaitConfirmation
 import net.axay.pacmc.logging.awaitContinueAnyways
@@ -22,6 +24,7 @@ import net.axay.pacmc.storage.db
 import net.axay.pacmc.storage.getArchiveOrWarn
 import net.axay.pacmc.terminal
 import org.kodein.db.*
+import java.io.File
 
 object Archive : CliktCommand(
     "Manages your mod archives"
@@ -36,7 +39,11 @@ object Archive : CliktCommand(
         private val gameVersion by option("-g", "--game-version", help = "Set a specific game version (latest by default)")
 
         private val name by argument(help = "The name of the new archive")
-        private val path by argument(help = "The path where all archive specific actions should take place").file(mustExist = true, canBeFile = false)
+        private val path by argument(help = "The path where all archive specific actions should take place")
+            .file(mustExist = true, canBeFile = false)
+            .defaultLazy {
+                File(Values.dataLocalDir, "/archives/$name").apply { mkdirs() }
+            }
 
         override fun run() = runBlocking(Dispatchers.Default) {
             val minecraftVersion = async {
@@ -45,7 +52,11 @@ object Archive : CliktCommand(
             if (db.find<DbArchive>().byId(name).use { it.isValid() }) {
                 terminal.danger("An archive with the name '$name' already exists!")
             } else {
-                db.put(DbArchive(name, path.canonicalPath, runBlocking { minecraftVersion.await() }))
+                val archive = DbArchive(name, path.canonicalPath, runBlocking { minecraftVersion.await() })
+                terminal.println("Will add the following archive to the database:")
+                terminal.printArchive(archive)
+                db.put(archive)
+                terminal.println()
                 terminal.success("Successfully added the new archive '$name'")
             }
         }

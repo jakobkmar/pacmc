@@ -15,14 +15,12 @@ object Values {
     }
 
     val dataLocalDir by lazy {
-        if (OperatingSystem.current != OperatingSystem.WINDOWS)
+        val dir = if (OperatingSystem.current != OperatingSystem.WINDOWS)
             File(ProjectDirectories.from("net", "axay", "pacmc").dataLocalDir)
         else File(System.getenv("LOCALAPPDATA"), "/axay/pacmc/data/")
+        dir.mkdirs()
+        dir
     }
 
-    val dbFile by lazy {
-        if (!dataLocalDir.exists())
-            dataLocalDir.mkdirs()
-        File(dataLocalDir, "/db1")
-    }
+    val dbFile by lazy { File(dataLocalDir, "/db1") }
 }
