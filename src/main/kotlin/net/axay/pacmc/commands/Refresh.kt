@@ -8,9 +8,9 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import net.axay.pacmc.commands.Install.findBestFile
-import net.axay.pacmc.requests.CurseProxy
-import net.axay.pacmc.requests.data.CurseProxyFile
-import net.axay.pacmc.requests.data.CurseProxyProjectInfo
+import net.axay.pacmc.requests.curse.CurseProxy
+import net.axay.pacmc.requests.curse.data.CurseProxyFile
+import net.axay.pacmc.requests.curse.data.CurseProxyProjectInfo
 import net.axay.pacmc.storage.data.DbArchive
 import net.axay.pacmc.storage.data.DbMod
 import net.axay.pacmc.storage.db

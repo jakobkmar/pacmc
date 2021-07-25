@@ -1,12 +1,12 @@
-package net.axay.pacmc.requests
+package net.axay.pacmc.requests.curse
 
 import io.ktor.client.features.*
 import io.ktor.client.request.*
 import net.axay.pacmc.ktorClient
-import net.axay.pacmc.requests.data.CurseProxyFile
-import net.axay.pacmc.requests.data.CurseProxyMinecraftVersion
-import net.axay.pacmc.requests.data.CurseProxyProject
-import net.axay.pacmc.requests.data.CurseProxyProjectInfo
+import net.axay.pacmc.requests.curse.data.CurseProxyFile
+import net.axay.pacmc.requests.curse.data.CurseProxyMinecraftVersion
+import net.axay.pacmc.requests.curse.data.CurseProxyProject
+import net.axay.pacmc.requests.curse.data.CurseProxyProjectInfo
 import net.axay.pacmc.utils.similarity
 
 object CurseProxy {

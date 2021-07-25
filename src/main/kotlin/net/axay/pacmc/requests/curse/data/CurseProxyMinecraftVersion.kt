@@ -1,4 +1,4 @@
-package net.axay.pacmc.requests.data
+package net.axay.pacmc.requests.curse.data
 
 import kotlinx.serialization.Serializable
 

@@ -15,10 +15,10 @@ import kotlinx.coroutines.*
 import net.axay.pacmc.data.MinecraftVersion
 import net.axay.pacmc.ktorClient
 import net.axay.pacmc.logging.printProject
-import net.axay.pacmc.requests.CurseProxy
-import net.axay.pacmc.requests.data.CurseProxyFile
-import net.axay.pacmc.requests.data.CurseProxyProject
-import net.axay.pacmc.requests.data.CurseProxyProjectInfo
+import net.axay.pacmc.requests.curse.CurseProxy
+import net.axay.pacmc.requests.curse.data.CurseProxyFile
+import net.axay.pacmc.requests.curse.data.CurseProxyProject
+import net.axay.pacmc.requests.curse.data.CurseProxyProjectInfo
 import net.axay.pacmc.storage.data.DbArchive
 import net.axay.pacmc.storage.data.DbMod
 import net.axay.pacmc.storage.data.PacmcFile

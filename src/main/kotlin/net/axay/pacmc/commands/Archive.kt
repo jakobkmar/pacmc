@@ -17,7 +17,7 @@ import net.axay.pacmc.data.MinecraftVersion
 import net.axay.pacmc.logging.awaitConfirmation
 import net.axay.pacmc.logging.awaitContinueAnyways
 import net.axay.pacmc.logging.printArchive
-import net.axay.pacmc.requests.CurseProxy
+import net.axay.pacmc.requests.curse.CurseProxy
 import net.axay.pacmc.storage.data.DbArchive
 import net.axay.pacmc.storage.data.DbMod
 import net.axay.pacmc.storage.db

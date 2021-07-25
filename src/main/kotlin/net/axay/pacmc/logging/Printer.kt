@@ -4,7 +4,7 @@ import com.github.ajalt.mordant.rendering.TextColors.*
 import com.github.ajalt.mordant.rendering.TextStyles.*
 import com.github.ajalt.mordant.terminal.Terminal
 import net.axay.pacmc.data.ReleaseType
-import net.axay.pacmc.requests.data.CurseProxyProject
+import net.axay.pacmc.requests.curse.data.CurseProxyProject
 import net.axay.pacmc.storage.data.DbArchive
 import net.axay.pacmc.terminal
 

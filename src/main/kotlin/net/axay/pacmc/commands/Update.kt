@@ -12,8 +12,8 @@ import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import net.axay.pacmc.commands.Install.findBestFile
-import net.axay.pacmc.requests.CurseProxy
-import net.axay.pacmc.requests.data.CurseProxyFile
+import net.axay.pacmc.requests.curse.CurseProxy
+import net.axay.pacmc.requests.curse.data.CurseProxyFile
 import net.axay.pacmc.storage.data.DbMod
 import net.axay.pacmc.storage.db
 import net.axay.pacmc.storage.execAsyncBatch

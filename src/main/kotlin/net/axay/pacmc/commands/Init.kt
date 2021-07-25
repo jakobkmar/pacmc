@@ -5,7 +5,7 @@ import com.github.ajalt.mordant.rendering.TextColors.gray
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
-import net.axay.pacmc.requests.CurseProxy
+import net.axay.pacmc.requests.curse.CurseProxy
 import net.axay.pacmc.storage.data.DbArchive
 import net.axay.pacmc.storage.db
 import net.axay.pacmc.terminal
