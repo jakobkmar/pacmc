@@ -2,7 +2,7 @@
 
 **`pacmc`** is a package manager for Fabric Minecraft mods.
 
-The aim of this project is to massively reduce the effort you have to put in for installing - and most importantly -
+The aim of this project is to massively reduce the effort you have to put in to installing - and most importantly -
 keeping your mods up to date.
 
 ## Installation
@@ -56,7 +56,7 @@ pacmc init
 #### Add an archive
 
 ```zsh
-pacmc archive add myarchive ./path/to/my/archive
+pacmc archive add myarchive [./path/to/my/archive]
 ```
 
 #### List all existing archives
@@ -79,7 +79,7 @@ pacmc search sodium
 pacmc search "Fabric API"
 ```
 
-_this searches for mods for the latest version by default_
+_this searches for mods for the latest minecraft version by default_
 
 For a specific game version:
 
