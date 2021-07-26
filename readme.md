@@ -41,6 +41,22 @@ pacmc install lithium
 
 The main command is `pacmc`. You can add `-h` to any command to get help.
 
+### Command overview
+
+```
+Commands:
+  install  Installs a minecraft mod
+  update   Updates the mods inside an archive
+  search   Searches for mods
+  list     Lists the installed mods
+  remove   Removes a minecraft mod
+  archive  Manages your mod archives
+  init     Sets the pacmc defaults
+  refresh  Refreshes the local mod files according to the database
+  load     Loads one archive into another
+  info     Prints debug information
+```
+
 ### Archives
 
 Archives are the places (folders) where your mods are stored. Your `.minecraft` folder is an archive by default, but you
