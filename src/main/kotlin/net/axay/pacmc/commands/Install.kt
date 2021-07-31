@@ -91,9 +91,9 @@ object Install : CliktCommand(
                     }
                     terminal.println()
 
-                    terminal.print("Which mod do you want to install? (${options.keys.joinToString()}) ")
                     var choice: Int? = null
                     while (choice == null) {
+                        terminal.print("Which mod do you want to install? (${options.keys.joinToString()}) ")
                         val readLine = (readLine() ?: return@runBlocking).toIntOrNull()
                         choice = when (readLine) {
                             null -> null
