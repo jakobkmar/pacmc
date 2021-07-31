@@ -124,7 +124,7 @@ object Install : CliktCommand(
         val modInfo = async { CurseProxy.getModInfo(modId.toInt()) }
 
         val file = files?.findBestFile(archive.minecraftVersion)?.first ?: kotlin.run {
-            notFoundMessage()
+            terminal.danger("Could not find a release of '$mod' for the minecraft version '${archive.minecraftVersion.versionString}'")
             return@runBlocking
         }
 
