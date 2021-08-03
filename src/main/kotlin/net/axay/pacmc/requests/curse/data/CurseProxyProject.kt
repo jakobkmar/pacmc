@@ -1,7 +1,10 @@
 package net.axay.pacmc.requests.curse.data
 
 import kotlinx.serialization.Serializable
+import net.axay.pacmc.data.MinecraftVersion
 import net.axay.pacmc.data.ReleaseType
+import net.axay.pacmc.requests.common.CommonConvertible
+import net.axay.pacmc.requests.common.data.CommonModResult
 
 @Serializable
 data class CurseProxyProject(
@@ -12,7 +15,7 @@ data class CurseProxyProject(
     val gameVersionLatestFiles: List<GameVersionLatestFile>,
     val gamePopularityRank: Long,
     val dateReleased: String,
-) {
+) : CommonConvertible<CommonModResult> {
     @Serializable
     data class Author(
         val name: String,
@@ -40,4 +43,13 @@ data class CurseProxyProject(
                 ?: files.firstOrNull()
         }?.let { it.projectFileName.removeSuffix(".jar") to ReleaseType.fromInt(it.fileType) }
     }
+
+    override fun convertToCommon() = CommonModResult(
+        "curseforge",
+        id.toString(),
+        name,
+        summary,
+        authors.first().name,
+        gameVersionLatestFiles.mapNotNull { MinecraftVersion.fromString(it.gameVersion) }
+    )
 }
