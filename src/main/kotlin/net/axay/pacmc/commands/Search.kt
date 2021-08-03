@@ -34,7 +34,7 @@ object Search : CliktCommand(
         }
         CurseProxy.search(
             searchTerm,
-            if (supressUnavailable) versionRequest.await() else null,
+            if (suppressUnavailable) versionRequest.await() else null,
             if (!allResults) limit else null
         )
             .apply {
@@ -42,7 +42,7 @@ object Search : CliktCommand(
                     terminal.warning("Could not find anything for the given term '$searchTerm'")
             }
             .forEach {
-                terminal.printProject(it, versionRequest.await(), !supressUnavailable)
+                terminal.printProject(it, versionRequest.await(), !suppressUnavailable)
             }
     }
 }
