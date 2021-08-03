@@ -1,5 +1,7 @@
 package net.axay.pacmc.requests.common
 
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import net.axay.pacmc.requests.common.data.CommonModInfo
 import net.axay.pacmc.requests.common.data.CommonModResult
 import net.axay.pacmc.requests.common.data.CommonModVersion
@@ -7,14 +9,20 @@ import net.axay.pacmc.requests.curse.CurseProxy
 import net.axay.pacmc.requests.modrinth.ModrinthApi
 
 object RepositoryApi {
-    suspend fun search(query: String, limit: Int?): List<CommonModResult> {
+    suspend fun search(query: String, limit: Int?): List<CommonModResult> = coroutineScope {
         val results = ArrayList<CommonModResult>()
 
         // TODO: allow filtering for game version
+        val modrinthResults = async {
+            ModrinthApi.search(query, limit ?: 50).hits
+        }
+        val curseforgeResults = async {
+            CurseProxy.search(query, null, limit)
+        }
 
-        ModrinthApi.search(query, limit ?: 50).hits.forEach { results += it.convertToCommon() }
+        modrinthResults.await().forEach { results += it.convertToCommon() }
 
-        CurseProxy.search(query, null, limit)
+        curseforgeResults.await()
             .map { it.convertToCommon() }
             .forEach { curseforgeResult ->
                 val alreadyPresent = results.any { presentResult ->
@@ -25,7 +33,7 @@ object RepositoryApi {
                     results += curseforgeResult
             }
 
-        return results
+        results
     }
 
     suspend fun getModVersions(id: String): List<CommonModVersion>? {
