@@ -103,7 +103,7 @@ object Install : CliktCommand(
 
                     terminal.println()
 
-                    options[choice]?.id.toString()
+                    options[choice]!!.id
                 }
                 // just take the one matching mod
                 searchResults.size == 1 -> searchResults.first().id

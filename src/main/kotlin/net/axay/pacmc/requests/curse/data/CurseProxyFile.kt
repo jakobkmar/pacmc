@@ -14,6 +14,7 @@ data class CurseProxyFile(
     val displayName: String,
     val fileName: String,
     val fileDate: String,
+    val releaseType: Int,
     val fileStatus: Int,
     val downloadUrl: String,
     val dependencies: List<Dependency>,
@@ -37,11 +38,11 @@ data class CurseProxyFile(
         fileName.removeSuffix(".jar").lowercase().trim { it in versionChars || it.isLetter() },
         null,
         Instant.parse(fileDate),
-        when (fileStatus) {
+        when (releaseType) {
             1 -> ReleaseType.RELEASE
             2 -> ReleaseType.BETA
             3 -> ReleaseType.ALPHA
-            else -> error("Received an invalid or unknown release type (number $fileStatus) from Curseforge")
+            else -> error("Received an invalid or unknown release type (number $releaseType) from Curseforge")
         },
         gameVersion.mapNotNull { MinecraftVersion.fromString(it) },
         gameVersion.filter { it in possibleLoaders }.map { it.lowercase() },
