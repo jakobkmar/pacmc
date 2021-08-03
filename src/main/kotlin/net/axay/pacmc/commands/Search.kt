@@ -29,10 +29,11 @@ object Search : CliktCommand(
         terminal.println()
 
         val versionRequest = async {
-            when {
-                gameVersion != null -> gameVersion
+            val versionString = when {
+                gameVersion != null -> gameVersion!!
                 else -> CurseProxy.getMinecraftVersions().first().versionString
             }
+            MinecraftVersion.fromString(versionString)
         }
 
         RepositoryApi.search(searchTerm, if (allResults) null else limit)
@@ -43,7 +44,7 @@ object Search : CliktCommand(
             .forEach { modResult ->
                 terminal.printProject(
                     modResult,
-                    versionRequest.await()?.let { MinecraftVersion.fromString(it) },
+                    versionRequest.await(),
                     !suppressUnavailable
                 )
             }
