@@ -44,8 +44,8 @@ data class CurseProxyFile(
             else -> error("Received an invalid or unknown release type (number $fileStatus) from Curseforge")
         },
         gameVersion.mapNotNull { MinecraftVersion.fromString(it) },
-        gameVersion.filter { it in possibleLoaders },
+        gameVersion.filter { it in possibleLoaders }.map { it.lowercase() },
         listOf(CommonModVersion.File(downloadUrl, fileName)),
-        dependencies.map { CommonModVersion.Dependency(it.addonId.toString(), false) }
+        dependencies.filter { it.type == 3 }.map { CommonModVersion.Dependency(it.addonId.toString(), false) }
     )
 }
