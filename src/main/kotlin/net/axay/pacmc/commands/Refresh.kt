@@ -8,9 +8,10 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import net.axay.pacmc.commands.Install.findBestFile
+import net.axay.pacmc.requests.common.RepositoryApi
+import net.axay.pacmc.requests.common.data.CommonModInfo
+import net.axay.pacmc.requests.common.data.CommonModVersion
 import net.axay.pacmc.requests.curse.CurseProxy
-import net.axay.pacmc.requests.curse.data.CurseProxyFile
-import net.axay.pacmc.requests.curse.data.CurseProxyProjectInfo
 import net.axay.pacmc.storage.data.DbArchive
 import net.axay.pacmc.storage.data.DbMod
 import net.axay.pacmc.storage.db
@@ -34,14 +35,14 @@ object Refresh : CliktCommand(
     suspend fun refreshArchive(archive: DbArchive, changedVersion: Boolean = false) = coroutineScope {
         val mods = db.getArchiveMods(archive.name).filter { it.persistent }
 
-        val freshFiles = Collections.synchronizedList(ArrayList<Triple<DbMod, CurseProxyFile, Deferred<CurseProxyProjectInfo>>>())
+        val freshFiles = Collections.synchronizedList(ArrayList<Triple<DbMod, CommonModVersion, Deferred<CommonModInfo>>>())
         val freshDependencies = Collections.synchronizedList(ArrayList<Install.ResolvedDependency>())
 
         terminal.println("Retrieving updated file data...")
         val warnLock = Mutex()
         mods.map { mod ->
             launch {
-                val freshFile = CurseProxy.getModFiles(mod.modId.toInt())?.findBestFile(archive.minecraftVersion)?.first
+                val freshFile = RepositoryApi.getModVersions(mod.modId)?.findBestFile(archive.minecraftVersion)?.first
                 if (freshFile == null) {
                     warnLock.withLock {
                         terminal.println()
@@ -50,7 +51,7 @@ object Refresh : CliktCommand(
                             terminal.danger(" (you can switch back to the previous version to install this mod again)")
                         } else {
                             terminal.danger("Could not find the file for ${white("${mod.repository}/${mod.name}")}!")
-                            terminal.danger(" Is it no available for this version? Did the author delete the mod?")
+                            terminal.danger(" Is it not available for this version? Did the author delete the mod?")
                         }
                     }
                     return@launch
@@ -80,7 +81,7 @@ object Refresh : CliktCommand(
             terminal.println()
 
             freshFiles.forEach {
-                Install.downloadFile(it.first.modId, it.second, it.first.repository, it.third, true, archive)
+                Install.downloadFile(it.first.modId, it.second, it.third, true, archive)
             }
         }
 
@@ -90,7 +91,7 @@ object Refresh : CliktCommand(
             terminal.println()
 
             freshDependencies.forEach {
-                Install.downloadFile(it.addonId, it.file, "curseforge", it.info, false, archive)
+                Install.downloadFile(it.addonId, it.file, it.info, false, archive)
             }
         }
 

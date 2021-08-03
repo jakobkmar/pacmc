@@ -12,8 +12,8 @@ import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import net.axay.pacmc.commands.Install.findBestFile
-import net.axay.pacmc.requests.curse.CurseProxy
-import net.axay.pacmc.requests.curse.data.CurseProxyFile
+import net.axay.pacmc.requests.common.RepositoryApi
+import net.axay.pacmc.requests.common.data.CommonModVersion
 import net.axay.pacmc.storage.data.DbMod
 import net.axay.pacmc.storage.db
 import net.axay.pacmc.storage.execAsyncBatch
@@ -48,12 +48,12 @@ object Update : CliktCommand(
         val dependencies = allMods.filter { !it.persistent }
         val dependencyIds = dependencies.map { it.modId }
 
-        val updateMods = Collections.synchronizedList(ArrayList<Pair<DbMod, CurseProxyFile>>())
+        val updateMods = Collections.synchronizedList(ArrayList<Pair<DbMod, CommonModVersion>>())
         val freshDependencies = Collections.synchronizedList(ArrayList<Install.ResolvedDependency>())
 
         mods.map { mod ->
             launch {
-                val modFile = CurseProxy.getModFiles(mod.modId.toInt())?.findBestFile(archive.minecraftVersion)?.first
+                val modFile = RepositoryApi.getModVersions(mod.modId)?.findBestFile(archive.minecraftVersion)?.first
                 if (modFile == null) {
                     terminal.danger("Could not check the following mod: ${mod.name} (has it been deleted by its owner?)")
                     unsureCounter.incrementAndGet()
@@ -79,7 +79,7 @@ object Update : CliktCommand(
 
         // now remove all dependencies which don't have any update
         freshDependencies.removeIf { dep ->
-            archiveFiles.any { it.second.modId == dep.addonId && it.second.versionId == dep.file.id.toString() }
+            archiveFiles.any { it.second.modId == dep.addonId && it.second.versionId == dep.file.id }
         }
 
         terminal.println()
@@ -91,7 +91,7 @@ object Update : CliktCommand(
                 // delete files which will be updated or aren't needed anymore
                 if (
                     it.second.modId in removableDependencies ||
-                    // may be removed later as old files get removed by the downloadFile function anyways
+                    // may be removed later, as old files get removed by the downloadFile function anyways
                     freshDependencies.any { dep -> dep.addonId == it.second.modId } ||
                     updateMods.any { newMod -> newMod.first.modId == it.second.modId }
                 ) it.first.delete()
@@ -115,7 +115,7 @@ object Update : CliktCommand(
                 terminal.println()
 
                 updateMods.forEach {
-                    Install.downloadFile(it.first.modId, it.second, "curseforge", null, true, archive)
+                    Install.downloadFile(it.first.modId, it.second, null, true, archive)
                     updateCounter.incrementAndGet()
                 }
             }
@@ -126,7 +126,7 @@ object Update : CliktCommand(
                 terminal.println()
 
                 freshDependencies.forEach {
-                    Install.downloadFile(it.addonId, it.file, "curseforge", it.info, false, archive)
+                    Install.downloadFile(it.addonId, it.file, it.info, false, archive)
                     updateCounter.incrementAndGet()
                 }
             }
