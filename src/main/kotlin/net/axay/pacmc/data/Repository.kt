@@ -18,7 +18,7 @@ enum class Repository(val stringName: String) {
         override val descriptor = PrimitiveSerialDescriptor("Repository", PrimitiveKind.STRING)
 
         override fun deserialize(decoder: Decoder): Repository {
-            return valueOf(decoder.decodeString())
+            return valueOf(decoder.decodeString().uppercase())
         }
 
         override fun serialize(encoder: Encoder, value: Repository) {
