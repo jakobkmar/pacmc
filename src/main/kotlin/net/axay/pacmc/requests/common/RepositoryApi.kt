@@ -1,6 +1,6 @@
 package net.axay.pacmc.requests.common
 
-import net.axay.pacmc.data.Repository
+import net.axay.pacmc.requests.common.data.CommonModInfo
 import net.axay.pacmc.requests.common.data.CommonModResult
 import net.axay.pacmc.requests.common.data.CommonModVersion
 import net.axay.pacmc.requests.curse.CurseProxy
@@ -28,10 +28,21 @@ object RepositoryApi {
         return results
     }
 
-    suspend fun getModFiles(repository: Repository, id: String): List<CommonModVersion>? {
-        return when (repository) {
-            Repository.MODRINTH -> ModrinthApi.getModVersions(id)
-            Repository.CURSEFORGE -> CurseProxy.getModFiles(id.toInt())
+    suspend fun getModVersions(id: String): List<CommonModVersion>? {
+        return when {
+            id.any { it.isLetter() } -> ModrinthApi.getModVersions(id)
+            else -> CurseProxy.getModFiles(id.toInt())
         }?.map { it.convertToCommon() }
+    }
+
+    // TODO: warning for curseforge
+    suspend fun getModVersion(id: String) =
+        ModrinthApi.getModVersion(id)?.convertToCommon()
+
+    suspend fun getModInfo(id: String): CommonModInfo? {
+        return when {
+            id.any { it.isLetter() } -> ModrinthApi.getModInfo(id)
+            else -> CurseProxy.getModInfo(id.toInt())
+        }
     }
 }

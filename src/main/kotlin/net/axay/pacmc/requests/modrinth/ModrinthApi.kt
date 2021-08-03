@@ -1,6 +1,5 @@
 package net.axay.pacmc.requests.modrinth
 
-import io.ktor.client.features.*
 import io.ktor.client.request.*
 import net.axay.pacmc.ktorClient
 import net.axay.pacmc.requests.modrinth.data.ModrinthModInfo
@@ -17,12 +16,14 @@ object ModrinthApi {
                 parameter("limit", limit)
         }
 
-    suspend fun getModVersions(id: String) =
-        try {
-            ktorClient.get<List<ModrinthModVersion>>("${apiUrl}mod/$id/version")
-        } catch (exc: ClientRequestException) {
-            null
-        }
+    suspend fun getModVersions(id: String) = kotlin.runCatching {
+        ktorClient.get<List<ModrinthModVersion>>("${apiUrl}mod/$id/version")
+    }.getOrNull()
+
+    suspend fun getModVersion(id: String) = kotlin.runCatching {
+        ktorClient.get<ModrinthModVersion>("${apiUrl}version/$id")
+    }.getOrNull()
+
     suspend fun getModInfo(id: String) = kotlin.runCatching {
         ktorClient.get<ModrinthModInfo>("${apiUrl}mod/$id")
     }.getOrNull()
