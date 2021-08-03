@@ -9,9 +9,11 @@ import net.axay.pacmc.requests.modrinth.data.ModrinthSearchResponse
 object ModrinthApi {
     private const val apiUrl = "https://api.modrinth.com/api/v1/"
 
-    suspend fun search(query: String) =
+    suspend fun search(query: String, limit: Int?) =
         ktorClient.get<ModrinthSearchResponse>("${apiUrl}mod") {
             parameter("query", query)
+            if (limit != null)
+                parameter("limit", limit)
         }
 
     suspend fun getModVersions(id: String) =

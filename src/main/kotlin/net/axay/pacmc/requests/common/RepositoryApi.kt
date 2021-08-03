@@ -7,12 +7,14 @@ import net.axay.pacmc.requests.curse.CurseProxy
 import net.axay.pacmc.requests.modrinth.ModrinthApi
 
 object RepositoryApi {
-    suspend fun search(query: String): ArrayList<CommonModResult> {
+    suspend fun search(query: String, limit: Int?): List<CommonModResult> {
         val results = ArrayList<CommonModResult>()
 
-        ModrinthApi.search(query).hits.forEach { results += it.convertToCommon() }
+        // TODO: allow filtering for game version
 
-        CurseProxy.search(query, null, null)
+        ModrinthApi.search(query, limit ?: 50).hits.forEach { results += it.convertToCommon() }
+
+        CurseProxy.search(query, null, limit)
             .map { it.convertToCommon() }
             .forEach { curseforgeResult ->
                 val alreadyPresent = results.any { presentResult ->
