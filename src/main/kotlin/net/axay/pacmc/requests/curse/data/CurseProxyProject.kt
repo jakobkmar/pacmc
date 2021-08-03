@@ -48,6 +48,7 @@ data class CurseProxyProject(
     override fun convertToCommon() = CommonModResult(
         Repository.CURSEFORGE,
         id.toString(),
+        null,
         name,
         summary,
         authors.first().name,

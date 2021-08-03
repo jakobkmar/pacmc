@@ -10,6 +10,7 @@ import net.axay.pacmc.requests.common.data.CommonModResult
 @Serializable
 data class ModrinthModResult(
     @SerialName("mod_id") val modId: String,
+    val slug: String,
     val author: String,
     val title: String,
     val description: String,
@@ -18,6 +19,7 @@ data class ModrinthModResult(
     override fun convertToCommon() = CommonModResult(
         Repository.MODRINTH,
         modId.removePrefix("local-"),
+        slug,
         title,
         description,
         author,
