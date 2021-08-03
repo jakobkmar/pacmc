@@ -44,6 +44,6 @@ data class ModrinthModVersion(
         gameVersions.mapNotNull { MinecraftVersion.fromString(it) },
         loaders,
         files.map { CommonModVersion.File(it.url, it.filename) },
-        dependencies.map { CommonModVersion.Dependency(it, true) }
+        dependencies.map { CommonModVersion.Dependency(modId, it) }
     )
 }

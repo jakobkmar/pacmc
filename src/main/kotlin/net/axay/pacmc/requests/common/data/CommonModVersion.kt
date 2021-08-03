@@ -20,5 +20,5 @@ data class CommonModVersion(
 ) {
     data class File(val url: String, val filename: String)
 
-    data class Dependency(val id: String, val isVersionId: Boolean)
+    data class Dependency(val modId: String, val versionId: String?)
 }
