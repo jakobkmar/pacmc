@@ -16,7 +16,7 @@ data class ModrinthModResult(
 ) : CommonConvertible<CommonModResult> {
     override fun convertToCommon() = CommonModResult(
         "modrinth",
-        modId,
+        modId.removePrefix("local-"),
         title,
         description,
         author,
