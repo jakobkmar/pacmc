@@ -5,6 +5,7 @@ import com.github.ajalt.mordant.rendering.TextStyles.*
 import com.github.ajalt.mordant.terminal.Terminal
 import net.axay.pacmc.data.MinecraftVersion
 import net.axay.pacmc.data.ReleaseType
+import net.axay.pacmc.data.Repository
 import net.axay.pacmc.requests.common.data.CommonModResult
 import net.axay.pacmc.requests.curse.data.CurseProxyProject
 import net.axay.pacmc.storage.data.DbArchive
@@ -24,7 +25,10 @@ fun Terminal.printProject(
             red(italic("no version info"))
         else ""
 
-    val repo = yellow("${project.repository}/")
+    val repo = if (project.repository == Repository.MODRINTH)
+        brightGreen("${project.repository}/")
+    else
+        yellow("${project.repository}/")
     val projectName = white(bold(underline(project.name)))
     val id = brightBlue("[${project.id}]")
     val author = "by ${project.author}"
