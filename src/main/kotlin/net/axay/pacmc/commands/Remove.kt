@@ -58,6 +58,6 @@ object Remove : CliktCommand(
         terminal.println("Deleting mod from archive list...")
         db.delete(modKey)
 
-        terminal.success("Successfully deleted mod ${mod.name}")
+        terminal.success("Successfully deleted the mod '${mod.name}'")
     }
 }
