@@ -9,6 +9,7 @@ import net.axay.pacmc.data.Repository
 import net.axay.pacmc.requests.common.CommonConvertible
 import net.axay.pacmc.requests.common.data.CommonModVersion
 
+@Serializable
 data class ModrinthModVersion(
     val id: String,
     @SerialName("mod_id") val modId: String,
