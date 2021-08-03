@@ -1,7 +1,9 @@
 package net.axay.pacmc.requests.modrinth
 
+import io.ktor.client.features.*
 import io.ktor.client.request.*
 import net.axay.pacmc.ktorClient
+import net.axay.pacmc.requests.modrinth.data.ModrinthModVersion
 import net.axay.pacmc.requests.modrinth.data.ModrinthSearchResponse
 
 object ModrinthApi {
@@ -10,5 +12,12 @@ object ModrinthApi {
     suspend fun search(query: String) =
         ktorClient.get<ModrinthSearchResponse>("${apiUrl}mod") {
             parameter("query", query)
+        }
+
+    suspend fun getModVersions(id: String) =
+        try {
+            ktorClient.get<List<ModrinthModVersion>>("${apiUrl}mod/$id/version")
+        } catch (exc: ClientRequestException) {
+            null
         }
 }

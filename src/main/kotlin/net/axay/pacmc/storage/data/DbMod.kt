@@ -1,11 +1,12 @@
 package net.axay.pacmc.storage.data
 
 import kotlinx.serialization.Serializable
+import net.axay.pacmc.data.Repository
 import org.kodein.db.model.orm.Metadata
 
 @Serializable
 data class DbMod(
-    val repository: String,
+    val repository: Repository,
     val modId: String,
     val version: String,
     val name: String,
