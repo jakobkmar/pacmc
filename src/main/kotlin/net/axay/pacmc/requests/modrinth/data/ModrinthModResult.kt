@@ -3,6 +3,7 @@ package net.axay.pacmc.requests.modrinth.data
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import net.axay.pacmc.data.MinecraftVersion
+import net.axay.pacmc.data.Repository
 import net.axay.pacmc.requests.common.CommonConvertible
 import net.axay.pacmc.requests.common.data.CommonModResult
 
@@ -15,7 +16,7 @@ data class ModrinthModResult(
     val versions: List<String>,
 ) : CommonConvertible<CommonModResult> {
     override fun convertToCommon() = CommonModResult(
-        "modrinth",
+        Repository.MODRINTH,
         modId.removePrefix("local-"),
         title,
         description,

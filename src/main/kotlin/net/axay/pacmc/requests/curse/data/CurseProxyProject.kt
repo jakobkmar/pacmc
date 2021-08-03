@@ -3,6 +3,7 @@ package net.axay.pacmc.requests.curse.data
 import kotlinx.serialization.Serializable
 import net.axay.pacmc.data.MinecraftVersion
 import net.axay.pacmc.data.ReleaseType
+import net.axay.pacmc.data.Repository
 import net.axay.pacmc.requests.common.CommonConvertible
 import net.axay.pacmc.requests.common.data.CommonModResult
 
@@ -45,7 +46,7 @@ data class CurseProxyProject(
     }
 
     override fun convertToCommon() = CommonModResult(
-        "curseforge",
+        Repository.CURSEFORGE,
         id.toString(),
         name,
         summary,
