@@ -11,7 +11,6 @@ import net.axay.pacmc.commands.Install.findBestFile
 import net.axay.pacmc.requests.common.RepositoryApi
 import net.axay.pacmc.requests.common.data.CommonModInfo
 import net.axay.pacmc.requests.common.data.CommonModVersion
-import net.axay.pacmc.requests.curse.CurseProxy
 import net.axay.pacmc.storage.data.DbArchive
 import net.axay.pacmc.storage.data.DbMod
 import net.axay.pacmc.storage.db
@@ -56,7 +55,7 @@ object Refresh : CliktCommand(
                     }
                     return@launch
                 }
-                freshFiles += Triple(mod, freshFile, async { CurseProxy.getModInfo(mod.modId.toInt()) })
+                freshFiles += Triple(mod, freshFile, async { RepositoryApi.getModInfo(mod.modId)!! })
                 Install.findDependencies(freshFile, archive.minecraftVersion).forEach { dep ->
                     if (!freshDependencies.any { it.addonId == dep.addonId })
                         freshDependencies += dep
