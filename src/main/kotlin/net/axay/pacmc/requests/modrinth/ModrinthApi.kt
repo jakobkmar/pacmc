@@ -3,6 +3,7 @@ package net.axay.pacmc.requests.modrinth
 import io.ktor.client.features.*
 import io.ktor.client.request.*
 import net.axay.pacmc.ktorClient
+import net.axay.pacmc.requests.modrinth.data.ModrinthModInfo
 import net.axay.pacmc.requests.modrinth.data.ModrinthModVersion
 import net.axay.pacmc.requests.modrinth.data.ModrinthSearchResponse
 
@@ -22,4 +23,7 @@ object ModrinthApi {
         } catch (exc: ClientRequestException) {
             null
         }
+    suspend fun getModInfo(id: String) = kotlin.runCatching {
+        ktorClient.get<ModrinthModInfo>("${apiUrl}mod/$id")
+    }.getOrNull()
 }
