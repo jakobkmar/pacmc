@@ -33,6 +33,11 @@ object Load : CliktCommand(
         val targetArchive = db.getArchiveOrWarn(targetArchiveName) ?: return@runBlocking
         val sourceArchive = db.getArchiveOrWarn(sourceArchiveName) ?: return@runBlocking
 
+        if (targetArchive.name == sourceArchive.name) {
+            terminal.danger("You cannot load an archive into itself!")
+            return@runBlocking
+        }
+
         terminal.println("This will override all the mods in the following archive:")
         terminal.printArchive(targetArchive)
         terminal.print("Are you sure?")
