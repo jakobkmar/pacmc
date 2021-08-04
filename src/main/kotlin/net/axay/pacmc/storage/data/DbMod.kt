@@ -10,7 +10,8 @@ data class DbMod(
     val modId: String,
     val version: String,
     val name: String,
-    val description: String?,
+    val slug: String? = null,
+    val description: String? = null,
     val persistent: Boolean,
     val archive: String,
 ) : Metadata {

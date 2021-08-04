@@ -233,7 +233,13 @@ object Install : CliktCommand(
                 val resolvedModInfo = runBlocking { modInfo?.await() }
                     ?: error("Resolved mod info is not provided upon first mod download")
 
-                put(DbMod(modVersion.repository, modId, versionId, resolvedModInfo.name, resolvedModInfo.description, persistent, archive.name))
+                put(DbMod(
+                    modVersion.repository, modId,
+                    versionId,
+                    resolvedModInfo.name, resolvedModInfo.slug, resolvedModInfo.description,
+                    persistent,
+                    archive.name
+                ))
             }
         }
 

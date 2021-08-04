@@ -6,6 +6,7 @@ import net.axay.pacmc.requests.common.data.CommonModInfo
 
 @Serializable
 data class ModrinthModInfo(
-    @SerialName("slug") override val name: String,
+    @SerialName("title") override val name: String,
+    override val slug: String,
     override val description: String,
 ) : CommonModInfo()
