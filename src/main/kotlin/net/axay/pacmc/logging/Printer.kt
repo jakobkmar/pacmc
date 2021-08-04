@@ -15,7 +15,7 @@ fun Terminal.printProject(
     showAll: Boolean = true,
 ) {
     val version =
-        if (minecraftVersion != null && !project.gameVersions.contains(minecraftVersion))
+        if (minecraftVersion != null && !project.gameVersions.any { it.matchesMajor(minecraftVersion) })
             if (showAll) red("not available for ${minecraftVersion.versionString}") else return
         else if (project.gameVersions.isEmpty())
             red(italic("no version info"))
