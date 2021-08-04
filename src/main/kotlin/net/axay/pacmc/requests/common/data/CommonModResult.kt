@@ -6,7 +6,7 @@ import net.axay.pacmc.data.Repository
 data class CommonModResult(
     val repository: Repository,
     val id: String,
-    val slug: String?,
+    val slug: String,
     val name: String,
     val description: String,
     val author: String,

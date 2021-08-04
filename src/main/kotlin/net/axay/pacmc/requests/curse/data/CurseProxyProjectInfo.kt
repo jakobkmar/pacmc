@@ -7,7 +7,6 @@ import net.axay.pacmc.requests.common.data.CommonModInfo
 @Serializable
 class CurseProxyProjectInfo(
     override val name: String,
-    @SerialName("summary") override val description: String? = null
-) : CommonModInfo() {
-    override val slug: String? = null
-}
+    @SerialName("summary") override val description: String? = null,
+    override val slug: String,
+) : CommonModInfo()

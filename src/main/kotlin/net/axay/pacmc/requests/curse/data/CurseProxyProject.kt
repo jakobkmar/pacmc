@@ -13,6 +13,7 @@ data class CurseProxyProject(
     val name: String,
     val authors: List<Author>,
     val summary: String,
+    val slug: String,
     val gameVersionLatestFiles: List<GameVersionLatestFile>,
     val gamePopularityRank: Long,
     val dateReleased: String,
@@ -48,7 +49,7 @@ data class CurseProxyProject(
     override fun convertToCommon() = CommonModResult(
         Repository.CURSEFORGE,
         id.toString(),
-        null,
+        slug,
         name,
         summary,
         authors.first().name,
