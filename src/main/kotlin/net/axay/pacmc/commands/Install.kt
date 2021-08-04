@@ -69,13 +69,18 @@ object Install : CliktCommand(
             files = RepositoryApi.getModVersions(modId)
         }
 
+        // start search already, because the user likely entered a mod name or slug and not an id
+        val searchResultsDeferred = async {
+            RepositoryApi.search(mod, 9)
+        }
+
         updateFiles()
 
         fun notFoundMessage() = terminal.danger("Could not find anything for the given mod '$mod'")
 
         // search for the given mod if it was not a valid ID
         if (files == null || files!!.isEmpty()) {
-            val searchResults = RepositoryApi.search(mod, 9)
+            val searchResults = searchResultsDeferred.await()
             modId = when {
                 // ask the user which mod he wants to install
                 searchResults.size > 1 -> {
@@ -114,6 +119,8 @@ object Install : CliktCommand(
             }
 
             updateFiles()
+        } else {
+            searchResultsDeferred.cancel()
         }
 
         if (files == null) {
