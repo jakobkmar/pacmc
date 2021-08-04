@@ -9,7 +9,7 @@ import net.axay.pacmc.Values.dbFile
 import net.axay.pacmc.terminal
 import net.axay.pacmc.utils.OperatingSystem
 
-object Info : CliktCommand(
+object Debug : CliktCommand(
     "Prints debug information"
 ) {
     override fun run() {
