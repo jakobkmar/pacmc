@@ -95,7 +95,7 @@ tasks {
     val systemVersion = File("/proc/version").let { if (it.exists()) it.readText().toLowerCase() else "" }
 
     if (systemVersion.contains("arch") || systemVersion.contains("manjaro")) {
-        create<Exec>("updateAurPackage") {
+        register<Exec>("updateAurPackage") {
             group = "packages"
 
             dependsOn(packagesResources)
@@ -106,7 +106,7 @@ tasks {
             commandLine("makepkg", "--printsrcinfo")
         }
 
-        create<Exec>("commitAurPackage") {
+        register<Exec>("commitAurPackage") {
             group = "packages"
 
             workingDir("packages/aur/pacmc/")
