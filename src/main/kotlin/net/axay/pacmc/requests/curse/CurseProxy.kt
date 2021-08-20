@@ -20,13 +20,15 @@ object CurseProxy {
             parameter("gameId", 432) // game: minecraft
             parameter("sectionId", 6) // section: mods
             parameter("searchFilter", searchTerm)
-            parameter("categoryId", 4780) // category: fabric
             if (gameVersion != null) parameter("gameVersion", gameVersion)
         }
+        .filter { it.modLoaders.map { modLoaderName -> modLoaderName.lowercase() }.contains("fabric") }
         .sortedWith { mod1, mod2 ->
             val mod1Similarity = mod1.name.similarity(searchTerm)
             val mod2Similarity = mod2.name.similarity(searchTerm)
             when {
+                mod1.slug == searchTerm -> 3
+                mod2.slug == searchTerm -> -3
                 mod1Similarity == 1.0 -> 2
                 mod2Similarity == 1.0 -> -2
                 mod1.gamePopularityRank < 120 && mod1.gamePopularityRank < mod2.gamePopularityRank -> 1
