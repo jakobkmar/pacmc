@@ -47,12 +47,12 @@ fun DB.migrateDatabase() = apply {
         if ((currentDbVersion?.compareTo(dbVersion) ?: 0) < 0)
             terminal.danger("The current version of the database was greater than the new version, skipping migrations...")
         else {
-            terminal.print("Migrating data in the database... ")
+            terminal.println("Migrating data in the database... ")
             val currentStep = (currentDbVersion ?: 0) to dbVersion
             for ((step, logic) in migrations) {
                 if (step.matches(currentStep)) logic(this@migrateDatabase)
             }
-            terminal.println(TextColors.green("done"))
+            terminal.println("Migrating data in the database... " + TextColors.green("done"))
         }
 
         terminal.println()
