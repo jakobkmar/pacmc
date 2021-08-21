@@ -27,12 +27,13 @@ data class ModrinthModVersion(
     data class File(
         val url: String,
         val filename: String,
+        val primary: Boolean,
     )
 
     override fun convertToCommon() = CommonModVersion(
         Repository.MODRINTH,
         id,
-        name,
+        if (name != versionNumber) name else files.firstOrNull { it.primary }?.filename?.removeSuffix(".jar") ?: "modrinth/$modId $name",
         versionNumber,
         changelog,
         Instant.parse(datePublished),
