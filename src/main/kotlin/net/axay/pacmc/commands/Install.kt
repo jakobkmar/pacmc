@@ -273,6 +273,8 @@ object Install : CliktCommand(
                                 append(' ')
                             }
                             append("] ${percentage}%")
+                            if (modVersion.files.size > 1)
+                                append(" ${brightCyan(modFile.filename)}")
                         }
                         terminal.print("\r  $string")
                     }.join()
