@@ -236,7 +236,7 @@ object Install : CliktCommand(
                 put(DbMod(
                     modVersion.repository, modId,
                     versionId,
-                    resolvedModInfo.name, resolvedModInfo.slug, resolvedModInfo.description,
+                    resolvedModInfo.name, resolvedModInfo.slug, resolvedModInfo.author, resolvedModInfo.description,
                     persistent,
                     archive.name
                 ))

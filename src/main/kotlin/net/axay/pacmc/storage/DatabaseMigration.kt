@@ -28,7 +28,8 @@ private class DbModelMigrationStep(val from: Int?, val to: Int?) {
 
 private const val dbVersion = 1
 
-private inline fun <reified T : Any> DB.insertAgain(crossinline mutator: suspend CoroutineScope.(T) -> T = { it }) {
+// noinline because of https://youtrack.jetbrains.com/issue/KT-48353
+private inline fun <reified T : Any> DB.insertAgain(noinline mutator: suspend CoroutineScope.(T) -> T = { it }) {
     runBlocking(Dispatchers.Default) {
         find<T>().all().useModels { it.toList() }
             .map { async { mutator(it) } }
