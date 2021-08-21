@@ -63,33 +63,37 @@ fun DB.migrateDatabase() = apply {
 private val migrations: Map<DbModelMigrationStep, DB.() -> Unit> by lazy {
     mapOf(
         DbModelMigrationStep(0, 1) to {
-            insertAgain<DbMod>()
+            insertAgain<DbMod> { dbMod ->
+                dbMod.copy(
+                    slug = dbMod.slug ?: migrateMissingModInfoValue(dbMod, "slug") { it.slug },
+                    author = dbMod.author ?: migrateMissingModInfoValue(dbMod, "author") { it.author }
+                )
+            }
         },
     )
 }
 
-object DatabaseMigration {
-    @PublishedApi
-    internal val cache = HashMap<String, HashMap<Triple<Repository, String, String>, Any>>()
+private suspend inline fun <T : Any> migrateMissingModInfoValue(
+    dbMod: DbMod,
+    valueName: String,
+    crossinline valueGetter: (CommonModInfo) -> T,
+) = migrateMissingModInfoValue(dbMod.repository, dbMod.modId, dbMod.name, dbMod.archive, valueName, valueGetter)
 
-    @Suppress("UNCHECKED_CAST")
-    inline fun <T : Any> migrateMissingModInfoValue(
-        repository: Repository,
-        modId: String,
-        name: String,
-        valueName: String,
-        crossinline valueGetter: (CommonModInfo) -> T,
-    ): T = cache.getOrPut(valueName) { HashMap() }.getOrPut(Triple(repository, modId, name)) {
-        runBlocking(Dispatchers.Default) {
-            val newValue = RepositoryApi.getModInfo(modId, repository)?.let(valueGetter)
-            if (newValue != null)
-                terminal.println("Resolved the $valueName '$newValue' for '${repository}/${name}'")
-            else {
-                terminal.danger("FATAL: Could not resolve the $valueName for '${repository}/${name}'")
-                terminal.danger("Clear the pacmc dataLocalDir (${Values.dataLocalDir.canonicalPath}) on your disk and recreate your mod archives")
-            }
+private suspend inline fun <T : Any> migrateMissingModInfoValue(
+    repository: Repository,
+    modId: String,
+    name: String,
+    archiveName: String,
+    valueName: String,
+    crossinline valueGetter: (CommonModInfo) -> T,
+): T {
+    val newValue = RepositoryApi.getModInfo(modId, repository)?.let(valueGetter)
+    if (newValue != null)
+        terminal.println("Resolved the $valueName '$newValue' for '${repository}/${name}' in archive '$archiveName'")
+    else {
+        terminal.danger("FATAL: Could not resolve the $valueName for '${repository}/${name}'")
+        terminal.danger("Clear the pacmc dataLocalDir (${Values.dataLocalDir.canonicalPath}) on your disk and recreate your mod archives")
+    }
 
-            newValue ?: error("Couldn't resolve the $valueName for a mod in the database")
-        }
-    } as T
+    return newValue ?: error("Couldn't resolve the $valueName for a mod in the database")
 }

@@ -2,7 +2,6 @@ package net.axay.pacmc.storage.data
 
 import kotlinx.serialization.Serializable
 import net.axay.pacmc.data.Repository
-import net.axay.pacmc.storage.DatabaseMigration
 import org.kodein.db.model.orm.Metadata
 
 @Serializable
@@ -11,8 +10,8 @@ data class DbMod(
     val modId: String,
     val version: String,
     val name: String,
-    val slug: String = DatabaseMigration.migrateMissingModInfoValue(repository, modId, name, "slug") { it.slug },
-    val author: String = DatabaseMigration.migrateMissingModInfoValue(repository, modId, name, "author") { it.author },
+    val slug: String? = null, // never null since model v1 TODO use the @EncodeDefault annotation when it is available
+    val author: String? = null, // never null since model v1 TODO use the @EncodeDefault annotation when it is available
     val description: String? = null,
     val persistent: Boolean,
     val archive: String,
