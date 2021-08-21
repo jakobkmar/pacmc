@@ -1,12 +1,17 @@
 package net.axay.pacmc.requests.curse.data
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import net.axay.pacmc.requests.common.CommonConvertible
 import net.axay.pacmc.requests.common.data.CommonModInfo
 
 @Serializable
-class CurseProxyProjectInfo(
-    override val name: String,
-    @SerialName("summary") override val description: String? = null,
-    override val slug: String,
-) : CommonModInfo()
+data class CurseProxyProjectInfo(
+    val name: String,
+    val authors: List<CurseProxyProject.Author>,
+    val summary: String? = null,
+    val slug: String,
+) : CommonConvertible<CommonModInfo> {
+    override fun convertToCommon() = CommonModInfo(
+        name, slug, authors.first().name, summary
+    )
+}

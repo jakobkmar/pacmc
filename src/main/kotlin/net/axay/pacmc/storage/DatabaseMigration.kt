@@ -9,6 +9,7 @@ import kotlinx.serialization.Serializable
 import net.axay.pacmc.Values
 import net.axay.pacmc.data.Repository
 import net.axay.pacmc.requests.common.RepositoryApi
+import net.axay.pacmc.requests.common.data.CommonModInfo
 import net.axay.pacmc.storage.data.DbMod
 import net.axay.pacmc.terminal
 import org.kodein.db.DB
@@ -67,15 +68,21 @@ private val migrations: Map<DbModelMigrationStep, DB.() -> Unit> by lazy {
 }
 
 object DatabaseMigration {
-    fun migrateMissingSlug(repository: Repository, modId: String, name: String): String = runBlocking {
-        val newSlug = RepositoryApi.getModInfo(modId, repository)?.slug
-        if (newSlug != null)
-            terminal.println("Resolved the slug '$newSlug' for '${repository}/${name}'")
+    inline fun <T> migrateMissingModInfoValue(
+        repository: Repository,
+        modId: String,
+        name: String,
+        valueName: String,
+        crossinline valueGetter: (CommonModInfo) -> T,
+    ): T = runBlocking(Dispatchers.Default) {
+        val newValue = RepositoryApi.getModInfo(modId, repository)?.let(valueGetter)
+        if (newValue != null)
+            terminal.println("Resolved the $valueName '$newValue' for '${repository}/${name}'")
         else {
-            terminal.danger("FATAL: Could not resolve the slug for '${repository}/${name}'")
+            terminal.danger("FATAL: Could not resolve the $valueName for '${repository}/${name}'")
             terminal.danger("Clear the pacmc dataLocalDir (${Values.dataLocalDir.canonicalPath}) on your disk and recreate your mod archives")
         }
 
-        newSlug ?: error("Couldn't resolve a slug for a mod in the database")
+        newValue ?: error("Couldn't resolve the $valueName for a mod in the database")
     }
 }

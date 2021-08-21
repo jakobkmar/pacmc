@@ -45,5 +45,7 @@ object CurseProxy {
         null
     }
 
-    suspend fun getModInfo(id: Int) = ktorClient.get<CurseProxyProjectInfo>("${proxyApi}addon/$id")
+    suspend fun getModInfo(id: Int) = kotlin.runCatching {
+        ktorClient.get<CurseProxyProjectInfo>("${proxyApi}addon/$id")
+    }.getOrNull()
 }

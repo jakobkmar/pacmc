@@ -56,8 +56,8 @@ object RepositoryApi {
             id.any { it.isLetter() } -> Repository.MODRINTH
             else -> Repository.CURSEFORGE
         }) {
-            Repository.MODRINTH -> ModrinthApi.getModInfo(id)
-            Repository.CURSEFORGE -> CurseProxy.getModInfo(id.toInt())
+            Repository.MODRINTH -> ModrinthApi.getModInfo(id)?.convertToCommon()
+            Repository.CURSEFORGE -> CurseProxy.getModInfo(id.toInt())?.convertToCommon()
         }
     }
 }

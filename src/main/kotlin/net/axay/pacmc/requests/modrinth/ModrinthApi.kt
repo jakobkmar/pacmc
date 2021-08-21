@@ -2,9 +2,7 @@ package net.axay.pacmc.requests.modrinth
 
 import io.ktor.client.request.*
 import net.axay.pacmc.ktorClient
-import net.axay.pacmc.requests.modrinth.data.ModrinthModInfo
-import net.axay.pacmc.requests.modrinth.data.ModrinthModVersion
-import net.axay.pacmc.requests.modrinth.data.ModrinthSearchResponse
+import net.axay.pacmc.requests.modrinth.data.*
 
 object ModrinthApi {
     private const val apiUrl = "https://api.modrinth.com/api/v1/"
@@ -26,5 +24,13 @@ object ModrinthApi {
 
     suspend fun getModInfo(id: String) = kotlin.runCatching {
         ktorClient.get<ModrinthModInfo>("${apiUrl}mod/$id")
+    }.getOrNull()
+
+    suspend fun getTeamMembers(id: String) = kotlin.runCatching {
+        ktorClient.get<List<ModrinthTeamMember>>("${apiUrl}team/$id/members")
+    }.getOrNull()
+
+    suspend fun getUser(id: String) = kotlin.runCatching {
+        ktorClient.get<ModrinthUser>("${apiUrl}user/$id")
     }.getOrNull()
 }
