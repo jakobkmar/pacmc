@@ -45,7 +45,7 @@ fun DB.migrateDatabase() = apply {
         terminal.warning("Changed model version of the database to '$dbVersion'")
         terminal.println("This happens after an update of pacmc")
 
-        if ((currentDbVersion?.compareTo(dbVersion) ?: 0) < 0)
+        if ((currentDbVersion?.compareTo(dbVersion) ?: 0) > 0)
             terminal.danger("The current version of the database was greater than the new version, skipping migrations...")
         else {
             terminal.println("Migrating data in the database... ")
