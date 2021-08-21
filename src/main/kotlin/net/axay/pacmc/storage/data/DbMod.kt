@@ -2,6 +2,7 @@ package net.axay.pacmc.storage.data
 
 import kotlinx.serialization.Serializable
 import net.axay.pacmc.data.Repository
+import net.axay.pacmc.storage.DatabaseMigration
 import org.kodein.db.model.orm.Metadata
 
 @Serializable
@@ -10,7 +11,7 @@ data class DbMod(
     val modId: String,
     val version: String,
     val name: String,
-    val slug: String? = null,
+    val slug: String = DatabaseMigration.migrateMissingSlug(repository, modId, name),
     val description: String? = null,
     val persistent: Boolean,
     val archive: String,

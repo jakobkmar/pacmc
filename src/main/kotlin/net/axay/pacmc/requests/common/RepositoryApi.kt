@@ -2,6 +2,7 @@ package net.axay.pacmc.requests.common
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import net.axay.pacmc.data.Repository
 import net.axay.pacmc.requests.common.data.CommonModInfo
 import net.axay.pacmc.requests.common.data.CommonModResult
 import net.axay.pacmc.requests.common.data.CommonModVersion
@@ -50,10 +51,13 @@ object RepositoryApi {
     suspend fun getModVersion(id: String) =
         ModrinthApi.getModVersion(id)?.convertToCommon()
 
-    suspend fun getModInfo(id: String): CommonModInfo? {
-        return when {
-            id.any { it.isLetter() } -> ModrinthApi.getModInfo(id)
-            else -> CurseProxy.getModInfo(id.toInt())
+    suspend fun getModInfo(id: String, repository: Repository? = null): CommonModInfo? {
+        return when (repository ?: when {
+            id.any { it.isLetter() } -> Repository.MODRINTH
+            else -> Repository.CURSEFORGE
+        }) {
+            Repository.MODRINTH -> ModrinthApi.getModInfo(id)
+            Repository.CURSEFORGE -> CurseProxy.getModInfo(id.toInt())
         }
     }
 }
