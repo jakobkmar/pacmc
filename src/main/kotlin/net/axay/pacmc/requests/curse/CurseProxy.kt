@@ -22,7 +22,7 @@ object CurseProxy {
             parameter("searchFilter", searchTerm)
             if (gameVersion != null) parameter("gameVersion", gameVersion)
         }
-        .filter { it.modLoaders.map { modLoaderName -> modLoaderName.lowercase() }.contains("fabric") }
+        .filter { it.modLoaders?.map { modLoaderName -> modLoaderName.lowercase() }?.contains("fabric") != false }
         .sortedWith { mod1, mod2 ->
             val mod1Similarity = mod1.name.similarity(searchTerm)
             val mod2Similarity = mod2.name.similarity(searchTerm)

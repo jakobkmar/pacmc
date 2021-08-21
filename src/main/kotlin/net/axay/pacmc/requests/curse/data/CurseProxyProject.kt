@@ -16,7 +16,7 @@ data class CurseProxyProject(
     val slug: String,
     val gameVersionLatestFiles: List<GameVersionLatestFile>,
     val gamePopularityRank: Long,
-    val modLoaders: List<String>,
+    val modLoaders: List<String>? = null,
     val dateReleased: String,
 ) : CommonConvertible<CommonModResult> {
     @Serializable
