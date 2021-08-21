@@ -1,5 +1,6 @@
 package net.axay.pacmc.data
 
+import com.github.ajalt.mordant.rendering.TextColors
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -13,6 +14,8 @@ enum class Repository(val stringName: String) {
     CURSEFORGE("curseforge");
 
     override fun toString() = stringName
+
+    val coloredName get() = "${if (this == MODRINTH) TextColors.brightGreen(stringName + "/") else TextColors.yellow(stringName + "/")}"
 
     object RepoSerializer : KSerializer<Repository> {
         override val descriptor = PrimitiveSerialDescriptor("Repository", PrimitiveKind.STRING)

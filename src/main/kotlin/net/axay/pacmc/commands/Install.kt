@@ -6,6 +6,7 @@ import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.mordant.rendering.TextColors
 import com.github.ajalt.mordant.rendering.TextColors.*
+import com.github.ajalt.mordant.rendering.TextStyles.underline
 import io.ktor.client.features.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -219,6 +220,25 @@ object Install : CliktCommand(
     ) = coroutineScope {
         val versionId = modVersion.id
 
+        val resolvedModInfo = modInfo?.await()
+        if (resolvedModInfo != null) {
+            val presentSimilarMod = db.find<DbMod>().byIndex(
+                "nameSlugAuthorArchiveIndex",
+                resolvedModInfo.name.lowercase(), resolvedModInfo.slug.lowercase(), resolvedModInfo.author.lowercase(), archive.name
+            ).useModels { it.firstOrNull() }
+                ?: db.find<DbMod>()
+                    .byIndex(
+                        "nameSlugDescriptionArchiveIndex",
+                        resolvedModInfo.name.lowercase(), resolvedModInfo.slug.lowercase(), resolvedModInfo.description.orEmpty().lowercase(), archive.name
+                    ).useModels { it.firstOrNull() }
+
+            if (presentSimilarMod != null && presentSimilarMod.repository != modVersion.repository) {
+                terminal.println("Skipping ${modVersion.repository.coloredName}${underline(white(resolvedModInfo.name))}")
+                terminal.println("  already installed as ${presentSimilarMod.repository.coloredName}${underline(white(presentSimilarMod.name))}")
+                return@coroutineScope
+            }
+        }
+
         // download the mod file to the given archive (and display progress)
         terminal.println("Downloading " + brightCyan(modVersion.name))
 
@@ -230,8 +250,8 @@ object Install : CliktCommand(
                 val newPersistence = if (persistent) true else existingMod.persistent
                 put(existingMod.copy(persistent = newPersistence, version = versionId))
             } else {
-                val resolvedModInfo = runBlocking { modInfo?.await() }
-                    ?: error("Resolved mod info is not provided upon first mod download")
+                if (resolvedModInfo == null)
+                    error("Resolved mod info is not provided upon first mod download")
 
                 put(DbMod(
                     modVersion.repository, modId,
