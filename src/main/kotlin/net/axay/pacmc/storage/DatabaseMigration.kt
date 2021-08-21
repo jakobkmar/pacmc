@@ -69,21 +69,27 @@ private val migrations: Map<DbModelMigrationStep, DB.() -> Unit> by lazy {
 }
 
 object DatabaseMigration {
-    inline fun <T> migrateMissingModInfoValue(
+    @PublishedApi
+    internal val cache = HashMap<String, HashMap<Triple<Repository, String, String>, Any>>()
+
+    @Suppress("UNCHECKED_CAST")
+    inline fun <T : Any> migrateMissingModInfoValue(
         repository: Repository,
         modId: String,
         name: String,
         valueName: String,
         crossinline valueGetter: (CommonModInfo) -> T,
-    ): T = runBlocking(Dispatchers.Default) {
-        val newValue = RepositoryApi.getModInfo(modId, repository)?.let(valueGetter)
-        if (newValue != null)
-            terminal.println("Resolved the $valueName '$newValue' for '${repository}/${name}'")
-        else {
-            terminal.danger("FATAL: Could not resolve the $valueName for '${repository}/${name}'")
-            terminal.danger("Clear the pacmc dataLocalDir (${Values.dataLocalDir.canonicalPath}) on your disk and recreate your mod archives")
-        }
+    ): T = cache.getOrPut(valueName) { HashMap() }.getOrPut(Triple(repository, modId, name)) {
+        runBlocking(Dispatchers.Default) {
+            val newValue = RepositoryApi.getModInfo(modId, repository)?.let(valueGetter)
+            if (newValue != null)
+                terminal.println("Resolved the $valueName '$newValue' for '${repository}/${name}'")
+            else {
+                terminal.danger("FATAL: Could not resolve the $valueName for '${repository}/${name}'")
+                terminal.danger("Clear the pacmc dataLocalDir (${Values.dataLocalDir.canonicalPath}) on your disk and recreate your mod archives")
+            }
 
-        newValue ?: error("Couldn't resolve the $valueName for a mod in the database")
-    }
+            newValue ?: error("Couldn't resolve the $valueName for a mod in the database")
+        }
+    } as T
 }
