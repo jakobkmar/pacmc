@@ -28,7 +28,8 @@ object RepositoryApi {
                 val alreadyPresent = results.any { presentResult ->
                     presentResult.repository != curseforgeResult.repository &&
                             presentResult.slug.contentEquals(curseforgeResult.slug, true) &&
-                            presentResult.author.contentEquals(curseforgeResult.author, true)
+                            (presentResult.author.contentEquals(curseforgeResult.author, true) ||
+                                    presentResult.description.contentEquals(curseforgeResult.description, true))
                 }
                 if (!alreadyPresent)
                     results += curseforgeResult
