@@ -77,20 +77,17 @@ private suspend inline fun <T : Any> migrateMissingModInfoValue(
     dbMod: DbMod,
     valueName: String,
     crossinline valueGetter: (CommonModInfo) -> T,
-) = migrateMissingModInfoValue(dbMod.repository, dbMod.modId, dbMod.name, dbMod.archive, valueName, valueGetter)
+) = migrateMissingModInfoValue(dbMod.repository, dbMod.modId, dbMod.name, valueName, valueGetter)
 
 private suspend inline fun <T : Any> migrateMissingModInfoValue(
     repository: Repository,
     modId: String,
     name: String,
-    archiveName: String,
     valueName: String,
     crossinline valueGetter: (CommonModInfo) -> T,
 ): T {
     val newValue = RepositoryApi.getModInfo(modId, repository)?.let(valueGetter)
-    if (newValue != null)
-        terminal.println("Resolved the $valueName '$newValue' for '${repository}/${name}' in archive '$archiveName'")
-    else {
+    if (newValue == null) {
         terminal.danger("FATAL: Could not resolve the $valueName for '${repository}/${name}'")
         terminal.danger("Clear the pacmc dataLocalDir (${Values.dataLocalDir.canonicalPath}) on your disk and recreate your mod archives")
     }
