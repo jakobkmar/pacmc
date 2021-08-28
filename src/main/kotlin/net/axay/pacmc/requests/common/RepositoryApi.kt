@@ -31,9 +31,10 @@ object RepositoryApi {
 
         // filter the curseforge results
         curseforgeResults.await()
-            .map { it.convertToCommon() }
-            .forEach { curseforgeResult ->
+            .forEach { uncommonResult ->
                 if (results.size >= generalLimit) return@forEach
+
+                val curseforgeResult = uncommonResult.convertToCommon()
 
                 val alreadyPresent = results.any { presentResult ->
                     // only if this is a different repo this can be duplicated mod
