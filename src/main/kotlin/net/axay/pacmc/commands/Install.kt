@@ -36,12 +36,14 @@ import kotlin.collections.any
 import kotlin.collections.emptyList
 import kotlin.collections.filterNot
 import kotlin.collections.first
+import kotlin.collections.firstOrNull
 import kotlin.collections.flatten
 import kotlin.collections.fold
 import kotlin.collections.forEach
 import kotlin.collections.forEachIndexed
 import kotlin.collections.isNotEmpty
 import kotlin.collections.joinToString
+import kotlin.collections.listOf
 import kotlin.collections.map
 import kotlin.collections.mapNotNull
 import kotlin.collections.minOrNull
@@ -281,7 +283,7 @@ object Install : CliktCommand(
         }
 
         // currently, this implementation only downloads the primary file
-        val filesToDownload = listOf(modVersion.files.first { it.primary })
+        val filesToDownload = modVersion.files.firstOrNull { it.primary }?.let { listOf(it) } ?: modVersion.files
 
         filesToDownload.forEachIndexed { modFileIndex, modFile ->
             val filename = PacmcFile(modVersion.repository, modId, versionId, modFileIndex).filename
