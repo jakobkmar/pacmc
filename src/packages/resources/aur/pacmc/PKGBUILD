@@ -1,6 +1,9 @@
 # Maintainer: Jakob Kretzschmar <bluefireolymp@gmail.com>
 
+# shellcheck disable=SC2016
 # shellcheck disable=SC2034
+# shellcheck disable=SC2154
+
 pkgname='pacmc'
 pkgver='${version}'
 pkgrel=1
@@ -14,7 +17,6 @@ source=("https://github.com/bluefireoly/pacmc/releases/download/${pkgver}/pacmc-
 sha256sums=('${sha256Hash}')
 
 build() {
-  # shellcheck disable=SC2154
   cd "${srcdir}" || exit
 
   echo "#!/bin/sh" > pacmc.sh
@@ -22,9 +24,7 @@ build() {
 }
 
 package() {
-  # shellcheck disable=SC2154
   cd "${srcdir}" || exit
-  # shellcheck disable=SC2154
   install -D 'pacmc.sh' "$pkgdir/usr/bin/pacmc"
 
   cd "pacmc-${pkgver}" || exit
