@@ -7,8 +7,8 @@ buildscript {
 }
 
 plugins {
-    kotlin("jvm") version "1.5.21"
-    kotlin("plugin.serialization") version "1.5.21"
+    kotlin("jvm") version "1.5.30"
+    kotlin("plugin.serialization") version "1.5.30"
     application
 }
 
@@ -22,23 +22,21 @@ repositories {
 }
 
 dependencies {
-    implementation(kotlin("stdlib"))
-
     implementation("com.github.ajalt.clikt:clikt:3.2.0")
     implementation("com.github.ajalt.mordant:mordant:2.0.0-beta2")
 
-    implementation("io.ktor:ktor-client-core:1.6.1")
-    implementation("io.ktor:ktor-client-cio:1.6.1")
-    implementation("io.ktor:ktor-client-serialization:1.6.1")
+    implementation("io.ktor:ktor-client-core:1.6.3")
+    implementation("io.ktor:ktor-client-cio:1.6.3")
+    implementation("io.ktor:ktor-client-serialization:1.6.3")
 
     implementation("dev.dirs:directories:26")
     implementation("org.apache.commons:commons-text:1.9")
 
-    implementation("org.slf4j:slf4j-simple:1.7.30")
+    implementation("org.slf4j:slf4j-simple:1.7.32")
 
-    implementation("org.kodein.db:kodein-db-jvm:0.8.1-beta")
-    implementation("org.kodein.db:kodein-db-serializer-kotlinx:0.8.1-beta")
-    implementation("org.kodein.db:kodein-leveldb-jni-jvm:0.8.1-beta")
+    implementation("org.kodein.db:kodein-db-jvm:0.9.0-beta")
+    implementation("org.kodein.db:kodein-db-serializer-kotlinx:0.9.0-beta")
+    implementation("org.kodein.db:kodein-leveldb-jni-jvm:0.9.0-beta")
 }
 
 application {
