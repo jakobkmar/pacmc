@@ -9,11 +9,11 @@ pkgver='${version}'
 pkgrel=1
 pkgdesc='${description}'
 arch=('any')
-url='https://github.com/bluefireoly/pacmc'
+url='https://github.com/jakobkmar/pacmc'
 license=('GPL3')
 depends=('java-runtime=${javaVersion}')
 optdepends=('minecraft-launcher: The game launcher, managing the .minecraft folder')
-source=("https://github.com/bluefireoly/pacmc/releases/download/${pkgver}/pacmc-${pkgver}.tar")
+source=("https://github.com/jakobkmar/pacmc/releases/download/${pkgver}/pacmc-${pkgver}.tar")
 sha256sums=('${sha256Hash}')
 
 build() {
