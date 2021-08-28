@@ -72,7 +72,7 @@ object Install : CliktCommand(
 
         // start search already, because the user likely entered a mod name or slug and not an id
         val searchResultsDeferred = async {
-            RepositoryApi.search(mod, 9)
+            RepositoryApi.search(mod, 7, 4, 9)
         }
 
         updateFiles()
