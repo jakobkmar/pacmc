@@ -18,13 +18,13 @@ import net.axay.pacmc.terminal
 object Search : CliktCommand(
     "Searches for mods"
 ) {
-    private val searchTerm by argument()
+    private val query by argument()
     private val gameVersion by option("-g", "--game-version", help = "Set a specific game version (latest by default)")
     private val suppressUnavailable by option("-s", "--suppress-unavailable", help = "Whether to suppress mods which are not available for the given Minecraft version").flag()
     private val limit by option("-l", "--limit", help = "The amount of results (defaults to 15)").int().default(5)
 
     override fun run() = runBlocking(Dispatchers.Default) {
-        terminal.println("Searching with the given term '$searchTerm'")
+        terminal.println("Searching with the given term '$query'")
 
         val versionRequest = async {
             val versionString = when {
@@ -34,11 +34,11 @@ object Search : CliktCommand(
             MinecraftVersion.fromString(versionString)
         }
 
-        RepositoryApi.search(searchTerm, limit, limit, showWaitingMessage = true)
+        RepositoryApi.search(query, limit, limit, showWaitingMessage = true)
             .apply {
                 terminal.println()
                 if (isEmpty())
-                    terminal.warning("Could not find anything for the given term '$searchTerm'")
+                    terminal.warning("Could not find anything for the given term '$query'")
             }
             .forEach { modResult ->
                 terminal.printProject(
