@@ -25,7 +25,7 @@ data class DbMod(
         "name" to name,
         "archive" to archive,
         "archiveRepoIdIndex" to listOf(repository, modId, archive),
-        "archiveNameIndex" to listOf(name, archive),
+        "archiveNameIndex" to listOf(name.lowercase(), archive),
         "nameSlugAuthorArchiveIndex" to listOf(name.lowercase(), slug!!.lowercase(), author!!.lowercase(), archive),
         "nameSlugDescriptionArchiveIndex" to listOf(name.lowercase(), slug.lowercase(), description.orEmpty().lowercase(), archive)
     )

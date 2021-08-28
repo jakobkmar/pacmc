@@ -26,13 +26,13 @@ object Remove : CliktCommand(
         val (maybeRepository, maybeModId) = inputModName.split('/')
             .let { if (it.size == 2) it else listOf(null, null) }
 
-        val modEntry = if (maybeRepository != null && maybeModId != null)
+        val modEntry = (if (maybeRepository != null && maybeModId != null) {
             db.find<DbMod>()
                 .byIndex("archiveRepoIdIndex", maybeRepository, maybeModId, archiveName)
                 .useEntries { it.firstOrNull() }
-        else null
+        } else null)
             ?: db.find<DbMod>()
-                .byIndex("archiveNameIndex", inputModName, archiveName)
+                .byIndex("archiveNameIndex", (maybeModId ?: inputModName).lowercase(), archiveName)
                 .useEntries {
                     if (it.firstOrNull() != null) {
                         val mod = it.singleOrNull()
