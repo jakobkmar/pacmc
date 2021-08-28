@@ -25,7 +25,6 @@ object Search : CliktCommand(
 
     override fun run() = runBlocking(Dispatchers.Default) {
         terminal.println("Searching with the given term '$searchTerm'")
-        terminal.println()
 
         val versionRequest = async {
             val versionString = when {
@@ -35,8 +34,9 @@ object Search : CliktCommand(
             MinecraftVersion.fromString(versionString)
         }
 
-        RepositoryApi.search(searchTerm, limit, limit)
+        RepositoryApi.search(searchTerm, limit, limit, showWaitingMessage = true)
             .apply {
+                terminal.println()
                 if (isEmpty())
                     terminal.warning("Could not find anything for the given term '$searchTerm'")
             }

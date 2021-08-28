@@ -1,13 +1,13 @@
 package net.axay.pacmc.requests.common
 
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.*
 import net.axay.pacmc.data.Repository
 import net.axay.pacmc.requests.common.data.CommonModInfo
 import net.axay.pacmc.requests.common.data.CommonModResult
 import net.axay.pacmc.requests.common.data.CommonModVersion
 import net.axay.pacmc.requests.curse.CurseProxy
 import net.axay.pacmc.requests.modrinth.ModrinthApi
+import net.axay.pacmc.terminal
 
 object RepositoryApi {
     suspend fun search(
@@ -15,6 +15,7 @@ object RepositoryApi {
         mainRepoLimit: Int,
         otherRepoLimit: Int,
         generalLimit: Int = mainRepoLimit + otherRepoLimit,
+        showWaitingMessage: Boolean = false,
     ): List<CommonModResult> = coroutineScope {
         val results = ArrayList<CommonModResult>()
 
@@ -25,6 +26,21 @@ object RepositoryApi {
         val curseforgeResults = async {
             CurseProxy.search(query, null, otherRepoLimit)
         }
+
+        val waitingMessageJob = launch(start = CoroutineStart.LAZY) {
+            while (isActive) {
+                delay(1000L * 4)
+                if (!isActive) break
+
+                if (!modrinthResults.isCompleted)
+                    terminal.println("Still waiting for Modrinth to answer...")
+                if (!curseforgeResults.isCompleted)
+                    terminal.println("Still waiting for Curseforge to answer...")
+
+                delay(1000L * 30)
+            }
+        }
+        if (showWaitingMessage) waitingMessageJob.start()
 
         // add all modrinth results
         modrinthResults.await().forEach { results += it.convertToCommon() }
@@ -55,6 +71,8 @@ object RepositoryApi {
                 }
                 if (!alreadyPresent) results += curseforgeResult
             }
+
+        waitingMessageJob.cancel()
 
         results
     }
