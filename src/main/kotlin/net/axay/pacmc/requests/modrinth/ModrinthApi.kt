@@ -33,4 +33,8 @@ object ModrinthApi {
     suspend fun getUser(id: String) = kotlin.runCatching {
         ktorClient.get<ModrinthUser>("${apiUrl}user/$id")
     }.getOrNull()
+
+    suspend fun getModDescriptionBody(id: String) = kotlin.runCatching {
+        ktorClient.get<ModrinthModDescriptionBody>("${apiUrl}mod/$id")
+    }.getOrNull()
 }
