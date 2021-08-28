@@ -46,7 +46,7 @@ data class CurseProxyFile(
         },
         gameVersion.mapNotNull { MinecraftVersion.fromString(it) },
         gameVersion.filter { it in possibleLoaders }.map { it.lowercase() },
-        listOf(CommonModVersion.File(downloadUrl, fileName)),
+        listOf(CommonModVersion.File(downloadUrl, fileName, true)),
         dependencies.filter { it.type == 3 }.map { CommonModVersion.Dependency(it.addonId.toString(), null) }
     )
 }

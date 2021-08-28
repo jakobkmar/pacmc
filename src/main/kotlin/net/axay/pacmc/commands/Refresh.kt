@@ -80,7 +80,7 @@ object Refresh : CliktCommand(
             terminal.println()
 
             freshFiles.forEach {
-                Install.downloadFile(it.first.modId, it.second, it.third, true, archive)
+                Install.downloadFile(it.first.modId, it.second, it.third, true, archive, false)
             }
         }
 

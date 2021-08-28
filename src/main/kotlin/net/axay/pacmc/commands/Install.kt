@@ -211,36 +211,46 @@ object Install : CliktCommand(
             }.awaitAll().flatten()
         }
 
+    /**
+     * Downloads the necessary files for this mod and installs it to the given [archive].
+     *
+     * @param modId the id of the mod which should be installed
+     * @param modVersion the specific version which should be installed
+     * @param modInfoDeferred metadata for the mod on the repository
+     * @param persistent if true, this is an explicitly installed mod - if false, this is a dependency
+     * @param archive the archive the mod should be intalled in
+     * @param runChecks if true, it is unclear if this mod should even be installed - if false, just install it
+     */
     suspend fun downloadFile(
         modId: String,
         modVersion: CommonModVersion,
-        modInfo: Deferred<CommonModInfo>?,
+        modInfoDeferred: Deferred<CommonModInfo>,
         persistent: Boolean,
         archive: DbArchive,
+        runChecks: Boolean = true,
     ) = coroutineScope {
         val versionId = modVersion.id
 
-        val resolvedModInfo = modInfo?.await()
-        if (resolvedModInfo != null) {
+        val modInfo = modInfoDeferred.await()
+        if (runChecks) {
             val presentSimilarMod = db.find<DbMod>().byIndex(
                 "nameSlugAuthorArchiveIndex",
-                resolvedModInfo.name.lowercase(), resolvedModInfo.slug.lowercase(), resolvedModInfo.author.lowercase(), archive.name
+                modInfo.name.lowercase(), modInfo.slug.lowercase(), modInfo.author.lowercase(), archive.name
             ).useModels { it.firstOrNull() }
                 ?: db.find<DbMod>()
                     .byIndex(
                         "nameSlugDescriptionArchiveIndex",
-                        resolvedModInfo.name.lowercase(), resolvedModInfo.slug.lowercase(), resolvedModInfo.description.orEmpty().lowercase(), archive.name
+                        modInfo.name.lowercase(), modInfo.slug.lowercase(), modInfo.description.orEmpty().lowercase(), archive.name
                     ).useModels { it.firstOrNull() }
 
             if (presentSimilarMod != null && presentSimilarMod.repository != modVersion.repository) {
-                terminal.println("Skipping ${modVersion.repository.coloredName}${underline(white(resolvedModInfo.name))}")
+                terminal.println("Skipping ${modVersion.repository.coloredName}${underline(white(modInfo.name))}")
                 terminal.println("  already installed as ${presentSimilarMod.repository.coloredName}${underline(white(presentSimilarMod.name))}")
                 return@coroutineScope
             }
         }
 
-        // download the mod file to the given archive (and display progress)
-        terminal.println("Downloading " + brightCyan(modVersion.name))
+        terminal.println("Downloading " + brightCyan("${modVersion.repository}/${modInfo.name} ${modVersion.number}"))
 
         db.execAsyncBatch {
             val existingMod = db.find<DbMod>()
@@ -250,13 +260,10 @@ object Install : CliktCommand(
                 val newPersistence = if (persistent) true else existingMod.persistent
                 put(existingMod.copy(persistent = newPersistence, version = versionId))
             } else {
-                if (resolvedModInfo == null)
-                    error("Resolved mod info is not provided upon first mod download")
-
                 put(DbMod(
                     modVersion.repository, modId,
                     versionId,
-                    resolvedModInfo.name, resolvedModInfo.slug, resolvedModInfo.author, resolvedModInfo.description,
+                    modInfo.name, modInfo.slug, modInfo.author, modInfo.description,
                     persistent,
                     archive.name
                 ))
@@ -273,7 +280,10 @@ object Install : CliktCommand(
                 it.first.delete()
         }
 
-        modVersion.files.forEachIndexed { modFileIndex, modFile ->
+        // currently, this implementation only downloads the primary file
+        val filesToDownload = listOf(modVersion.files.first { it.primary })
+
+        filesToDownload.forEachIndexed { modFileIndex, modFile ->
             val filename = PacmcFile(modVersion.repository, modId, versionId, modFileIndex).filename
             val localFile = File(archive.path, filename)
 
@@ -292,9 +302,7 @@ object Install : CliktCommand(
                             repeat(30 - dashCount) {
                                 append(' ')
                             }
-                            append("] ${percentage}%")
-                            if (modVersion.files.size > 1)
-                                append(" ${brightCyan(modFile.filename)}")
+                            append("] ${percentage}% ${brightCyan(modFile.filename)}")
                         }
                         terminal.print("\r  $string")
                     }.join()

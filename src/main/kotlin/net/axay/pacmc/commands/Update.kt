@@ -7,12 +7,10 @@ import com.github.ajalt.mordant.rendering.TextColors.gray
 import com.github.ajalt.mordant.rendering.TextColors.red
 import com.github.ajalt.mordant.rendering.TextStyles.bold
 import com.github.ajalt.mordant.rendering.TextStyles.underline
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.joinAll
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import net.axay.pacmc.commands.Install.findBestFile
 import net.axay.pacmc.requests.common.RepositoryApi
+import net.axay.pacmc.requests.common.data.CommonModInfo
 import net.axay.pacmc.requests.common.data.CommonModVersion
 import net.axay.pacmc.storage.data.DbMod
 import net.axay.pacmc.storage.db
@@ -115,7 +113,7 @@ object Update : CliktCommand(
                 terminal.println()
 
                 updateMods.forEach {
-                    Install.downloadFile(it.first.modId, it.second, null, true, archive)
+                    Install.downloadFile(it.first.modId, it.second, CompletableDeferred(it.first.createModInfo()), true, archive, false)
                     updateCounter.incrementAndGet()
                 }
             }

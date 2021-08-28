@@ -18,7 +18,7 @@ data class CommonModVersion(
     val files: List<File>,
     val dependencies: List<Dependency>
 ) {
-    data class File(val url: String, val filename: String)
+    data class File(val url: String, val filename: String, val primary: Boolean)
 
     data class Dependency(val modId: String, val versionId: String?)
 }
