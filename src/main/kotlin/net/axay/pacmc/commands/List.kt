@@ -12,6 +12,7 @@ import net.axay.pacmc.storage.db
 import net.axay.pacmc.storage.getArchiveMods
 import net.axay.pacmc.storage.getArchiveOrWarn
 import net.axay.pacmc.terminal
+import net.axay.pacmc.utils.OperatingSystem
 
 object List : CliktCommand(
     "Lists the installed mods"
@@ -29,7 +30,10 @@ object List : CliktCommand(
 
             val type = if (!persistent) " ${cyan("(dependency)")}" else ""
 
-            terminal.println(" → $name $id$type")
+            // yikes, what are the Windows terminals even doing
+            val arrowSymbol = if (OperatingSystem.current == OperatingSystem.WINDOWS) "->" else "→"
+
+            terminal.println(" $arrowSymbol $name $id$type")
             terminal.println("    ${gray(mod.description ?: "no description available")}")
         }
 
