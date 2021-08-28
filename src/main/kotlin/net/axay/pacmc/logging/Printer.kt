@@ -30,9 +30,12 @@ fun Terminal.printProject(
     val author = "by ${project.author}"
 
     this.println("$repo$projectName $id $author $version")
-    this.println("  ${gray(project.description)}")
+    this.println("  ${gray(project.description ?: "no description available")}")
 }
 
 fun Terminal.printArchive(archive: DbArchive) {
-    terminal.println("${red(archive.name)} at ${gray(archive.path)}")
+    println("${red(archive.name)} at ${gray(archive.path)}")
 }
+
+fun formatMod(repository: Repository, name: String) =
+    "${repository.coloredName}${white(bold(underline(name)))}"

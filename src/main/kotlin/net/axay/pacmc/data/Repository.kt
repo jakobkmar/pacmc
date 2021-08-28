@@ -15,7 +15,7 @@ enum class Repository(val stringName: String) {
 
     override fun toString() = stringName
 
-    val coloredName get() = "${if (this == MODRINTH) TextColors.brightGreen(stringName + "/") else TextColors.yellow(stringName + "/")}"
+    val coloredName get() = if (this == MODRINTH) TextColors.brightGreen("$stringName/") else TextColors.yellow("$stringName/")
 
     object RepoSerializer : KSerializer<Repository> {
         override val descriptor = PrimitiveSerialDescriptor("Repository", PrimitiveKind.STRING)

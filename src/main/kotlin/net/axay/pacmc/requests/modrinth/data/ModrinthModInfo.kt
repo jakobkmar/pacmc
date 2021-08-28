@@ -11,7 +11,7 @@ import net.axay.pacmc.requests.modrinth.ModrinthApi
 @Serializable
 data class ModrinthModInfo(
     val id: String,
-    val slug: String,
+    val slug: String? = null,
     @SerialName("team") val teamId: String,
     val title: String,
     val description: String,
@@ -26,6 +26,6 @@ data class ModrinthModInfo(
     }
 
     suspend fun convertToCommon() = CommonModInfo(
-        title, slug, author.await(), description
+        title, slug ?: id, author.await(), description
     )
 }

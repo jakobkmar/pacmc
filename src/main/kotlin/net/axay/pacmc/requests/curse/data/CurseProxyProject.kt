@@ -12,7 +12,7 @@ data class CurseProxyProject(
     val id: Int,
     val name: String,
     val authors: List<Author>,
-    val summary: String,
+    val summary: String? = null,
     val slug: String,
     val gameVersionLatestFiles: List<GameVersionLatestFile>,
     val gamePopularityRank: Long,

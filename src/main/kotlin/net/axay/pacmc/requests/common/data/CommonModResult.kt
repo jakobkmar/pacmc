@@ -8,7 +8,7 @@ data class CommonModResult(
     val id: String,
     val slug: String,
     val name: String,
-    val description: String,
+    val description: String?,
     val author: String,
     val gameVersions: List<MinecraftVersion>,
 )

@@ -6,7 +6,6 @@ import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.mordant.rendering.TextColors
 import com.github.ajalt.mordant.rendering.TextColors.*
-import com.github.ajalt.mordant.rendering.TextStyles.underline
 import io.ktor.client.features.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -15,6 +14,7 @@ import io.ktor.utils.io.*
 import kotlinx.coroutines.*
 import net.axay.pacmc.data.MinecraftVersion
 import net.axay.pacmc.ktorClient
+import net.axay.pacmc.logging.formatMod
 import net.axay.pacmc.logging.printProject
 import net.axay.pacmc.requests.common.RepositoryApi
 import net.axay.pacmc.requests.common.data.CommonModInfo
@@ -246,13 +246,13 @@ object Install : CliktCommand(
                     ).useModels { it.firstOrNull() }
 
             if (presentSimilarMod != null && presentSimilarMod.repository != modVersion.repository) {
-                terminal.println("Skipping ${modVersion.repository.coloredName}${underline(white(modInfo.name))}")
-                terminal.println("  already installed as ${presentSimilarMod.repository.coloredName}${underline(white(presentSimilarMod.name))}")
+                terminal.println("Skipping ${formatMod(modVersion.repository, modInfo.name)}")
+                terminal.println("  already installed as ${formatMod(presentSimilarMod.repository, presentSimilarMod.name)}")
                 return@coroutineScope
             }
         }
 
-        terminal.println("Downloading " + brightCyan("${modVersion.repository}/${modInfo.name} ${modVersion.number}"))
+        terminal.println("Downloading " + formatMod(modVersion.repository, modInfo.name) + magenta(" ${modVersion.number}"))
 
         db.execAsyncBatch {
             val existingMod = db.find<DbMod>()
@@ -304,7 +304,8 @@ object Install : CliktCommand(
                             repeat(30 - dashCount) {
                                 append(' ')
                             }
-                            append("] ${percentage}% ${brightCyan(modFile.filename)}")
+                            append("] ${percentage}%")
+                            if (filesToDownload.size > 1) append(" " + brightCyan(modFile.filename))
                         }
                         terminal.print("\r  $string")
                     }.join()
