@@ -54,7 +54,8 @@ Commands:
   init     Sets the pacmc defaults
   refresh  Refreshes the local mod files according to the database
   load     Loads one archive into another
-  info     Prints debug information
+  info     Displays the formatted project description
+  debug    Prints debug information
 ```
 
 ### Archives
