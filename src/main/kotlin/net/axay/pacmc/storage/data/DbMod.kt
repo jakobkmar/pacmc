@@ -2,6 +2,7 @@ package net.axay.pacmc.storage.data
 
 import kotlinx.serialization.Serializable
 import net.axay.pacmc.data.Repository
+import net.axay.pacmc.logging.formatMod
 import net.axay.pacmc.requests.common.data.CommonModInfo
 import org.kodein.db.model.orm.Metadata
 
@@ -18,6 +19,8 @@ data class DbMod(
     val archive: String,
 ) : Metadata {
     override val id get() = listOf(repository, modId, archive)
+
+    val formattedName get() = formatMod(repository, name)
 
     fun createModInfo() = CommonModInfo(name, slug!!, author!!, description)
 

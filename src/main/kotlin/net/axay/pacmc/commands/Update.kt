@@ -6,11 +6,9 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.mordant.rendering.TextColors.gray
 import com.github.ajalt.mordant.rendering.TextColors.red
 import com.github.ajalt.mordant.rendering.TextStyles.bold
-import com.github.ajalt.mordant.rendering.TextStyles.underline
 import kotlinx.coroutines.*
 import net.axay.pacmc.commands.Install.findBestFile
 import net.axay.pacmc.requests.common.RepositoryApi
-import net.axay.pacmc.requests.common.data.CommonModInfo
 import net.axay.pacmc.requests.common.data.CommonModVersion
 import net.axay.pacmc.storage.data.DbMod
 import net.axay.pacmc.storage.db
@@ -53,17 +51,17 @@ object Update : CliktCommand(
             launch {
                 val modFile = RepositoryApi.getModVersions(mod.modId)?.findBestFile(archive.minecraftVersion)?.first
                 if (modFile == null) {
-                    terminal.danger("Could not check the following mod: ${mod.name} (has it been deleted by its owner?)")
+                    terminal.danger("The following mod could not be checked: ${mod.formattedName}")
                     unsureCounter.incrementAndGet()
                 } else {
                     freshDependencies += Install.findDependencies(modFile, archive.minecraftVersion)
                         .filterNot { dep -> freshDependencies.any { it.addonId == dep.addonId } }
 
-                    if (modFile.id.toString() != mod.version) {
-                        terminal.println("The mod ${bold("${mod.repository}/${underline(mod.name)}")} is ${red("outdated")}")
+                    if (modFile.id != mod.version) {
+                        terminal.println("The mod ${bold(mod.formattedName)} is ${red("outdated")}")
                         updateMods += mod to modFile
                     } else {
-                        terminal.println("The mod ${bold("${mod.repository}/${underline(mod.name)}")} is up to date")
+                        terminal.println("The mod ${bold(mod.formattedName)} is up to date")
                         upToDateCounter.incrementAndGet()
                     }
                 }

@@ -7,14 +7,13 @@ import io.ktor.client.engine.cio.*
 import io.ktor.client.features.json.*
 import io.ktor.client.features.json.serializer.*
 import net.axay.pacmc.commands.Pacmc
-import net.axay.pacmc.logging.printIssueLink
+import net.axay.pacmc.logging.Printer
 
 fun main(args: Array<String>) = try {
     Pacmc.main(args)
 } catch (exception: Exception) {
     exception.printStackTrace()
-    terminal.print(TextColors.brightRed("An error occured, "))
-    terminal.printIssueLink("the above stack trace")
+    terminal.println(TextColors.brightRed("An error occured, ") + Printer.issueLink("the above stack trace"))
 }
 
 val terminal = Terminal()

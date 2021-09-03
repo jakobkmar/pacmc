@@ -36,10 +36,12 @@ fun Terminal.printArchive(archive: DbArchive) {
     println("${red(archive.name)} at ${gray(archive.path)}")
 }
 
-fun Terminal.printIssueLink(problemName: String = "the above error message") = println(
-    yellow("Please ${underline("open an issue")} with $problemName at ") +
-            underline("https://github.com/jakobkmar/pacmc/issues/new")
-)
-
 fun formatMod(repository: Repository, name: String) =
     "${repository.coloredName}${white(bold(underline(name)))}"
+
+object Printer {
+    fun issueLink(problemName: String = "the above error message"): String {
+        return yellow("Please ${underline("open an issue")} with $problemName at ") +
+                underline("https://github.com/jakobkmar/pacmc/issues/new")
+    }
+}
