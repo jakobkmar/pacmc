@@ -3,6 +3,7 @@ package net.axay.pacmc.requests.modrinth
 import io.ktor.client.request.*
 import net.axay.pacmc.ktorClient
 import net.axay.pacmc.requests.modrinth.data.*
+import net.axay.pacmc.utils.repositoryRequest
 
 object ModrinthApi {
     private const val apiUrl = "https://api.modrinth.com/api/v1/"
@@ -14,27 +15,21 @@ object ModrinthApi {
                 parameter("limit", limit)
         }
 
-    suspend fun getModVersions(id: String) = kotlin.runCatching {
-        ktorClient.get<List<ModrinthModVersion>>("${apiUrl}mod/$id/version")
-    }.getOrNull()
+    suspend fun getModVersions(id: String) =
+        ktorClient.repositoryRequest<List<ModrinthModVersion>>("${apiUrl}mod/$id/version")
 
-    suspend fun getModVersion(id: String) = kotlin.runCatching {
-        ktorClient.get<ModrinthModVersion>("${apiUrl}version/$id")
-    }.getOrNull()
+    suspend fun getModVersion(id: String) =
+        ktorClient.repositoryRequest<ModrinthModVersion>("${apiUrl}version/$id")
 
-    suspend fun getModInfo(id: String) = kotlin.runCatching {
-        ktorClient.get<ModrinthModInfo>("${apiUrl}mod/$id")
-    }.getOrNull()
+    suspend fun getModInfo(id: String) =
+        ktorClient.repositoryRequest<ModrinthModInfo>("${apiUrl}mod/$id")
 
-    suspend fun getTeamMembers(id: String) = kotlin.runCatching {
-        ktorClient.get<List<ModrinthTeamMember>>("${apiUrl}team/$id/members")
-    }.getOrNull()
+    suspend fun getTeamMembers(id: String) =
+        ktorClient.repositoryRequest<List<ModrinthTeamMember>>("${apiUrl}team/$id/members")
 
-    suspend fun getUser(id: String) = kotlin.runCatching {
-        ktorClient.get<ModrinthUser>("${apiUrl}user/$id")
-    }.getOrNull()
+    suspend fun getUser(id: String) =
+        ktorClient.repositoryRequest<ModrinthUser>("${apiUrl}user/$id")
 
-    suspend fun getModDescriptionBody(id: String) = kotlin.runCatching {
-        ktorClient.get<ModrinthModDescriptionBody>("${apiUrl}mod/$id")
-    }.getOrNull()
+    suspend fun getModDescriptionBody(id: String) =
+        ktorClient.repositoryRequest<ModrinthModDescriptionBody>("${apiUrl}mod/$id")
 }

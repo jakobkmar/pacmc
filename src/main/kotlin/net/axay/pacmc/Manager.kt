@@ -24,6 +24,8 @@ val terminal = Terminal()
 
 val ktorClient by lazy {
     HttpClient(CIO) {
+        expectSuccess = false
+
         install(JsonFeature) {
             serializer = KotlinxSerializer(Values.json)
         }
