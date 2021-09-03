@@ -7,7 +7,6 @@ import net.axay.pacmc.data.MinecraftVersion
 import net.axay.pacmc.data.Repository
 import net.axay.pacmc.requests.common.data.CommonModResult
 import net.axay.pacmc.storage.data.DbArchive
-import net.axay.pacmc.terminal
 
 fun Terminal.printProject(
     project: CommonModResult,
@@ -36,6 +35,11 @@ fun Terminal.printProject(
 fun Terminal.printArchive(archive: DbArchive) {
     println("${red(archive.name)} at ${gray(archive.path)}")
 }
+
+fun Terminal.printIssueLink(problemName: String = "the above error message") = println(
+    yellow("Please ${underline("open an issue")} with $problemName at ") +
+            underline("https://github.com/jakobkmar/pacmc/issues/new")
+)
 
 fun formatMod(repository: Repository, name: String) =
     "${repository.coloredName}${white(bold(underline(name)))}"

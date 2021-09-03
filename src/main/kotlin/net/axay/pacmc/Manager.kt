@@ -1,23 +1,20 @@
 package net.axay.pacmc
 
 import com.github.ajalt.mordant.rendering.TextColors
-import com.github.ajalt.mordant.rendering.TextStyles
 import com.github.ajalt.mordant.terminal.Terminal
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.features.json.*
 import io.ktor.client.features.json.serializer.*
 import net.axay.pacmc.commands.Pacmc
+import net.axay.pacmc.logging.printIssueLink
 
 fun main(args: Array<String>) = try {
     Pacmc.main(args)
 } catch (exception: Exception) {
     exception.printStackTrace()
-    terminal.println(
-        TextColors.brightRed("An error occured,") +
-                TextColors.yellow(" please open an issue with the above stack trace at ") +
-                TextStyles.underline("https://github.com/jakobkmar/pacmc/issues/new")
-    )
+    terminal.print(TextColors.brightRed("An error occured, "))
+    terminal.printIssueLink("the above stack trace")
 }
 
 val terminal = Terminal()
