@@ -1,6 +1,9 @@
 package net.axay.pacmc
 
 import dev.dirs.ProjectDirectories
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.serialization.json.Json
 import net.axay.pacmc.utils.OperatingSystem
 import java.io.File
@@ -12,6 +15,10 @@ object Values {
             isLenient = true
             encodeDefaults = false
         }
+    }
+
+    val generalScope by lazy {
+        CoroutineScope(SupervisorJob() + Dispatchers.Default)
     }
 
     val dataLocalDir by lazy {

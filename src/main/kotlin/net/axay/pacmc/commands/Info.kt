@@ -18,7 +18,7 @@ object Info : CliktCommand(
     private val query by argument()
 
     override fun run(): Unit = runBlocking(Dispatchers.Default) {
-        val result = ModrinthApi.search(query, 1).hits.firstOrNull()?.convertToCommon()
+        val result = ModrinthApi.search(query, 1)?.hits?.firstOrNull()?.convertToCommon()
 
         if (result != null) {
             val body = ModrinthApi.getModDescriptionBody(result.id)?.body

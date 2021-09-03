@@ -13,7 +13,7 @@ object CurseProxy {
     private const val proxyApi = "https://addons-ecs.forgesvc.net/api/v2/"
 
     suspend fun getMinecraftVersions() =
-        ktorClient.repositoryRequest<List<CurseProxyMinecraftVersion>>("${proxyApi}minecraft/version")
+        ktorClient.get<List<CurseProxyMinecraftVersion>>("${proxyApi}minecraft/version")
 
     suspend fun search(searchTerm: String, gameVersion: String?, limit: Int?) =
         ktorClient.repositoryRequest<List<CurseProxyProject>>("${proxyApi}addon/search") {
