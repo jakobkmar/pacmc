@@ -9,7 +9,7 @@ object ModrinthApi {
     private const val apiUrl = "https://api.modrinth.com/api/v1/"
 
     suspend fun search(query: String, limit: Int?) =
-        ktorClient.get<ModrinthSearchResponse>("${apiUrl}mod") {
+        ktorClient.repositoryRequest<ModrinthSearchResponse>("${apiUrl}mod") {
             parameter("query", query)
             if (limit != null)
                 parameter("limit", limit)

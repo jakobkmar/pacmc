@@ -9,8 +9,11 @@ import io.ktor.http.*
 import kotlinx.serialization.SerializationException
 import net.axay.pacmc.terminal
 
-suspend inline fun <reified T> HttpClient.repositoryRequest(urlString: String): T? {
-    val response: HttpResponse = get(urlString)
+suspend inline fun <reified T> HttpClient.repositoryRequest(
+    urlString: String,
+    block: HttpRequestBuilder.() -> Unit = {},
+): T? {
+    val response: HttpResponse = get(urlString, block)
     val status = response.status
 
     if (status.isSuccess())

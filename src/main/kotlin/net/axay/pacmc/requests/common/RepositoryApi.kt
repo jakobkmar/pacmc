@@ -21,7 +21,7 @@ object RepositoryApi {
 
         // TODO: allow filtering for game version
         val modrinthResults = async {
-            ModrinthApi.search(query, mainRepoLimit).hits
+            ModrinthApi.search(query, mainRepoLimit)?.hits
         }
         val curseforgeResults = async {
             CurseProxy.search(query, null, otherRepoLimit)
@@ -43,11 +43,11 @@ object RepositoryApi {
         if (showWaitingMessage) waitingMessageJob.start()
 
         // add all modrinth results
-        modrinthResults.await().forEach { results += it.convertToCommon() }
+        modrinthResults.await()?.forEach { results += it.convertToCommon() }
 
         // filter the curseforge results
         curseforgeResults.await()
-            .forEach { uncommonResult ->
+            ?.forEach { uncommonResult ->
                 if (results.size >= generalLimit) return@forEach
 
                 val curseforgeResult = uncommonResult.convertToCommon()
