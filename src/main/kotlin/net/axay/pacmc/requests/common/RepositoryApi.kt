@@ -1,6 +1,8 @@
 package net.axay.pacmc.requests.common
 
 import kotlinx.coroutines.*
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.minus
 import net.axay.pacmc.data.Repository
 import net.axay.pacmc.requests.common.data.CommonModInfo
 import net.axay.pacmc.requests.common.data.CommonModResult
@@ -52,7 +54,7 @@ object RepositoryApi {
 
                 val curseforgeResult = uncommonResult.convertToCommon()
 
-                val alreadyPresent = results.any { presentResult ->
+                val alreadyPresent = ArrayList(results).any { presentResult ->
                     // only if this is a different repo this can be duplicated mod
                     if (presentResult.repository != curseforgeResult.repository) {
                         // consider mods with the same name or slug to be a possible duplicate
@@ -64,7 +66,14 @@ object RepositoryApi {
                             val sameAuthorOrDescription = presentResult.author.contentEquals(curseforgeResult.author, true) ||
                                     presentResult.description.contentEquals(curseforgeResult.description, true)
 
-                            if (sameAuthorOrDescription) return@any true // found a duplicate
+                            if (sameAuthorOrDescription) {
+                                // check if the present result is approx. equally new
+                                if (presentResult.dateModified >= curseforgeResult.dateModified.minus(5, DateTimeUnit.MINUTE)) {
+                                    return@any true // found a duplicate
+                                } else {
+                                    results -= presentResult
+                                }
+                            }
                         }
                     }
                     false // no duplicate
