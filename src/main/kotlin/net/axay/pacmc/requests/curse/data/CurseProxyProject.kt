@@ -1,5 +1,6 @@
 package net.axay.pacmc.requests.curse.data
 
+import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import net.axay.pacmc.data.MinecraftVersion
 import net.axay.pacmc.data.ReleaseType
@@ -17,7 +18,7 @@ data class CurseProxyProject(
     val gameVersionLatestFiles: List<GameVersionLatestFile>,
     val gamePopularityRank: Long,
     val modLoaders: List<String>? = null,
-    val dateReleased: String,
+    val dateReleased: Instant,
 ) : CommonConvertible<CommonModResult> {
     @Serializable
     data class Author(
@@ -54,6 +55,7 @@ data class CurseProxyProject(
         name,
         summary,
         authors.first().name,
-        gameVersionLatestFiles.mapNotNull { MinecraftVersion.fromString(it.gameVersion) }
+        gameVersionLatestFiles.mapNotNull { MinecraftVersion.fromString(it.gameVersion) },
+        dateReleased
     )
 }

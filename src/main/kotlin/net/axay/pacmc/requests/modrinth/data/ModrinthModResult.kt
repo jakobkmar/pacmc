@@ -1,5 +1,6 @@
 package net.axay.pacmc.requests.modrinth.data
 
+import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import net.axay.pacmc.data.MinecraftVersion
@@ -15,6 +16,7 @@ data class ModrinthModResult(
     val title: String,
     val description: String,
     val versions: List<String>,
+    @SerialName("date_modified") val dateModified: Instant,
 ) : CommonConvertible<CommonModResult> {
     override fun convertToCommon() = CommonModResult(
         Repository.MODRINTH,
@@ -23,6 +25,7 @@ data class ModrinthModResult(
         title,
         description,
         author,
-        versions.mapNotNull { MinecraftVersion.fromString(it) }
+        versions.mapNotNull { MinecraftVersion.fromString(it) },
+        dateModified
     )
 }
