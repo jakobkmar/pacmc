@@ -7,8 +7,8 @@ buildscript {
 }
 
 plugins {
-    kotlin("jvm") version "1.5.31"
-    kotlin("plugin.serialization") version "1.5.31"
+    kotlin("jvm")
+    kotlin("plugin.serialization")
     application
 }
 
@@ -45,7 +45,7 @@ application {
 
 sourceSets {
     create("packages") {
-        output.setResourcesDir(rootDir.resolve("packages/"))
+        output.resourcesDir = rootDir.resolve("packages/")
     }
 }
 
