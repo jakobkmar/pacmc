@@ -4,3 +4,6 @@ build/
 
 # IDE
 .idea/
+
+# project specific build files
+pacmc-repo-api/modrinth-openapi.yaml
