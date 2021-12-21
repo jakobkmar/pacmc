@@ -23,11 +23,11 @@ repositories {
 
 dependencies {
     implementation("com.github.ajalt.clikt:clikt:3.3.0")
-    implementation("com.github.ajalt.mordant:mordant:2.0.0-beta2")
+    implementation("com.github.ajalt.mordant:mordant:2.0.0-beta4")
 
-    implementation("io.ktor:ktor-client-core:1.6.4")
-    implementation("io.ktor:ktor-client-cio:1.6.4")
-    implementation("io.ktor:ktor-client-serialization:1.6.4")
+    implementation("io.ktor:ktor-client-core:1.6.7")
+    implementation("io.ktor:ktor-client-cio:1.6.7")
+    implementation("io.ktor:ktor-client-serialization:1.6.7")
 
     implementation("dev.dirs:directories:26")
     implementation("org.apache.commons:commons-text:1.9")
