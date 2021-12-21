@@ -20,11 +20,7 @@
 
 package net.axay.pacmc.repoapi.modrinth.model
 
-import net.axay.pacmc.repoapi.modrinth.model.ProjectResult
-
 import kotlinx.serialization.*
-import kotlinx.serialization.descriptors.*
-import kotlinx.serialization.encoding.*
 
 /**
  * 
@@ -35,7 +31,7 @@ import kotlinx.serialization.encoding.*
  * @param totalHits The total number of results that match the query
  */
 @Serializable
-data class InlineResponse200 (
+data class SearchResults (
 
     /* The list of results */
     @SerialName(value = "hits") val hits: kotlin.collections.List<ProjectResult>? = null,
