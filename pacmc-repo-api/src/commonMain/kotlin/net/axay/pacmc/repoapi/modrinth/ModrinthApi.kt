@@ -3,10 +3,7 @@ package net.axay.pacmc.repoapi.modrinth
 import io.ktor.client.*
 import io.ktor.client.request.*
 import net.axay.pacmc.repoapi.RepositoryApi
-import net.axay.pacmc.repoapi.modrinth.model.Project
-import net.axay.pacmc.repoapi.modrinth.model.SearchResults
-import net.axay.pacmc.repoapi.modrinth.model.User
-import net.axay.pacmc.repoapi.modrinth.model.Version
+import net.axay.pacmc.repoapi.modrinth.model.*
 
 class ModrinthApi(
     override val client: HttpClient,
@@ -42,4 +39,10 @@ class ModrinthApi(
 
     suspend fun getUserProjects(idOrUsername: String) =
         repoRequest<List<Project>>("/user/${idOrUsername}/projects")
+
+    suspend fun getTeamMembers(id: String) =
+        repoRequest<List<TeamMember>>("/team/${id}/members")
+
+    suspend fun getProjectTeamMembers(idOrSlug: String) =
+        repoRequest<List<TeamMember>>("/project/${idOrSlug}/members")
 }
