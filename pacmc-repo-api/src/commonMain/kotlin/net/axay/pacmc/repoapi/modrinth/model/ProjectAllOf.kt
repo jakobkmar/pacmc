@@ -1,7 +1,7 @@
 /**
  * Labrinth
  *
- * This API is documented in the **OpenAPI format** and is available for download [here](/openapi.yaml).  # Cross-Origin Resource Sharing This API features Cross-Origin Resource Sharing (CORS) implemented in compliance with  [W3C spec](https://www.w3.org/TR/cors/). This allows for cross-domain communication from the browser. All responses have a wildcard same-origin which makes them completely public and accessible to everyone, including any code on any site.  # Authentication This API uses GitHub tokens for authentication. The token is in the `Authorization` header of the request. You can get a token [here](#operation/initAuth).    Example:  ```  Authorization: gho_pJ9dGXVKpfzZp4PUHSxYEq9hjk0h288Gwj4S  ``` 
+ * This API is documented in the **OpenAPI format** and is available for download [here](/openapi.yaml).  # Cross-Origin Resource Sharing This API features Cross-Origin Resource Sharing (CORS) implemented in compliance with  [W3C spec](https://www.w3.org/TR/cors/). This allows for cross-domain communication from the browser. All responses have a wildcard same-origin which makes them completely public and accessible to everyone, including any code on any site.  # Authentication This API uses GitHub tokens for authentication. The token is in the `Authorization` header of the request. You can get a token [here](#operation/initAuth).   Example:  ```  Authorization: gho_pJ9dGXVKpfzZp4PUHSxYEq9hjk0h288Gwj4S  ``` 
  *
  * The version of the OpenAPI document: 13187de (v2)
  * 
@@ -30,31 +30,35 @@ import kotlinx.serialization.encoding.*
  *
  * @param id The ID of the project, encoded as a base62 string
  * @param team The ID of the team that has ownership of this project
- * @param moderatorMessage A message that a moderator sent regarding the project
  * @param published The date the project was published
  * @param updated The date the project was last updated
+ * @param followers The total number of users following the project
  * @param versions A list of the version IDs of the project
+ * @param moderatorMessage A message that a moderator sent regarding the project
  */
 @Serializable
 data class ProjectAllOf (
 
     /* The ID of the project, encoded as a base62 string */
-    @SerialName(value = "id") val id: kotlin.String? = null,
+    @SerialName(value = "id") @Required val id: kotlin.String,
 
     /* The ID of the team that has ownership of this project */
-    @SerialName(value = "team") val team: kotlin.String? = null,
-
-    /* A message that a moderator sent regarding the project */
-    @SerialName(value = "moderator_message") val moderatorMessage: kotlin.String? = null,
+    @SerialName(value = "team") @Required val team: kotlin.String,
 
     /* The date the project was published */
-    @SerialName(value = "published") val published: kotlin.String? = null,
+    @SerialName(value = "published") @Required val published: kotlin.String,
 
     /* The date the project was last updated */
-    @SerialName(value = "updated") val updated: kotlin.String? = null,
+    @SerialName(value = "updated") @Required val updated: kotlin.String,
+
+    /* The total number of users following the project */
+    @SerialName(value = "followers") @Required val followers: kotlin.Int,
 
     /* A list of the version IDs of the project */
-    @SerialName(value = "versions") val versions: kotlin.collections.List<kotlin.String>? = null
+    @SerialName(value = "versions") @Required val versions: kotlin.collections.List<kotlin.String>,
+
+    /* A message that a moderator sent regarding the project */
+    @SerialName(value = "moderator_message") val moderatorMessage: kotlin.String? = null
 
 )
 

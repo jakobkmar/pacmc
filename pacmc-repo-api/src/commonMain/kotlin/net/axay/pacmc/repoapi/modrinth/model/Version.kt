@@ -1,7 +1,7 @@
 /**
  * Labrinth
  *
- * This API is documented in the **OpenAPI format** and is available for download [here](/openapi.yaml).  # Cross-Origin Resource Sharing This API features Cross-Origin Resource Sharing (CORS) implemented in compliance with  [W3C spec](https://www.w3.org/TR/cors/). This allows for cross-domain communication from the browser. All responses have a wildcard same-origin which makes them completely public and accessible to everyone, including any code on any site.  # Authentication This API uses GitHub tokens for authentication. The token is in the `Authorization` header of the request. You can get a token [here](#operation/initAuth).    Example:  ```  Authorization: gho_pJ9dGXVKpfzZp4PUHSxYEq9hjk0h288Gwj4S  ``` 
+ * This API is documented in the **OpenAPI format** and is available for download [here](/openapi.yaml).  # Cross-Origin Resource Sharing This API features Cross-Origin Resource Sharing (CORS) implemented in compliance with  [W3C spec](https://www.w3.org/TR/cors/). This allows for cross-domain communication from the browser. All responses have a wildcard same-origin which makes them completely public and accessible to everyone, including any code on any site.  # Authentication This API uses GitHub tokens for authentication. The token is in the `Authorization` header of the request. You can get a token [here](#operation/initAuth).   Example:  ```  Authorization: gho_pJ9dGXVKpfzZp4PUHSxYEq9hjk0h288Gwj4S  ``` 
  *
  * The version of the OpenAPI document: 13187de (v2)
  * 
@@ -34,7 +34,6 @@ import kotlinx.serialization.encoding.*
  * @param name The name of this version
  * @param versionNumber The version number. Ideally will follow semantic versioning
  * @param changelog The changelog for this version
- * @param changelogUrl A link to the changelog for this version
  * @param dependencies A list of specific versions of projects that this version depends on
  * @param gameVersions A list of versions of Minecraft that this version supports
  * @param versionType The release channel for this version
@@ -45,52 +44,53 @@ import kotlinx.serialization.encoding.*
  * @param authorId The ID of the author who published this version
  * @param datePublished 
  * @param downloads The number of times this version has been downloaded
+ * @param changelogUrl A link to the changelog for this version
  * @param files A list of files available for download for this version
  */
 @Serializable
 data class Version (
 
     /* The name of this version */
-    @SerialName(value = "name") val name: kotlin.String? = null,
+    @SerialName(value = "name") @Required val name: kotlin.String,
 
     /* The version number. Ideally will follow semantic versioning */
-    @SerialName(value = "version_number") val versionNumber: kotlin.String? = null,
+    @SerialName(value = "version_number") @Required val versionNumber: kotlin.String,
 
     /* The changelog for this version */
-    @SerialName(value = "changelog") val changelog: kotlin.String? = null,
+    @SerialName(value = "changelog") @Required val changelog: kotlin.String,
+
+    /* A list of specific versions of projects that this version depends on */
+    @SerialName(value = "dependencies") @Required val dependencies: kotlin.collections.List<kotlin.String>,
+
+    /* A list of versions of Minecraft that this version supports */
+    @SerialName(value = "game_versions") @Required val gameVersions: kotlin.collections.List<kotlin.String>,
+
+    /* The release channel for this version */
+    @SerialName(value = "version_type") @Required val versionType: Version.VersionType,
+
+    /* The mod loaders that this version supports */
+    @SerialName(value = "loaders") @Required val loaders: kotlin.collections.List<kotlin.String>,
+
+    /* Whether the version is featured or not */
+    @SerialName(value = "featured") @Required val featured: kotlin.Boolean,
+
+    /* The ID of the version, encoded as a base62 string */
+    @SerialName(value = "id") @Required val id: kotlin.String,
+
+    /* The ID of the project this version is for */
+    @SerialName(value = "project_id") @Required val projectId: kotlin.String,
+
+    /* The ID of the author who published this version */
+    @SerialName(value = "author_id") @Required val authorId: kotlin.String,
+
+    @SerialName(value = "date_published") @Required val datePublished: kotlin.String,
+
+    /* The number of times this version has been downloaded */
+    @SerialName(value = "downloads") @Required val downloads: kotlin.Int,
 
     /* A link to the changelog for this version */
     @Deprecated(message = "This property is deprecated.")
     @SerialName(value = "changelog_url") val changelogUrl: kotlin.String? = null,
-
-    /* A list of specific versions of projects that this version depends on */
-    @SerialName(value = "dependencies") val dependencies: kotlin.collections.List<kotlin.String>? = null,
-
-    /* A list of versions of Minecraft that this version supports */
-    @SerialName(value = "game_versions") val gameVersions: kotlin.collections.List<kotlin.String>? = null,
-
-    /* The release channel for this version */
-    @SerialName(value = "version_type") val versionType: Version.VersionType? = null,
-
-    /* The mod loaders that this version supports */
-    @SerialName(value = "loaders") val loaders: kotlin.collections.List<kotlin.String>? = null,
-
-    /* Whether the version is featured or not */
-    @SerialName(value = "featured") val featured: kotlin.Boolean? = null,
-
-    /* The ID of the version, encoded as a base62 string */
-    @SerialName(value = "id") val id: kotlin.String? = null,
-
-    /* The ID of the project this version is for */
-    @SerialName(value = "project_id") val projectId: kotlin.String? = null,
-
-    /* The ID of the author who published this version */
-    @SerialName(value = "author_id") val authorId: kotlin.String? = null,
-
-    @SerialName(value = "date_published") val datePublished: kotlin.String? = null,
-
-    /* The number of times this version has been downloaded */
-    @SerialName(value = "downloads") val downloads: kotlin.Int? = null,
 
     /* A list of files available for download for this version */
     @SerialName(value = "files") val files: kotlin.collections.List<VersionAllOfFiles>? = null

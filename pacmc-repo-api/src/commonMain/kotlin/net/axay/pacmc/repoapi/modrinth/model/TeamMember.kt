@@ -20,6 +20,7 @@
 
 package net.axay.pacmc.repoapi.modrinth.model
 
+import net.axay.pacmc.repoapi.modrinth.model.User
 
 import kotlinx.serialization.*
 import kotlinx.serialization.descriptors.*
@@ -28,42 +29,28 @@ import kotlinx.serialization.encoding.*
 /**
  * 
  *
- * @param id The user's id
- * @param created The time at which the user was created
- * @param role The user's role
- * @param githubId The user's github id
- * @param avatarUrl The user's avatar url
+ * @param teamId The ID of the team this team member is a member of
+ * @param user 
+ * @param role The user's role on the team
+ * @param accepted Whether or not the user has accepted to be on the team (requires authorization)
+ * @param permissions The user's permissions in bitflag format (requires authorization)
  */
 @Serializable
-data class UserAllOf (
+data class TeamMember (
 
-    /* The user's id */
-    @SerialName(value = "id") @Required val id: kotlin.String,
+    /* The ID of the team this team member is a member of */
+    @SerialName(value = "team_id") @Required val teamId: kotlin.String,
 
-    /* The time at which the user was created */
-    @SerialName(value = "created") @Required val created: kotlin.String,
+    @SerialName(value = "user") @Required val user: User,
 
-    /* The user's role */
-    @SerialName(value = "role") @Required val role: UserAllOf.Role,
+    /* The user's role on the team */
+    @SerialName(value = "role") @Required val role: kotlin.String,
 
-    /* The user's github id */
-    @SerialName(value = "github_id") val githubId: kotlin.Int? = null,
+    /* Whether or not the user has accepted to be on the team (requires authorization) */
+    @SerialName(value = "accepted") @Required val accepted: kotlin.Boolean,
 
-    /* The user's avatar url */
-    @SerialName(value = "avatar_url") val avatarUrl: kotlin.String? = null
+    /* The user's permissions in bitflag format (requires authorization) */
+    @SerialName(value = "permissions") val permissions: kotlin.Int? = null
 
-) {
-
-    /**
-     * The user's role
-     *
-     * Values: admin,moderator,developer
-     */
-    @Serializable
-    enum class Role(val value: kotlin.String) {
-        @SerialName(value = "admin") admin("admin"),
-        @SerialName(value = "moderator") moderator("moderator"),
-        @SerialName(value = "developer") developer("developer");
-    }
-}
+)
 

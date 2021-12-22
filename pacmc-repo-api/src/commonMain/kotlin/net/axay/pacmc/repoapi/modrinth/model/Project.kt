@@ -1,7 +1,7 @@
 /**
  * Labrinth
  *
- * This API is documented in the **OpenAPI format** and is available for download [here](/openapi.yaml).  # Cross-Origin Resource Sharing This API features Cross-Origin Resource Sharing (CORS) implemented in compliance with  [W3C spec](https://www.w3.org/TR/cors/). This allows for cross-domain communication from the browser. All responses have a wildcard same-origin which makes them completely public and accessible to everyone, including any code on any site.  # Authentication This API uses GitHub tokens for authentication. The token is in the `Authorization` header of the request. You can get a token [here](#operation/initAuth).    Example:  ```  Authorization: gho_pJ9dGXVKpfzZp4PUHSxYEq9hjk0h288Gwj4S  ``` 
+ * This API is documented in the **OpenAPI format** and is available for download [here](/openapi.yaml).  # Cross-Origin Resource Sharing This API features Cross-Origin Resource Sharing (CORS) implemented in compliance with  [W3C spec](https://www.w3.org/TR/cors/). This allows for cross-domain communication from the browser. All responses have a wildcard same-origin which makes them completely public and accessible to everyone, including any code on any site.  # Authentication This API uses GitHub tokens for authentication. The token is in the `Authorization` header of the request. You can get a token [here](#operation/initAuth).   Example:  ```  Authorization: gho_pJ9dGXVKpfzZp4PUHSxYEq9hjk0h288Gwj4S  ``` 
  *
  * The version of the OpenAPI document: 13187de (v2)
  * 
@@ -33,64 +33,88 @@ import kotlinx.serialization.encoding.*
 /**
  * 
  *
- * @param slug The slug of a project, used for vanity URLs
  * @param title The title or name of the project
  * @param description A short description of the project
  * @param categories A list of the categories that the project is in
  * @param clientSide The client side support of the project
  * @param serverSide The server side support of the project
  * @param body A long form description of the mod
- * @param bodyUrl The link to the long description of the project
  * @param status The status of the project
  * @param license 
+ * @param projectType The project type of the project
+ * @param downloads The total number of downloads of the project
+ * @param id The ID of the project, encoded as a base62 string
+ * @param team The ID of the team that has ownership of this project
+ * @param published The date the project was published
+ * @param updated The date the project was last updated
+ * @param followers The total number of users following the project
+ * @param versions A list of the version IDs of the project
+ * @param slug The slug of a project, used for vanity URLs
+ * @param bodyUrl The link to the long description of the project
  * @param issuesUrl An optional link to where to submit bugs or issues with the project
  * @param sourceUrl An optional link to the source code of the project
  * @param wikiUrl An optional link to the project's wiki page or other relevant information
  * @param discordUrl An optional invite link to the project's discord
  * @param donationUrls A list of donation links for the project
- * @param projectType The project type of the project
- * @param downloads The total number of downloads of the project
- * @param follows The total number of users following the project
  * @param iconUrl The URL of the project's icon
- * @param id The ID of the project, encoded as a base62 string
- * @param team The ID of the team that has ownership of this project
  * @param moderatorMessage A message that a moderator sent regarding the project
- * @param published The date the project was published
- * @param updated The date the project was last updated
- * @param versions A list of the version IDs of the project
  */
 @Serializable
 data class Project (
 
-    /* The slug of a project, used for vanity URLs */
-    @SerialName(value = "slug") val slug: kotlin.String? = null,
-
     /* The title or name of the project */
-    @SerialName(value = "title") val title: kotlin.String? = null,
+    @SerialName(value = "title") @Required val title: kotlin.String,
 
     /* A short description of the project */
-    @SerialName(value = "description") val description: kotlin.String? = null,
+    @SerialName(value = "description") @Required val description: kotlin.String,
 
     /* A list of the categories that the project is in */
-    @SerialName(value = "categories") val categories: kotlin.collections.List<kotlin.String>? = null,
+    @SerialName(value = "categories") @Required val categories: kotlin.collections.List<kotlin.String>,
 
     /* The client side support of the project */
-    @SerialName(value = "client_side") val clientSide: Project.ClientSide? = null,
+    @SerialName(value = "client_side") @Required val clientSide: Project.ClientSide,
 
     /* The server side support of the project */
-    @SerialName(value = "server_side") val serverSide: Project.ServerSide? = null,
+    @SerialName(value = "server_side") @Required val serverSide: Project.ServerSide,
 
     /* A long form description of the mod */
-    @SerialName(value = "body") val body: kotlin.String? = null,
+    @SerialName(value = "body") @Required val body: kotlin.String,
+
+    /* The status of the project */
+    @SerialName(value = "status") @Required val status: Project.Status,
+
+    @SerialName(value = "license") @Required val license: EditableProjectAllOfLicense,
+
+    /* The project type of the project */
+    @SerialName(value = "project_type") @Required val projectType: Project.ProjectType,
+
+    /* The total number of downloads of the project */
+    @SerialName(value = "downloads") @Required val downloads: kotlin.Int,
+
+    /* The ID of the project, encoded as a base62 string */
+    @SerialName(value = "id") @Required val id: kotlin.String,
+
+    /* The ID of the team that has ownership of this project */
+    @SerialName(value = "team") @Required val team: kotlin.String,
+
+    /* The date the project was published */
+    @SerialName(value = "published") @Required val published: kotlin.String,
+
+    /* The date the project was last updated */
+    @SerialName(value = "updated") @Required val updated: kotlin.String,
+
+    /* The total number of users following the project */
+    @SerialName(value = "followers") @Required val followers: kotlin.Int,
+
+    /* A list of the version IDs of the project */
+    @SerialName(value = "versions") @Required val versions: kotlin.collections.List<kotlin.String>,
+
+    /* The slug of a project, used for vanity URLs */
+    @SerialName(value = "slug") val slug: kotlin.String? = null,
 
     /* The link to the long description of the project */
     @Deprecated(message = "This property is deprecated.")
     @SerialName(value = "body_url") val bodyUrl: kotlin.String? = "null",
-
-    /* The status of the project */
-    @SerialName(value = "status") val status: Project.Status? = null,
-
-    @SerialName(value = "license") val license: EditableProjectAllOfLicense? = null,
 
     /* An optional link to where to submit bugs or issues with the project */
     @SerialName(value = "issues_url") val issuesUrl: kotlin.String? = null,
@@ -107,35 +131,11 @@ data class Project (
     /* A list of donation links for the project */
     @SerialName(value = "donation_urls") val donationUrls: kotlin.collections.List<EditableProjectAllOfDonationUrls>? = null,
 
-    /* The project type of the project */
-    @SerialName(value = "project_type") val projectType: Project.ProjectType? = null,
-
-    /* The total number of downloads of the project */
-    @SerialName(value = "downloads") val downloads: kotlin.Int? = null,
-
-    /* The total number of users following the project */
-    @SerialName(value = "follows") val follows: kotlin.Int? = null,
-
     /* The URL of the project's icon */
     @SerialName(value = "icon_url") val iconUrl: kotlin.String? = null,
 
-    /* The ID of the project, encoded as a base62 string */
-    @SerialName(value = "id") val id: kotlin.String? = null,
-
-    /* The ID of the team that has ownership of this project */
-    @SerialName(value = "team") val team: kotlin.String? = null,
-
     /* A message that a moderator sent regarding the project */
-    @SerialName(value = "moderator_message") val moderatorMessage: kotlin.String? = null,
-
-    /* The date the project was published */
-    @SerialName(value = "published") val published: kotlin.String? = null,
-
-    /* The date the project was last updated */
-    @SerialName(value = "updated") val updated: kotlin.String? = null,
-
-    /* A list of the version IDs of the project */
-    @SerialName(value = "versions") val versions: kotlin.collections.List<kotlin.String>? = null
+    @SerialName(value = "moderator_message") val moderatorMessage: kotlin.String? = null
 
 ) {
 

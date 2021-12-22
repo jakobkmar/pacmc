@@ -1,7 +1,7 @@
 /**
  * Labrinth
  *
- * This API is documented in the **OpenAPI format** and is available for download [here](/openapi.yaml).  # Cross-Origin Resource Sharing This API features Cross-Origin Resource Sharing (CORS) implemented in compliance with  [W3C spec](https://www.w3.org/TR/cors/). This allows for cross-domain communication from the browser. All responses have a wildcard same-origin which makes them completely public and accessible to everyone, including any code on any site.  # Authentication This API uses GitHub tokens for authentication. The token is in the `Authorization` header of the request. You can get a token [here](#operation/initAuth).    Example:  ```  Authorization: gho_pJ9dGXVKpfzZp4PUHSxYEq9hjk0h288Gwj4S  ``` 
+ * This API is documented in the **OpenAPI format** and is available for download [here](/openapi.yaml).  # Cross-Origin Resource Sharing This API features Cross-Origin Resource Sharing (CORS) implemented in compliance with  [W3C spec](https://www.w3.org/TR/cors/). This allows for cross-domain communication from the browser. All responses have a wildcard same-origin which makes them completely public and accessible to everyone, including any code on any site.  # Authentication This API uses GitHub tokens for authentication. The token is in the `Authorization` header of the request. You can get a token [here](#operation/initAuth).   Example:  ```  Authorization: gho_pJ9dGXVKpfzZp4PUHSxYEq9hjk0h288Gwj4S  ``` 
  *
  * The version of the OpenAPI document: 13187de (v2)
  * 
@@ -31,34 +31,38 @@ import kotlinx.serialization.encoding.*
  * @param projectId The ID of the project
  * @param author The username of the project's author
  * @param versions A list of the minecraft versions supported by the project
+ * @param follows The total number of users following the project
  * @param dateCreated The date the project was created
  * @param dateModified The date the project was last modified
- * @param latestVersion The latest version of minecraft that this project supports
  * @param license The license of the project
+ * @param latestVersion The latest version of minecraft that this project supports
  */
 @Serializable
 data class ProjectResultAllOf (
 
     /* The ID of the project */
-    @SerialName(value = "project_id") val projectId: kotlin.String? = null,
+    @SerialName(value = "project_id") @Required val projectId: kotlin.String,
 
     /* The username of the project's author */
-    @SerialName(value = "author") val author: kotlin.String? = null,
+    @SerialName(value = "author") @Required val author: kotlin.String,
 
     /* A list of the minecraft versions supported by the project */
-    @SerialName(value = "versions") val versions: kotlin.collections.List<kotlin.String>? = null,
+    @SerialName(value = "versions") @Required val versions: kotlin.collections.List<kotlin.String>,
+
+    /* The total number of users following the project */
+    @SerialName(value = "follows") @Required val follows: kotlin.Int,
 
     /* The date the project was created */
-    @SerialName(value = "date_created") val dateCreated: kotlin.String? = null,
+    @SerialName(value = "date_created") @Required val dateCreated: kotlin.String,
 
     /* The date the project was last modified */
-    @SerialName(value = "date_modified") val dateModified: kotlin.String? = null,
-
-    /* The latest version of minecraft that this project supports */
-    @SerialName(value = "latest_version") val latestVersion: kotlin.String? = null,
+    @SerialName(value = "date_modified") @Required val dateModified: kotlin.String,
 
     /* The license of the project */
-    @SerialName(value = "license") val license: kotlin.String? = null
+    @SerialName(value = "license") @Required val license: kotlin.String,
+
+    /* The latest version of minecraft that this project supports */
+    @SerialName(value = "latest_version") val latestVersion: kotlin.String? = null
 
 )
 

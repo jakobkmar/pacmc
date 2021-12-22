@@ -1,7 +1,7 @@
 /**
  * Labrinth
  *
- * This API is documented in the **OpenAPI format** and is available for download [here](/openapi.yaml).  # Cross-Origin Resource Sharing This API features Cross-Origin Resource Sharing (CORS) implemented in compliance with  [W3C spec](https://www.w3.org/TR/cors/). This allows for cross-domain communication from the browser. All responses have a wildcard same-origin which makes them completely public and accessible to everyone, including any code on any site.  # Authentication This API uses GitHub tokens for authentication. The token is in the `Authorization` header of the request. You can get a token [here](#operation/initAuth).    Example:  ```  Authorization: gho_pJ9dGXVKpfzZp4PUHSxYEq9hjk0h288Gwj4S  ``` 
+ * This API is documented in the **OpenAPI format** and is available for download [here](/openapi.yaml).  # Cross-Origin Resource Sharing This API features Cross-Origin Resource Sharing (CORS) implemented in compliance with  [W3C spec](https://www.w3.org/TR/cors/). This allows for cross-domain communication from the browser. All responses have a wildcard same-origin which makes them completely public and accessible to everyone, including any code on any site.  # Authentication This API uses GitHub tokens for authentication. The token is in the `Authorization` header of the request. You can get a token [here](#operation/initAuth).   Example:  ```  Authorization: gho_pJ9dGXVKpfzZp4PUHSxYEq9hjk0h288Gwj4S  ``` 
  *
  * The version of the OpenAPI document: 13187de (v2)
  * 
@@ -32,16 +32,16 @@ import kotlinx.serialization.encoding.*
 /**
  * 
  *
- * @param slug The slug of a project, used for vanity URLs
  * @param title The title or name of the project
  * @param description A short description of the project
  * @param categories A list of the categories that the project is in
  * @param clientSide The client side support of the project
  * @param serverSide The server side support of the project
  * @param body A long form description of the mod
- * @param bodyUrl The link to the long description of the project
  * @param status The status of the project
  * @param license 
+ * @param slug The slug of a project, used for vanity URLs
+ * @param bodyUrl The link to the long description of the project
  * @param issuesUrl An optional link to where to submit bugs or issues with the project
  * @param sourceUrl An optional link to the source code of the project
  * @param wikiUrl An optional link to the project's wiki page or other relevant information
@@ -51,35 +51,35 @@ import kotlinx.serialization.encoding.*
 @Serializable
 data class EditableProject (
 
-    /* The slug of a project, used for vanity URLs */
-    @SerialName(value = "slug") val slug: kotlin.String? = null,
-
     /* The title or name of the project */
-    @SerialName(value = "title") val title: kotlin.String? = null,
+    @SerialName(value = "title") @Required val title: kotlin.String,
 
     /* A short description of the project */
-    @SerialName(value = "description") val description: kotlin.String? = null,
+    @SerialName(value = "description") @Required val description: kotlin.String,
 
     /* A list of the categories that the project is in */
-    @SerialName(value = "categories") val categories: kotlin.collections.List<kotlin.String>? = null,
+    @SerialName(value = "categories") @Required val categories: kotlin.collections.List<kotlin.String>,
 
     /* The client side support of the project */
-    @SerialName(value = "client_side") val clientSide: EditableProject.ClientSide? = null,
+    @SerialName(value = "client_side") @Required val clientSide: EditableProject.ClientSide,
 
     /* The server side support of the project */
-    @SerialName(value = "server_side") val serverSide: EditableProject.ServerSide? = null,
+    @SerialName(value = "server_side") @Required val serverSide: EditableProject.ServerSide,
 
     /* A long form description of the mod */
-    @SerialName(value = "body") val body: kotlin.String? = null,
+    @SerialName(value = "body") @Required val body: kotlin.String,
+
+    /* The status of the project */
+    @SerialName(value = "status") @Required val status: EditableProject.Status,
+
+    @SerialName(value = "license") @Required val license: EditableProjectAllOfLicense,
+
+    /* The slug of a project, used for vanity URLs */
+    @SerialName(value = "slug") val slug: kotlin.String? = null,
 
     /* The link to the long description of the project */
     @Deprecated(message = "This property is deprecated.")
     @SerialName(value = "body_url") val bodyUrl: kotlin.String? = "null",
-
-    /* The status of the project */
-    @SerialName(value = "status") val status: EditableProject.Status? = null,
-
-    @SerialName(value = "license") val license: EditableProjectAllOfLicense? = null,
 
     /* An optional link to where to submit bugs or issues with the project */
     @SerialName(value = "issues_url") val issuesUrl: kotlin.String? = null,

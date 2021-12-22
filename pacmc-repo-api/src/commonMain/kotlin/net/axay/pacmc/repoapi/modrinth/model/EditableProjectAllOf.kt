@@ -1,7 +1,7 @@
 /**
  * Labrinth
  *
- * This API is documented in the **OpenAPI format** and is available for download [here](/openapi.yaml).  # Cross-Origin Resource Sharing This API features Cross-Origin Resource Sharing (CORS) implemented in compliance with  [W3C spec](https://www.w3.org/TR/cors/). This allows for cross-domain communication from the browser. All responses have a wildcard same-origin which makes them completely public and accessible to everyone, including any code on any site.  # Authentication This API uses GitHub tokens for authentication. The token is in the `Authorization` header of the request. You can get a token [here](#operation/initAuth).    Example:  ```  Authorization: gho_pJ9dGXVKpfzZp4PUHSxYEq9hjk0h288Gwj4S  ``` 
+ * This API is documented in the **OpenAPI format** and is available for download [here](/openapi.yaml).  # Cross-Origin Resource Sharing This API features Cross-Origin Resource Sharing (CORS) implemented in compliance with  [W3C spec](https://www.w3.org/TR/cors/). This allows for cross-domain communication from the browser. All responses have a wildcard same-origin which makes them completely public and accessible to everyone, including any code on any site.  # Authentication This API uses GitHub tokens for authentication. The token is in the `Authorization` header of the request. You can get a token [here](#operation/initAuth).   Example:  ```  Authorization: gho_pJ9dGXVKpfzZp4PUHSxYEq9hjk0h288Gwj4S  ``` 
  *
  * The version of the OpenAPI document: 13187de (v2)
  * 
@@ -31,9 +31,9 @@ import kotlinx.serialization.encoding.*
  * 
  *
  * @param body A long form description of the mod
- * @param bodyUrl The link to the long description of the project
  * @param status The status of the project
  * @param license 
+ * @param bodyUrl The link to the long description of the project
  * @param issuesUrl An optional link to where to submit bugs or issues with the project
  * @param sourceUrl An optional link to the source code of the project
  * @param wikiUrl An optional link to the project's wiki page or other relevant information
@@ -44,16 +44,16 @@ import kotlinx.serialization.encoding.*
 data class EditableProjectAllOf (
 
     /* A long form description of the mod */
-    @SerialName(value = "body") val body: kotlin.String? = null,
+    @SerialName(value = "body") @Required val body: kotlin.String,
+
+    /* The status of the project */
+    @SerialName(value = "status") @Required val status: EditableProjectAllOf.Status,
+
+    @SerialName(value = "license") @Required val license: EditableProjectAllOfLicense,
 
     /* The link to the long description of the project */
     @Deprecated(message = "This property is deprecated.")
     @SerialName(value = "body_url") val bodyUrl: kotlin.String? = "null",
-
-    /* The status of the project */
-    @SerialName(value = "status") val status: EditableProjectAllOf.Status? = null,
-
-    @SerialName(value = "license") val license: EditableProjectAllOfLicense? = null,
 
     /* An optional link to where to submit bugs or issues with the project */
     @SerialName(value = "issues_url") val issuesUrl: kotlin.String? = null,

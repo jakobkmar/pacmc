@@ -1,7 +1,7 @@
 /**
  * Labrinth
  *
- * This API is documented in the **OpenAPI format** and is available for download [here](/openapi.yaml).  # Cross-Origin Resource Sharing This API features Cross-Origin Resource Sharing (CORS) implemented in compliance with  [W3C spec](https://www.w3.org/TR/cors/). This allows for cross-domain communication from the browser. All responses have a wildcard same-origin which makes them completely public and accessible to everyone, including any code on any site.  # Authentication This API uses GitHub tokens for authentication. The token is in the `Authorization` header of the request. You can get a token [here](#operation/initAuth).    Example:  ```  Authorization: gho_pJ9dGXVKpfzZp4PUHSxYEq9hjk0h288Gwj4S  ``` 
+ * This API is documented in the **OpenAPI format** and is available for download [here](/openapi.yaml).  # Cross-Origin Resource Sharing This API features Cross-Origin Resource Sharing (CORS) implemented in compliance with  [W3C spec](https://www.w3.org/TR/cors/). This allows for cross-domain communication from the browser. All responses have a wildcard same-origin which makes them completely public and accessible to everyone, including any code on any site.  # Authentication This API uses GitHub tokens for authentication. The token is in the `Authorization` header of the request. You can get a token [here](#operation/initAuth).   Example:  ```  Authorization: gho_pJ9dGXVKpfzZp4PUHSxYEq9hjk0h288Gwj4S  ``` 
  *
  * The version of the OpenAPI document: 13187de (v2)
  * 
@@ -30,20 +30,16 @@ import kotlinx.serialization.encoding.*
  *
  * @param projectType The project type of the project
  * @param downloads The total number of downloads of the project
- * @param follows The total number of users following the project
  * @param iconUrl The URL of the project's icon
  */
 @Serializable
 data class ServerRenderedProjectAllOf (
 
     /* The project type of the project */
-    @SerialName(value = "project_type") val projectType: ServerRenderedProjectAllOf.ProjectType? = null,
+    @SerialName(value = "project_type") @Required val projectType: ServerRenderedProjectAllOf.ProjectType,
 
     /* The total number of downloads of the project */
-    @SerialName(value = "downloads") val downloads: kotlin.Int? = null,
-
-    /* The total number of users following the project */
-    @SerialName(value = "follows") val follows: kotlin.Int? = null,
+    @SerialName(value = "downloads") @Required val downloads: kotlin.Int,
 
     /* The URL of the project's icon */
     @SerialName(value = "icon_url") val iconUrl: kotlin.String? = null

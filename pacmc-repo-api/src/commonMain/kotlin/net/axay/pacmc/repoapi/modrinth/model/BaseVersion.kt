@@ -1,7 +1,7 @@
 /**
  * Labrinth
  *
- * This API is documented in the **OpenAPI format** and is available for download [here](/openapi.yaml).  # Cross-Origin Resource Sharing This API features Cross-Origin Resource Sharing (CORS) implemented in compliance with  [W3C spec](https://www.w3.org/TR/cors/). This allows for cross-domain communication from the browser. All responses have a wildcard same-origin which makes them completely public and accessible to everyone, including any code on any site.  # Authentication This API uses GitHub tokens for authentication. The token is in the `Authorization` header of the request. You can get a token [here](#operation/initAuth).    Example:  ```  Authorization: gho_pJ9dGXVKpfzZp4PUHSxYEq9hjk0h288Gwj4S  ``` 
+ * This API is documented in the **OpenAPI format** and is available for download [here](/openapi.yaml).  # Cross-Origin Resource Sharing This API features Cross-Origin Resource Sharing (CORS) implemented in compliance with  [W3C spec](https://www.w3.org/TR/cors/). This allows for cross-domain communication from the browser. All responses have a wildcard same-origin which makes them completely public and accessible to everyone, including any code on any site.  # Authentication This API uses GitHub tokens for authentication. The token is in the `Authorization` header of the request. You can get a token [here](#operation/initAuth).   Example:  ```  Authorization: gho_pJ9dGXVKpfzZp4PUHSxYEq9hjk0h288Gwj4S  ``` 
  *
  * The version of the OpenAPI document: 13187de (v2)
  * 
@@ -31,43 +31,43 @@ import kotlinx.serialization.encoding.*
  * @param name The name of this version
  * @param versionNumber The version number. Ideally will follow semantic versioning
  * @param changelog The changelog for this version
- * @param changelogUrl A link to the changelog for this version
  * @param dependencies A list of specific versions of projects that this version depends on
  * @param gameVersions A list of versions of Minecraft that this version supports
  * @param versionType The release channel for this version
  * @param loaders The mod loaders that this version supports
  * @param featured Whether the version is featured or not
+ * @param changelogUrl A link to the changelog for this version
  */
 @Serializable
 data class BaseVersion (
 
     /* The name of this version */
-    @SerialName(value = "name") val name: kotlin.String? = null,
+    @SerialName(value = "name") @Required val name: kotlin.String,
 
     /* The version number. Ideally will follow semantic versioning */
-    @SerialName(value = "version_number") val versionNumber: kotlin.String? = null,
+    @SerialName(value = "version_number") @Required val versionNumber: kotlin.String,
 
     /* The changelog for this version */
-    @SerialName(value = "changelog") val changelog: kotlin.String? = null,
+    @SerialName(value = "changelog") @Required val changelog: kotlin.String,
+
+    /* A list of specific versions of projects that this version depends on */
+    @SerialName(value = "dependencies") @Required val dependencies: kotlin.collections.List<kotlin.String>,
+
+    /* A list of versions of Minecraft that this version supports */
+    @SerialName(value = "game_versions") @Required val gameVersions: kotlin.collections.List<kotlin.String>,
+
+    /* The release channel for this version */
+    @SerialName(value = "version_type") @Required val versionType: BaseVersion.VersionType,
+
+    /* The mod loaders that this version supports */
+    @SerialName(value = "loaders") @Required val loaders: kotlin.collections.List<kotlin.String>,
+
+    /* Whether the version is featured or not */
+    @SerialName(value = "featured") @Required val featured: kotlin.Boolean,
 
     /* A link to the changelog for this version */
     @Deprecated(message = "This property is deprecated.")
-    @SerialName(value = "changelog_url") val changelogUrl: kotlin.String? = null,
-
-    /* A list of specific versions of projects that this version depends on */
-    @SerialName(value = "dependencies") val dependencies: kotlin.collections.List<kotlin.String>? = null,
-
-    /* A list of versions of Minecraft that this version supports */
-    @SerialName(value = "game_versions") val gameVersions: kotlin.collections.List<kotlin.String>? = null,
-
-    /* The release channel for this version */
-    @SerialName(value = "version_type") val versionType: BaseVersion.VersionType? = null,
-
-    /* The mod loaders that this version supports */
-    @SerialName(value = "loaders") val loaders: kotlin.collections.List<kotlin.String>? = null,
-
-    /* Whether the version is featured or not */
-    @SerialName(value = "featured") val featured: kotlin.Boolean? = null
+    @SerialName(value = "changelog_url") val changelogUrl: kotlin.String? = null
 
 ) {
 

@@ -1,7 +1,7 @@
 /**
  * Labrinth
  *
- * This API is documented in the **OpenAPI format** and is available for download [here](/openapi.yaml).  # Cross-Origin Resource Sharing This API features Cross-Origin Resource Sharing (CORS) implemented in compliance with  [W3C spec](https://www.w3.org/TR/cors/). This allows for cross-domain communication from the browser. All responses have a wildcard same-origin which makes them completely public and accessible to everyone, including any code on any site.  # Authentication This API uses GitHub tokens for authentication. The token is in the `Authorization` header of the request. You can get a token [here](#operation/initAuth).    Example:  ```  Authorization: gho_pJ9dGXVKpfzZp4PUHSxYEq9hjk0h288Gwj4S  ``` 
+ * This API is documented in the **OpenAPI format** and is available for download [here](/openapi.yaml).  # Cross-Origin Resource Sharing This API features Cross-Origin Resource Sharing (CORS) implemented in compliance with  [W3C spec](https://www.w3.org/TR/cors/). This allows for cross-domain communication from the browser. All responses have a wildcard same-origin which makes them completely public and accessible to everyone, including any code on any site.  # Authentication This API uses GitHub tokens for authentication. The token is in the `Authorization` header of the request. You can get a token [here](#operation/initAuth).   Example:  ```  Authorization: gho_pJ9dGXVKpfzZp4PUHSxYEq9hjk0h288Gwj4S  ``` 
  *
  * The version of the OpenAPI document: 13187de (v2)
  * 
@@ -40,18 +40,18 @@ import kotlinx.serialization.encoding.*
 data class VersionAllOf (
 
     /* The ID of the version, encoded as a base62 string */
-    @SerialName(value = "id") val id: kotlin.String? = null,
+    @SerialName(value = "id") @Required val id: kotlin.String,
 
     /* The ID of the project this version is for */
-    @SerialName(value = "project_id") val projectId: kotlin.String? = null,
+    @SerialName(value = "project_id") @Required val projectId: kotlin.String,
 
     /* The ID of the author who published this version */
-    @SerialName(value = "author_id") val authorId: kotlin.String? = null,
+    @SerialName(value = "author_id") @Required val authorId: kotlin.String,
 
-    @SerialName(value = "date_published") val datePublished: kotlin.String? = null,
+    @SerialName(value = "date_published") @Required val datePublished: kotlin.String,
 
     /* The number of times this version has been downloaded */
-    @SerialName(value = "downloads") val downloads: kotlin.Int? = null,
+    @SerialName(value = "downloads") @Required val downloads: kotlin.Int,
 
     /* A list of files available for download for this version */
     @SerialName(value = "files") val files: kotlin.collections.List<VersionAllOfFiles>? = null
