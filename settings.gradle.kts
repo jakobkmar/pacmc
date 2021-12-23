@@ -11,5 +11,6 @@ pluginManagement {
 include("pacmc-repo-api")
 
 // applications
+include("pacmc-app")
 include("pacmc-cli")
 include("pacmc-gui")
