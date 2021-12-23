@@ -20,12 +20,9 @@
 
 package net.axay.pacmc.repoapi.modrinth.model
 
-import net.axay.pacmc.repoapi.modrinth.model.BaseVersion
-import net.axay.pacmc.repoapi.modrinth.model.EditableVersionAllOf
-
-import kotlinx.serialization.*
-import kotlinx.serialization.descriptors.*
-import kotlinx.serialization.encoding.*
+import kotlinx.serialization.Required
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 /**
  * 
