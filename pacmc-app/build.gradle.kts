@@ -4,20 +4,22 @@ plugins {
 }
 
 kotlin {
-    jvm()
+    jvm {
+        withJava()
+    }
 
     sourceSets {
         named("commonMain") {
             dependencies {
-                implementation(project(":pacmc-repo-api"))
-                implementation("com.squareup.okio:okio:3.0.0")
-                implementation("io.realm.kotlin:library-base:0.8.0")
+                api(project(":pacmc-repo-api"))
+                api("com.squareup.okio:okio:3.0.0")
+                api("io.realm.kotlin:library-base:0.8.0")
             }
         }
 
         named("jvmMain") {
             dependencies {
-                implementation("dev.dirs:directories:26")
+                api("dev.dirs:directories:26")
             }
         }
     }
