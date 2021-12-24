@@ -2,12 +2,13 @@ package net.axay.pacmc.repoapi.modrinth
 
 import io.ktor.client.*
 import io.ktor.client.request.*
-import net.axay.pacmc.repoapi.RepositoryApi
+import net.axay.pacmc.repoapi.AbstractRepositoryApi
 import net.axay.pacmc.repoapi.modrinth.model.*
 
 class ModrinthApi(
+    override val apiUrl: String = "https://staging-api.modrinth.com/v2",
     override val client: HttpClient,
-) : RepositoryApi("https://staging-api.modrinth.com/v2") {
+) : AbstractRepositoryApi() {
 
     private fun List<String>.joinQuotedStrings() =
         joinToString("\", ", "[\"", "\"]")

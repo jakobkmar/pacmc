@@ -6,9 +6,8 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 
-abstract class RepositoryApi(
-    protected val apiUrl: String
-) {
+abstract class AbstractRepositoryApi {
+    protected abstract val apiUrl: String
     protected abstract val client: HttpClient
 
     protected suspend inline fun <reified T> repoRequest(
