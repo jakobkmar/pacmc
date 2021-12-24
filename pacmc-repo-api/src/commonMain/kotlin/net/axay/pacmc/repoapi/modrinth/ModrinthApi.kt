@@ -9,6 +9,9 @@ class ModrinthApi(
     override val client: HttpClient,
 ) : RepositoryApi("https://staging-api.modrinth.com/v2") {
 
+    private fun List<String>.joinQuotedStrings() =
+        joinToString("\", ", "[\"", "\"]")
+
     suspend fun searchProjects(
         query: String,
         facets: String? = null,
@@ -28,8 +31,16 @@ class ModrinthApi(
     suspend fun getProject(idOrSlug: String) =
         repoRequest<Project>("/project/${idOrSlug}")
 
-    suspend fun getProjectVersions(idOrSlug: String) =
-        repoRequest<List<Version>>("/project/${idOrSlug}/version")
+    suspend fun getProjectVersions(
+        idOrSlug: String,
+        loaders: List<String>? = null,
+        gameVersions: List<String>? = null,
+        featured: Boolean? = null,
+    ) = repoRequest<List<Version>>("/project/${idOrSlug}/version") {
+        parameter("loaders", loaders?.joinQuotedStrings())
+        parameter("game_versions", gameVersions?.joinQuotedStrings())
+        parameter("featured", featured)
+    }
 
     suspend fun getProjectVersion(id: String) =
         repoRequest<Version>("/version/${id}")
