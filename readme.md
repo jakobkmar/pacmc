@@ -5,7 +5,8 @@
 The aim of this project is to massively reduce the effort you have to put in to installing - and most importantly -
 keeping your mods up to date.
 
-The current version of pacmc is already pretty useful and works, however keep an eye on this project, as it will receive major new features and improvements in the near future!
+The current version of pacmc is already pretty useful and works, however keep an eye on this project, as it will
+receive major new features and improvements in the near future!
 
 To install pacmc, visit the [**Installation** section](#installation).
 
@@ -112,36 +113,19 @@ _when installing using a search term, you may be prompted to select a mod from a
 
 ## Installation
 
-#### Arch Linux and Manjaro via [an AUR helper](https://wiki.archlinux.org/title/AUR_helpers)
-
-`pacmc` is the name of [the package in the **AUR**](https://aur.archlinux.org/packages/pacmc/).
-
-#### macOS and Linux via [Homebrew](https://brew.sh/)
-
-This installation method will be available with the next release.
-
-#### Linux via [Flatpak](https://flatpak.org/)
-
-pacmc will be available as a Flatpak on Flathub with the next release.
-
-#### Windows via [scoop](https://scoop.sh)
-
-```sh
-scoop bucket add games
-scoop install pacmc
-# update later with
-scoop update pacmc
-```
-
-#### Windows via [winget](https://github.com/microsoft/winget-cli)
-
-We will investigate whether winget is suitable for distributing pacmc when preparing the next release.
-
-#### Windows via [Microsoft Store](https://www.microsoft.com/de-de/store/apps/windows)
-
-We will check whether we can provide pacmc-gui via the Microsoft Store without any major drawbacks.
+| Platform                       | Instructions                                                                                               | Location                                                                                       | Package Manager                                                       |
+|--------------------------------|------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------|
+| **Arch Linux** and **Manjaro** | install using [an AUR helper](https://wiki.archlinux.org/title/AUR_helpers) <br> e.g. `paru install pacmc` | `pacmc` [in AUR](https://aur.archlinux.org/packages/pacmc/)                                    | any AUR helper                                                        |
+| **macOS** and **Linux**        | <del> `brew install pacmc` </del>                                                                          | coming soon                                                                                    | [Homebrew](https://brew.sh/)                                          |
+| **Linux**                      | <del>`flatpak install net.axay.pacmc` </del>                                                               | coming soon                                                                                    | [Flatpak](https://flatpak.org/)                                       |
+| **Windows**                    | (`scoop bucket add games`) <br> `scoop install pacmc`                                                      | `pacmc` [in scoop-games](https://github.com/Calinou/scoop-games/blob/master/bucket/pacmc.json) | [scoop](https://scoop.sh)                                             |
+| **Windows**                    | <del> `winget install pacmc` </del>                                                                        | coming soon                                                                                    | [winget](https://github.com/microsoft/winget-cli)                     |
+| **Windows** (gui only)         | <del> Install pacmc from the Microsoft Store </del>                                                        | coming soon                                                                                    | [Microsoft Store](https://www.microsoft.com/de-de/store/apps/windows) |
 
 #### Other
+
+If the installation methods above don't fit your needs, you can also install pacmc manually. Keep in mind though, that
+this way pacmc won't receive updates automatically.
 
 Download one of the released archives from the [releases page](https://github.com/bluefireoly/pacmc/releases).
 Extract the archive. Inside there will be a `bin` directory.
