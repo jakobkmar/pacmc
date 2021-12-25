@@ -14,6 +14,7 @@ kotlin {
                 api(project(":pacmc-repo-api"))
                 api("com.squareup.okio:okio:3.0.0")
                 api("io.realm.kotlin:library-base:0.8.0")
+                api("org.jetbrains.kotlinx:kotlinx-datetime:0.3.1")
             }
         }
 
