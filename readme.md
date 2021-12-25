@@ -5,37 +5,9 @@
 The aim of this project is to massively reduce the effort you have to put in to installing - and most importantly -
 keeping your mods up to date.
 
-## Installation
+The current version of pacmc is already pretty useful and works, however keep an eye on this project, as it will receive major new features and improvements in the near future!
 
-#### Arch Linux
-
-`pacmc` is the name of [the package in the **AUR**](https://aur.archlinux.org/packages/pacmc/).
-
-#### Windows via [scoop](https://scoop.sh)
-
-```sh
-scoop bucket add games
-scoop install pacmc
-# update later with
-scoop update pacmc
-```
-
-#### Other
-
-Download one of the released archives from the [releases page](https://github.com/bluefireoly/pacmc/releases).
-Extract the archive. Inside there will be a `bin` directory.
-Run the shell script using `./pacmc`.
-
-## Quick start
-
-```bash
-# add the .minecraft folder as an archive
-pacmc init
-# search for mods
-pacmc search minihud
-# install a mod
-pacmc install lithium
-```
+To install pacmc, visit the [**Installation** section](#installation).
 
 ## Usage
 
@@ -56,6 +28,17 @@ Commands:
   load     Loads one archive into another
   info     Displays the formatted project description
   debug    Prints debug information
+```
+
+### Quick start (for installing mods)
+
+```bash
+# add the .minecraft folder as an archive
+pacmc init
+# search for mods
+pacmc search minihud
+# install a mod
+pacmc install lithium
 ```
 
 ### Archives
@@ -126,3 +109,40 @@ pacmc install -a myarchive 447425
 ```
 
 _when installing using a search term, you may be prompted to select a mod from a couple of options_
+
+## Installation
+
+#### Arch Linux and Manjaro via [an AUR helper](https://wiki.archlinux.org/title/AUR_helpers)
+
+`pacmc` is the name of [the package in the **AUR**](https://aur.archlinux.org/packages/pacmc/).
+
+#### macOS and Linux via [Homebrew](https://brew.sh/)
+
+This installation method will be available with the next release.
+
+#### Linux via [Flatpak](https://flatpak.org/)
+
+pacmc will be available as a Flatpak on Flathub with the next release.
+
+#### Windows via [scoop](https://scoop.sh)
+
+```sh
+scoop bucket add games
+scoop install pacmc
+# update later with
+scoop update pacmc
+```
+
+#### Windows via [winget](https://github.com/microsoft/winget-cli)
+
+We will investigate whether winget is suitable for distributing pacmc when preparing the next release.
+
+#### Windows via [Microsoft Store](https://www.microsoft.com/de-de/store/apps/windows)
+
+We will check whether we can provide pacmc-gui via the Microsoft Store without any major drawbacks.
+
+#### Other
+
+Download one of the released archives from the [releases page](https://github.com/bluefireoly/pacmc/releases).
+Extract the archive. Inside there will be a `bin` directory.
+Run the shell script using `./pacmc`.
