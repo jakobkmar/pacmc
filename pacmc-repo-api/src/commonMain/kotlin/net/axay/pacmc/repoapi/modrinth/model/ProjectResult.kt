@@ -20,12 +20,9 @@
 
 package net.axay.pacmc.repoapi.modrinth.model
 
-import net.axay.pacmc.repoapi.modrinth.model.ProjectResultAllOf
-import net.axay.pacmc.repoapi.modrinth.model.ServerRenderedProject
-
-import kotlinx.serialization.*
-import kotlinx.serialization.descriptors.*
-import kotlinx.serialization.encoding.*
+import kotlinx.serialization.Required
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 /**
  * 
@@ -113,7 +110,8 @@ data class ProjectResult (
     enum class ClientSide(val value: kotlin.String) {
         @SerialName(value = "required") required("required"),
         @SerialName(value = "optional") optional("optional"),
-        @SerialName(value = "unsupported") unsupported("unsupported");
+        @SerialName(value = "unsupported") unsupported("unsupported"),
+        @SerialName(value = "unknown") unknown("unknown");
     }
     /**
      * The server side support of the project
@@ -124,7 +122,8 @@ data class ProjectResult (
     enum class ServerSide(val value: kotlin.String) {
         @SerialName(value = "required") required("required"),
         @SerialName(value = "optional") optional("optional"),
-        @SerialName(value = "unsupported") unsupported("unsupported");
+        @SerialName(value = "unsupported") unsupported("unsupported"),
+        @SerialName(value = "unknown") unknown("unknown");
     }
     /**
      * The project type of the project

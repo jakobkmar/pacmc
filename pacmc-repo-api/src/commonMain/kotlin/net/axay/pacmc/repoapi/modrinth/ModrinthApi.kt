@@ -6,7 +6,7 @@ import net.axay.pacmc.repoapi.AbstractRepositoryApi
 import net.axay.pacmc.repoapi.modrinth.model.*
 
 class ModrinthApi(
-    override val apiUrl: String = "https://staging-api.modrinth.com/v2",
+    override val apiUrl: String = "https://test-api.modrinth.com/v2",
     override val client: HttpClient,
 ) : AbstractRepositoryApi() {
 
