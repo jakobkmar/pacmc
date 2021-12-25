@@ -14,9 +14,9 @@ kotlin {
     sourceSets {
         named("jvmMain") {
             dependencies {
+                implementation(project(":pacmc-app"))
+
                 implementation(compose.desktop.currentOs)
-                implementation(project(":pacmc-repo-api"))
-                implementation("io.ktor:ktor-client-cio:1.6.7")
                 implementation("br.com.devsrsouza.compose.icons.jetbrains:tabler-icons:1.0.0")
             }
         }
