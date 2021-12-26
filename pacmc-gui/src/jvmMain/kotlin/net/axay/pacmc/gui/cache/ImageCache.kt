@@ -1,29 +1,52 @@
 package net.axay.pacmc.gui.cache
 
+import androidx.compose.animation.core.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
+import androidx.compose.ui.graphics.asComposeImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.res.loadSvgPainter
-import androidx.compose.ui.unit.Density
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.util.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import net.axay.pacmc.app.Environment
 import net.axay.pacmc.app.data.ModId
 import net.axay.pacmc.app.ktorClient
+import org.jetbrains.skia.AnimationFrameInfo
+import org.jetbrains.skia.Bitmap
+import org.jetbrains.skia.Codec
+import org.jetbrains.skia.Data
 
-object ImageCache {
-    private fun cachePath(group: String, name: String) =
-        Environment.cacheDir.resolve("gui/images/${group}/${name}")
+private fun cachePath(group: String, name: String) =
+    Environment.cacheDir.resolve("gui/images/${group}/${name}")
 
-    suspend fun loadProjectIcon(
-        url: String,
-        modId: ModId,
-        density: Density,
-    ): Painter? {
-        return try {
+private sealed class PainterHolder
+
+private class SinglePainterHolder(val painter: Painter) : PainterHolder()
+
+private class AnimationPainterHolder(
+    val painters: List<Painter>,
+    val framesInfo: Array<AnimationFrameInfo>,
+) : PainterHolder()
+
+@Composable
+fun producePainterCached(
+    url: String,
+    modId: ModId,
+): Painter? {
+    val density = LocalDensity.current
+
+    val painterHolder by produceState<PainterHolder?>(null, key1 = url) {
+        value = withContext(Dispatchers.IO) {
+            println("loading icon for $url")
             val extension = url.substringAfterLast('.')
             val filePath = cachePath(
                 "icons",
@@ -48,13 +71,47 @@ object ImageCache {
             Environment.fileSystem.read(filePath) {
                 val stream = inputStream().buffered()
                 when (extension) {
-                    "svg" -> loadSvgPainter(stream, density)
-                    else -> BitmapPainter(loadImageBitmap(stream))
+                    "svg" -> SinglePainterHolder(loadSvgPainter(stream, density))
+                    "gif" -> {
+                        val codec = Codec.makeFromData(Data.makeFromBytes(stream.readAllBytes()))
+
+                        AnimationPainterHolder(
+                            (0 until codec.frameCount).map { frameIndex ->
+                                val bitmap = Bitmap()
+                                bitmap.allocPixels(codec.imageInfo)
+                                codec.readPixels(bitmap, frameIndex)
+                                BitmapPainter(bitmap.asComposeImageBitmap())
+                            },
+                            codec.framesInfo
+                        )
+                    }
+                    else -> SinglePainterHolder(BitmapPainter(loadImageBitmap(stream)))
                 }
             }
-        } catch (exc: Exception) {
-            exc.printStackTrace()
-            null
         }
+    }
+
+    return when (val currentPainterHolder = painterHolder) {
+        is SinglePainterHolder -> currentPainterHolder.painter
+        is AnimationPainterHolder -> {
+            val transition = rememberInfiniteTransition()
+            val frameIndex by transition.animateValue(
+                initialValue = 0,
+                targetValue = currentPainterHolder.painters.lastIndex,
+                Int.VectorConverter,
+                animationSpec = infiniteRepeatable(
+                    animation = keyframes {
+                        durationMillis = 0
+                        for ((index, frame) in currentPainterHolder.framesInfo.withIndex()) {
+                            index at durationMillis
+                            durationMillis += frame.duration
+                        }
+                    }
+                )
+            )
+
+            currentPainterHolder.painters[frameIndex]
+        }
+        else -> null
     }
 }

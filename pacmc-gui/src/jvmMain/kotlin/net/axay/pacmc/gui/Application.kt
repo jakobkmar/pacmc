@@ -16,9 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -28,13 +26,11 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import compose.icons.TablerIcons
 import compose.icons.tablericons.Download
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import net.axay.pacmc.app.data.Repository
 import net.axay.pacmc.app.repoapi.RepositoryApi
 import net.axay.pacmc.app.repoapi.model.CommonProjectInfo
-import net.axay.pacmc.gui.cache.ImageCache
+import net.axay.pacmc.gui.cache.producePainterCached
 
 @OptIn(ExperimentalFoundationApi::class)
 fun main() = application {
@@ -122,14 +118,10 @@ fun ProjectIconImage(
     modifier: Modifier = Modifier,
     contentScale: ContentScale = ContentScale.Fit,
 ) {
-    val density = LocalDensity.current
-
-    val painter by produceState<Painter?>(null, project) {
-        value = withContext(Dispatchers.IO) {
-            val iconUrl = project.iconUrl?.ifEmpty { null } ?: "https://cdn.modrinth.com/placeholder.svg"
-            ImageCache.loadProjectIcon(iconUrl, project.id, density)
-        }
-    }
+    val painter = producePainterCached(
+        project.iconUrl?.ifEmpty { null } ?: "https://cdn.modrinth.com/placeholder.svg",
+        project.id
+    )
 
     if (painter != null) {
         Image(
