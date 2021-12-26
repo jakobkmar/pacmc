@@ -26,6 +26,7 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import compose.icons.TablerIcons
 import compose.icons.tablericons.Download
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.axay.pacmc.app.data.Repository
 import net.axay.pacmc.app.repoapi.RepositoryApi
@@ -51,6 +52,9 @@ fun main() = application {
                 onValueChange = {
                     searchTerm = it
                     searchScope.launch {
+                        delay(200)
+                        if (searchTerm != it) return@launch
+
                         println("sending request")
                         val projects = RepositoryApi.search(it, Repository.MODRINTH)
                         if (searchTerm == it) {
