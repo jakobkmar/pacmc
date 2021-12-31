@@ -13,7 +13,7 @@ object RepositoryApi {
         val results = mutableListOf<CommonProjectInfo>()
 
         if (repository == null || repository == Repository.MODRINTH) {
-            results += modrinthApi.searchProjects(searchTerm)?.hits.orEmpty().map {
+            results += modrinthApi.searchProjects(searchTerm, limit = 20)?.hits.orEmpty().map {
                 CommonProjectInfo.fromModrinthProjectResult(it)
             }
         }
