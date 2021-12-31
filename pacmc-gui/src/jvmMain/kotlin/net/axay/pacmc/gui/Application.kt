@@ -7,20 +7,23 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.Icon
-import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
@@ -33,7 +36,7 @@ import net.axay.pacmc.app.repoapi.RepositoryApi
 import net.axay.pacmc.app.repoapi.model.CommonProjectInfo
 import net.axay.pacmc.gui.cache.producePainterCached
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalUnitApi::class)
 fun main() = application {
     Window(
         onCloseRequest = ::exitApplication,
@@ -47,32 +50,52 @@ fun main() = application {
             var searchTerm by remember { mutableStateOf("") }
             val searchResults = remember { mutableStateListOf<CommonProjectInfo>() }
 
-            OutlinedTextField(
-                searchTerm,
-                onValueChange = {
-                    searchTerm = it
-                    searchScope.launch {
-                        delay(200)
-                        if (searchTerm != it) return@launch
+            Row(
+                Modifier
+                    .fillMaxWidth().padding(20.dp).height(40.dp)
+                    .background(Color.White, RoundedCornerShape(10.dp)),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(Icons.Default.Search, "Search", Modifier.padding(start = 8.dp).padding(vertical = 4.dp))
+                Box(contentAlignment = Alignment.CenterStart) {
+                    BasicTextField(
+                        searchTerm,
+                        onValueChange = {
+                            searchTerm = it
+                            searchScope.launch {
+                                delay(200)
+                                if (searchTerm != it) return@launch
 
-                        println("sending request")
-                        val projects = RepositoryApi.search(it, Repository.MODRINTH)
-                        if (searchTerm == it) {
-                            searchResults.clear()
-                            searchResults.addAll(projects)
-                        }
+                                println("sending request")
+                                val projects = RepositoryApi.search(it, Repository.MODRINTH)
+                                if (searchTerm == it) {
+                                    searchResults.clear()
+                                    searchResults.addAll(projects)
+                                }
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth().padding(start = 4.dp, end = 8.dp).padding(vertical = 4.dp),
+                        textStyle = TextStyle(fontSize = TextUnit(18f, TextUnitType.Sp)),
+                        maxLines = 1,
+                    )
+                    if (searchTerm.isEmpty()) {
+                        Text("Search...", Modifier.padding(start = 4.dp))
                     }
-                },
-                modifier = Modifier.fillMaxWidth().padding(8.dp)
-            )
+                }
+            }
+
+            val listState = rememberLazyListState()
 
             LazyVerticalGrid(
+                state = listState,
                 cells = GridCells.Adaptive(500.dp),
-                contentPadding = PaddingValues(20.dp),
+                contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 20.dp),
                 horizontalArrangement = Arrangement.spacedBy(15.dp),
                 verticalArrangement = Arrangement.spacedBy(15.dp),
             ) {
-                items(searchResults) { ProjectItem(it) }
+                items(searchResults) {
+                    ProjectItem(it)
+                }
             }
         }
     }
@@ -129,7 +152,7 @@ fun ProjectIconImage(
 
     if (painter != null) {
         Image(
-            painter = painter!!,
+            painter = painter,
             contentDescription = "Icon of ${project.name}",
             contentScale = contentScale,
             modifier = modifier
