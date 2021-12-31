@@ -46,7 +46,6 @@ fun producePainterCached(
 
     val painterHolder by produceState<PainterHolder?>(null, key1 = url) {
         value = withContext(Dispatchers.IO) {
-            println("loading icon for $url")
             val extension = url.substringAfterLast('.')
             val filePath = cachePath(
                 "icons",
@@ -73,17 +72,22 @@ fun producePainterCached(
                 when (extension) {
                     "svg" -> SinglePainterHolder(loadSvgPainter(stream, density))
                     "gif" -> {
-                        val codec = Codec.makeFromData(Data.makeFromBytes(stream.readAllBytes()))
+                        val bytes = stream.readAllBytes()
+                        val codec = Codec.makeFromData(Data.makeFromBytes(bytes))
 
-                        AnimationPainterHolder(
-                            (0 until codec.frameCount).map { frameIndex ->
-                                val bitmap = Bitmap()
-                                bitmap.allocPixels(codec.imageInfo)
-                                codec.readPixels(bitmap, frameIndex)
-                                BitmapPainter(bitmap.asComposeImageBitmap())
-                            },
-                            codec.framesInfo
-                        )
+                        if (codec.frameCount > 1) {
+                            AnimationPainterHolder(
+                                (0 until codec.frameCount).map { frameIndex ->
+                                    val bitmap = Bitmap()
+                                    bitmap.allocPixels(codec.imageInfo)
+                                    codec.readPixels(bitmap, frameIndex)
+                                    BitmapPainter(bitmap.asComposeImageBitmap())
+                                },
+                                codec.framesInfo
+                            )
+                        } else {
+                            SinglePainterHolder(BitmapPainter(loadImageBitmap(bytes.inputStream())))
+                        }
                     }
                     else -> SinglePainterHolder(BitmapPainter(loadImageBitmap(stream)))
                 }
