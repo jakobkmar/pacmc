@@ -1,9 +1,12 @@
 package net.axay.pacmc.app.repoapi
 
+import net.axay.pacmc.app.data.MinecraftVersion
 import net.axay.pacmc.app.data.ModId
+import net.axay.pacmc.app.data.ModLoader
 import net.axay.pacmc.app.data.Repository
 import net.axay.pacmc.app.ktorClient
 import net.axay.pacmc.app.repoapi.model.CommonProjectInfo
+import net.axay.pacmc.app.repoapi.model.CommonProjectVersion
 import net.axay.pacmc.repoapi.modrinth.ModrinthApi
 
 object RepositoryApi {
@@ -25,10 +28,20 @@ object RepositoryApi {
         return results
     }
 
-    suspend fun getProject(modId: ModId): CommonProjectInfo? {
-        return when (modId.repository) {
-            Repository.MODRINTH -> TODO()
-            Repository.CURSEFORGE -> TODO()
+    suspend fun getProject(modId: ModId): CommonProjectInfo? = when (modId.repository) {
+        Repository.MODRINTH -> TODO()
+        Repository.CURSEFORGE -> TODO()
+    }
+
+    suspend fun getProjectVersions(
+        modId: ModId,
+        loaders: List<ModLoader>? = null,
+        gameVersions: List<MinecraftVersion>? = null,
+    ) = when (modId.repository) {
+        Repository.MODRINTH -> {
+            modrinthApi.getProjectVersions(modId.id, loaders?.map { it.identifier }, gameVersions?.map { it.toString() })
+                ?.map { CommonProjectVersion.fromModrinthProjectVersion(it) }
         }
+        Repository.CURSEFORGE -> TODO()
     }
 }
