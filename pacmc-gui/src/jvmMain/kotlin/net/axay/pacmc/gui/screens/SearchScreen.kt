@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.*
 import co.touchlab.kermit.Logger
 import compose.icons.TablerIcons
 import compose.icons.tablericons.Download
+import compose.icons.tablericons.MoodCry
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.axay.pacmc.app.data.Repository
@@ -130,6 +131,8 @@ fun SearchScreen() = Box {
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    Image(TablerIcons.MoodCry, "Sad Face", Modifier.size(40.dp))
+                    Spacer(Modifier.height(5.dp))
                     Text(
                         buildString {
                             appendLine("Did not receive a valid response for '${searchTerm}'")

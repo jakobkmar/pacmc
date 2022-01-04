@@ -16,8 +16,7 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import compose.icons.TablerIcons
-import compose.icons.tablericons.Archive
-import compose.icons.tablericons.Package
+import compose.icons.tablericons.*
 import net.axay.pacmc.gui.screens.ArchiveScreen
 import net.axay.pacmc.gui.screens.SearchScreen
 
@@ -26,7 +25,10 @@ private enum class Screen(
     val icon: ImageVector,
 ) {
     SEARCH("Search", TablerIcons.Package),
-    ARCHIVE("Archives", TablerIcons.Archive);
+    INSTANCE("Instances", TablerIcons.Stack),
+    ARCHIVE("Archives", TablerIcons.Archive),
+    SERVER("Server", TablerIcons.Server),
+    NEWS("News", TablerIcons.News);
 }
 
 fun main() = application {
