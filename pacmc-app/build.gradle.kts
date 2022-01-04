@@ -17,6 +17,7 @@ kotlin {
                 api("org.jetbrains.kotlinx:kotlinx-datetime:0.3.1")
                 api("io.ktor:ktor-client-cio:1.6.7")
                 api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
+                api("co.touchlab:kermit:1.0.0")
             }
         }
 

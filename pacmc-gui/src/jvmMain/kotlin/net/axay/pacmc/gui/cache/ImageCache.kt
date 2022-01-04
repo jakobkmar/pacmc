@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.res.loadSvgPainter
+import co.touchlab.kermit.Logger
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.util.*
@@ -62,10 +63,17 @@ fun producePainterCached(
             }
 
             if (download) {
-                val bytes = ktorClient.get<HttpResponse>(url).content.toByteArray()
-                Environment.fileSystem.createDirectories(filePath.parent!!)
-                Environment.fileSystem.write(filePath) { write(bytes) }
+                try {
+                    val bytes = ktorClient.get<HttpResponse>(url).content.toByteArray()
+                    Environment.fileSystem.createDirectories(filePath.parent!!)
+                    Environment.fileSystem.write(filePath) { write(bytes) }
+                } catch (exc: Exception) {
+                    Logger.w("Failed to download image $url (${exc.message})")
+                }
             }
+
+            if (!Environment.fileSystem.exists(filePath))
+                return@withContext null
 
             Environment.fileSystem.read(filePath) {
                 val stream = inputStream().buffered()
