@@ -50,7 +50,7 @@ private class SearchResponseFailure(
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalUnitApi::class)
 @Composable
-fun SearchScreen() = Box {
+fun SearchScreen() {
     val searchScope = rememberCoroutineScope()
     var searchTerm by remember { mutableStateOf("") }
     var loading by remember { mutableStateOf(false) }

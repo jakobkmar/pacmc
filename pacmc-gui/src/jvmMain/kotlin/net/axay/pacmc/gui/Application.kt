@@ -1,6 +1,7 @@
 package net.axay.pacmc.gui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Icon
@@ -53,9 +54,11 @@ fun main() = application {
                 }
             }
 
-            when (currentScreen) {
-                Screen.SEARCH -> SearchScreen()
-                Screen.ARCHIVE -> ArchiveScreen()
+            Box {
+                when (currentScreen) {
+                    Screen.SEARCH -> SearchScreen()
+                    Screen.ARCHIVE -> ArchiveScreen()
+                }
             }
         }
     }
