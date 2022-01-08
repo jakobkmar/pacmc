@@ -8,4 +8,5 @@ expect object Environment {
     val dataLocalDir: Path
     val cacheDir: Path
     val osName: String
+    val userHome: Path
 }
