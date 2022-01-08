@@ -7,6 +7,7 @@ import net.axay.pacmc.app.Environment
 import org.lwjgl.system.MemoryUtil
 import org.lwjgl.util.nfd.NativeFileDialog
 import javax.swing.JFileChooser
+import javax.swing.UIManager
 
 object FileChooser {
     suspend fun chooseDirectory(): String? {
@@ -49,6 +50,8 @@ object FileChooser {
     }
 
     private suspend fun chooseDirectorySwing() = withContext(Dispatchers.IO) {
+        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
+
         val chooser = JFileChooser(Environment.userHome.toString()).apply {
             fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
             isVisible = true
