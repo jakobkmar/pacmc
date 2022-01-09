@@ -11,15 +11,15 @@ import javax.swing.UIManager
 
 object FileChooser {
     suspend fun chooseDirectory(): String? {
-        kotlin.runCatching { chooseDirectoryNative() }
-            .onFailure {
-                Logger.w("A call to chooseDirectoryNative failed: ${it.message}")
-            }
-            .getOrNull()?.let { return it }
+        return kotlin.runCatching { chooseDirectoryNative() }
+            .onFailure { nativeException ->
+                Logger.e("A call to chooseDirectoryNative failed: ${nativeException.message}")
 
-        return kotlin.runCatching { chooseDirectorySwing() }
-            .onFailure {
-                Logger.e("A call to chooseDirectorySwing failed ${it.message}")
+                return kotlin.runCatching { chooseDirectorySwing() }
+                    .onFailure { swingException ->
+                        Logger.e("A call to chooseDirectorySwing failed ${swingException.message}")
+                    }
+                    .getOrNull()
             }
             .getOrNull()
     }
@@ -35,14 +35,8 @@ object FileChooser {
                     path
                 }
                 NativeFileDialog.NFD_CANCEL -> null
-                NativeFileDialog.NFD_ERROR -> {
-                    Logger.e("An error occurred while executing NativeFileDialog.NFD_PickFolder")
-                    null
-                }
-                else -> {
-                    Logger.w("Unknown return code '${code}' from NativeFileDialog.NFD_PickFolder")
-                    null
-                }
+                NativeFileDialog.NFD_ERROR -> error("An error occurred while executing NativeFileDialog.NFD_PickFolder")
+                else -> error("Unknown return code '${code}' from NativeFileDialog.NFD_PickFolder")
             }
         } finally {
             MemoryUtil.memFree(pathPointer)
@@ -60,14 +54,8 @@ object FileChooser {
         when (val code = chooser.showOpenDialog(null)) {
             JFileChooser.APPROVE_OPTION -> chooser.selectedFile.absolutePath
             JFileChooser.CANCEL_OPTION -> null
-            JFileChooser.ERROR_OPTION -> {
-                Logger.e("An error occurred while executing JFileChooser::showOpenDialog")
-                null
-            }
-            else -> {
-                Logger.w("Unknown return code '${code}' from JFileChooser::showOpenDialog")
-                null
-            }
+            JFileChooser.ERROR_OPTION -> error("An error occurred while executing JFileChooser::showOpenDialog")
+            else -> error("Unknown return code '${code}' from JFileChooser::showOpenDialog")
         }
     }
 }
