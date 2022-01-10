@@ -10,9 +10,9 @@ kotlin {
     sourceSets {
         named("commonMain") {
             dependencies {
-
-                api("io.ktor:ktor-client-core:1.6.7")
-                api("io.ktor:ktor-client-serialization:1.6.7")
+                api(libs.ktor.client.core)
+                api(libs.ktor.client.serialization)
+                api(libs.kotlinx.datetime)
             }
         }
     }

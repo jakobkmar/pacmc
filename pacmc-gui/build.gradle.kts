@@ -18,7 +18,7 @@ kotlin {
 
                 implementation(compose.desktop.currentOs)
 
-                implementation("br.com.devsrsouza.compose.icons.jetbrains:tabler-icons:1.0.0")
+                implementation(libs.devsrsouza.icons.tablericons)
 
                 val lwjglVersion = "3.3.0"
                 listOf("lwjgl", "lwjgl-nfd").forEach { lwjglDep ->

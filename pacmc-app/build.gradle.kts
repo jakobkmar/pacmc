@@ -12,12 +12,12 @@ kotlin {
         named("commonMain") {
             dependencies {
                 api(project(":pacmc-repo-api"))
-                api("com.squareup.okio:okio:3.0.0")
-                api("io.realm.kotlin:library-base:0.8.0")
-                api("org.jetbrains.kotlinx:kotlinx-datetime:0.3.1")
-                api("io.ktor:ktor-client-cio:1.6.7")
-                api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
-                api("co.touchlab:kermit:1.0.0")
+                api(libs.okio)
+                api(libs.realm.base)
+                api(libs.kotlinx.datetime)
+                api(libs.ktor.client.cio)
+                api(libs.kotlinx.coroutines.core)
+                api(libs.kermit)
             }
         }
 
