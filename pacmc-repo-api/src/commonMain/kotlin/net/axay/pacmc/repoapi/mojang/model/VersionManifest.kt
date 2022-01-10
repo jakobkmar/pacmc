@@ -22,6 +22,8 @@ data class VersionManifest(
         val url: String,
         val time: Instant,
         val releaseTime: Instant,
+        val sha1: String,
+        val complianceLevel: String,
     ) {
         @Serializable
         enum class Type {

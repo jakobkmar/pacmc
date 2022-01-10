@@ -10,5 +10,5 @@ class LauncherMetaApi(
 ) : AbstractRepositoryApi() {
 
     suspend fun getVersionManifest() =
-        repoRequest<VersionManifest>("/game/version_manifest.json")
+        repoRequest<VersionManifest>("/game/version_manifest_v2.json")
 }
