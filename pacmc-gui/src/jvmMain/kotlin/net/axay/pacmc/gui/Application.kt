@@ -21,7 +21,11 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import compose.icons.TablerIcons
 import compose.icons.tablericons.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import net.axay.pacmc.app.CommonApplication
+import net.axay.pacmc.app.database.realm
 import net.axay.pacmc.gui.screens.ArchiveScreen
 import net.axay.pacmc.gui.screens.SearchScreen
 
@@ -38,6 +42,8 @@ private enum class Screen(
 
 fun main() {
     CommonApplication.init()
+
+    CoroutineScope(Dispatchers.IO).launch { realm }
 
     application {
         Window(
