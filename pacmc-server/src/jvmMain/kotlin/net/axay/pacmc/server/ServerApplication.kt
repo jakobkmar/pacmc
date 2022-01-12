@@ -10,7 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import net.axay.pacmc.server.feeds.MinecraftFeedHandler
 import net.axay.pacmc.server.routes.routeIndex
-
+import net.axay.pacmc.server.routes.routeNews
 
 fun main() {
     runBlocking(Dispatchers.Default) {
@@ -23,6 +23,7 @@ fun main() {
 
             routing {
                 routeIndex()
+                routeNews()
             }
         }.start(wait = true)
     }
