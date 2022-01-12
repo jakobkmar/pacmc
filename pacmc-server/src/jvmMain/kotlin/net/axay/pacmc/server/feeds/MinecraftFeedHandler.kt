@@ -7,6 +7,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collect
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toKotlinLocalDateTime
@@ -18,6 +19,7 @@ import net.axay.pacmc.server.requestText
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import org.litote.kmongo.eq
+import org.litote.kmongo.setValue
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
@@ -114,6 +116,18 @@ class MinecraftFeedHandler {
         }.onFailure {
             log.e("Failed to parse $url (${it.message})", it)
         }.getOrNull()
+    }
+
+    fun updateContentJson() = monitorScope.launch {
+        var count = 0
+        db.minecraftFeed.find().toFlow().collect {
+            db.minecraftFeed.updateOne(
+                MinecraftArticle::url eq it.url,
+                setValue(MinecraftArticle::contentJson, Json.encodeToString(HtmlMarkupParser.parse(Jsoup.parse(it.contentHtml))))
+            )
+            count++
+        }
+        log.i("Updated json of $count articles")
     }
 
     private data class RssFeed(val channel: Channel) {
