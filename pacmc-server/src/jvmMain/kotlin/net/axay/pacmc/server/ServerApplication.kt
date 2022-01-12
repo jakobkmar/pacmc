@@ -6,25 +6,21 @@ import io.ktor.routing.*
 import io.ktor.serialization.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 import net.axay.pacmc.server.feeds.MinecraftFeedHandler
 import net.axay.pacmc.server.routes.routeIndex
 import net.axay.pacmc.server.routes.routeNews
 
 fun main() {
-    runBlocking(Dispatchers.Default) {
-        MinecraftFeedHandler().monitor()
+    MinecraftFeedHandler().monitor()
 
-        embeddedServer(Netty, port = 8080) {
-            install(ContentNegotiation) {
-                json()
-            }
+    embeddedServer(Netty, port = 8080) {
+        install(ContentNegotiation) {
+            json()
+        }
 
-            routing {
-                routeIndex()
-                routeNews()
-            }
-        }.start(wait = true)
-    }
+        routing {
+            routeIndex()
+            routeNews()
+        }
+    }.start(wait = true)
 }

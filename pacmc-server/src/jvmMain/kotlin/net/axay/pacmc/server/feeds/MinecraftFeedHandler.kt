@@ -37,7 +37,7 @@ class MinecraftFeedHandler {
 
     private val log = Logger.withTag("Minecraft Feed")
 
-    suspend fun monitor() = monitorScope.launch {
+    fun monitor() = monitorScope.launch {
         while (isActive) {
             httpClient.requestText(FEED_URL).onSuccess { response ->
                 kotlin.runCatching {
