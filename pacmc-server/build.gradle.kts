@@ -20,7 +20,9 @@ kotlin {
                 implementation(libs.jackson.kotlin)
                 implementation(libs.jackson.xml)
                 implementation(libs.jsoup)
+
                 implementation(libs.kmongo)
+                implementation(libs.kmongo.id)
             }
         }
     }

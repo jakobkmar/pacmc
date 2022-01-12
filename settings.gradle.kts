@@ -47,7 +47,10 @@ dependencyResolutionManagement {
 
             alias("slfj4-simple").to("org.slf4j:slf4j-simple:1.7.32")
             alias("jsoup").to("org.jsoup:jsoup:1.14.3")
-            alias("kmongo").to("org.litote.kmongo:kmongo-coroutine-serialization:4.4.0")
+
+            version("kmongo", "4.4.0")
+            alias("kmongo").to("org.litote.kmongo", "kmongo-coroutine-serialization").versionRef("kmongo")
+            alias("kmongo-id").to("org.litote.kmongo", "kmongo-id-serialization").versionRef("kmongo")
         }
     }
 }
