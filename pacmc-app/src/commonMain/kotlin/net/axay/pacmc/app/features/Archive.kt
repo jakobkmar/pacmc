@@ -7,8 +7,6 @@ import io.ktor.client.statement.*
 import io.realm.objects
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.toList
 import net.axay.pacmc.app.Environment
 import net.axay.pacmc.app.data.ModFile
 import net.axay.pacmc.app.data.ModId
@@ -20,7 +18,7 @@ import okio.Path.Companion.toPath
 
 class Archive(private val name: String) {
     companion object {
-        suspend fun getArchives() = realm.objects<DbArchive>().asFlow().toList()
+        fun getArchives() = realm.objects<DbArchive>()
 
         suspend fun create(dbArchive: DbArchive) {
             realm.write {
