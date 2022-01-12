@@ -57,14 +57,14 @@ class MinecraftFeedHandler {
 
                             db.minecraftFeed.insertOne(
                                 MinecraftArticle(
-                                    item.link,
+                                    item.link.trim(),
                                     ZonedDateTime.parse(item.pubDate, DateTimeFormatter.RFC_1123_DATE_TIME)
                                         .toLocalDateTime().toKotlinLocalDateTime().toInstant(TimeZone.UTC),
-                                    item.primaryTag,
-                                    item.imageURL,
+                                    item.primaryTag.trim(),
+                                    item.imageURL.trim(),
                                     parseResult.headerImage,
-                                    item.title,
-                                    item.description,
+                                    item.title.trim(),
+                                    item.description.trim(),
                                     parseResult.author,
                                     parseResult.content.html(),
                                     Json.encodeToString(HtmlMarkupParser.parse(parseResult.content))
