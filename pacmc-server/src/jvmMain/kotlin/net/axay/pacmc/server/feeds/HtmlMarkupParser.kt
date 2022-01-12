@@ -42,10 +42,17 @@ object HtmlMarkupParser {
                     "ul", "ol" -> ListNode(child.select("> li").map { parseNodes(it) }, child.tagName() == "ol")
                     // link
                     "a" -> {
-                        val videoElement = child.select("div[data-video-url]").first()
-                        child.attr("href").ifBlank { null }
-                            ?.let { LinkNode(parseNodes(child), it, videoElement != null) }
+                        val videoElement = child.selectFirst("div[data-video-url]")
+                        child.attr("href").ifBlank { null }?.let {
+                            if (videoElement == null) {
+                                LinkNode(parseNodes(child), it, false)
+                            } else {
+                                LinkNode(parseNodes(child), videoElement.attr("data-video-url"), true)
+                            }
+                        }
                     }
+                    // ignore svg for now
+                    "svg" -> return@flatMap emptyList()
                     else -> null
                 }
                 if (node != null) listOf(node) else parseNodes(child)
