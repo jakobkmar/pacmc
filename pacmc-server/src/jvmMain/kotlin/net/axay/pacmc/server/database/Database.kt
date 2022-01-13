@@ -6,7 +6,7 @@ import com.mongodb.client.model.Indexes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import net.axay.pacmc.server.feeds.MinecraftArticle
+import net.axay.pacmc.server.model.MinecraftArticle
 import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.reactivestreams.KMongo
 import org.litote.kmongo.textIndex

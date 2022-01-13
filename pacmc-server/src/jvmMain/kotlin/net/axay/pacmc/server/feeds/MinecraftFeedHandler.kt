@@ -15,6 +15,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import net.axay.pacmc.server.database.db
 import net.axay.pacmc.server.httpClient
+import net.axay.pacmc.server.model.MinecraftArticle
 import net.axay.pacmc.server.requestText
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element

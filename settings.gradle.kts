@@ -12,6 +12,7 @@ include("pacmc-repo-api")
 
 // server-side
 include("pacmc-server")
+include("pacmc-server:pacmc-server-model")
 
 // applications
 include("pacmc-app")
@@ -24,6 +25,7 @@ dependencyResolutionManagement {
     @Suppress("UnstableApiUsage")
     versionCatalogs {
         create("libs") {
+            alias("kotlinx-serialization-json").to("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
             alias("kotlinx-coroutines-core").to("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
             alias("kotlinx-datetime").to("org.jetbrains.kotlinx:kotlinx-datetime:0.3.1")
 
@@ -50,7 +52,6 @@ dependencyResolutionManagement {
 
             version("kmongo", "4.4.0")
             alias("kmongo").to("org.litote.kmongo", "kmongo-coroutine-serialization").versionRef("kmongo")
-            alias("kmongo-id").to("org.litote.kmongo", "kmongo-id-serialization").versionRef("kmongo")
         }
     }
 }
