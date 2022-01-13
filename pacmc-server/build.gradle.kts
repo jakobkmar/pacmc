@@ -7,8 +7,10 @@ kotlin {
     jvm()
 
     sourceSets {
-        named("commonMain") {
+        named("jvmMain") {
             dependencies {
+                api(project(":pacmc-server:pacmc-server-model"))
+
                 implementation(libs.ktor.server.core)
                 implementation(libs.ktor.server.netty)
                 implementation(libs.ktor.server.serialization)
@@ -22,7 +24,6 @@ kotlin {
                 implementation(libs.jsoup)
 
                 implementation(libs.kmongo)
-                implementation(libs.kmongo.id)
             }
         }
     }
