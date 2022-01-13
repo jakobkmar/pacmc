@@ -14,40 +14,38 @@ import net.axay.pacmc.server.feeds.MinecraftArticle
 import org.bson.types.ObjectId
 import org.litote.kmongo.*
 
-fun Routing.routeNews() {
-    route("/news/minecraft") {
-        get {
-            val params = call.request.queryParameters
-            val query = params["query"]
+fun Routing.routeNews() = route("/news/minecraft") {
+    get {
+        val params = call.request.queryParameters
+        val query = params["query"]
 
-            val pipeline = buildList {
-                if (query != null) {
-                    add(match(text(query)))
-                    add(sort(MinecraftArticle::title.sortByMetaTextScore()))
-                } else {
-                    add(sort(descending(MinecraftArticle::datePublished)))
-                }
-                add(project(exclude(MinecraftArticle::contentHtml, MinecraftArticle::contentJson)))
+        val pipeline = buildList {
+            if (query != null) {
+                add(match(text(query)))
+                add(sort(MinecraftArticle::title.sortByMetaTextScore()))
+            } else {
+                add(sort(descending(MinecraftArticle::datePublished)))
             }
-
-            val articles = db.minecraftFeed.aggregate<SearchResult>(pipeline)
-            call.respond(articles.toList())
+            add(project(exclude(MinecraftArticle::contentHtml, MinecraftArticle::contentJson)))
         }
 
-        get("/{id}") {
-            val params = call.parameters
-            val id = params["id"]
+        val articles = db.minecraftFeed.aggregate<SearchResult>(pipeline)
+        call.respond(articles.toList())
+    }
 
-            if (id != null) {
-                val feed = db.minecraftFeed.findOne(Filters.eq(ObjectId(id)))
-                if (feed != null) {
-                    call.respond(feed)
-                    return@get
-                }
+    get("/{id}") {
+        val params = call.parameters
+        val id = params["id"]
+
+        if (id != null) {
+            val feed = db.minecraftFeed.findOne(Filters.eq(ObjectId(id)))
+            if (feed != null) {
+                call.respond(feed)
+                return@get
             }
-
-            call.response.status(HttpStatusCode.NotFound)
         }
+
+        call.response.status(HttpStatusCode.NotFound)
     }
 }
 
