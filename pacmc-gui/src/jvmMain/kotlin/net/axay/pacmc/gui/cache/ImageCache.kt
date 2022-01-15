@@ -19,7 +19,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import net.axay.pacmc.app.Environment
-import net.axay.pacmc.app.data.ModId
 import net.axay.pacmc.app.ktorClient
 import org.jetbrains.skia.AnimationFrameInfo
 import org.jetbrains.skia.Bitmap
@@ -41,17 +40,16 @@ private class AnimationPainterHolder(
 @Composable
 fun producePainterCached(
     url: String,
-    modId: ModId,
+    cacheGroup: String,
+    cacheName: String,
+    maxAgeHours: Int = 24,
 ): Painter? {
     val density = LocalDensity.current
 
     val painterHolder by produceState<PainterHolder?>(null, key1 = url) {
         value = withContext(Dispatchers.IO) {
             val extension = url.substringAfterLast('.')
-            val filePath = cachePath(
-                "icons",
-                "${modId.repository.shortForm}_${modId.id}." + extension
-            )
+            val filePath = cachePath(cacheGroup, "${cacheName}.${extension}")
 
             val download = if (!Environment.fileSystem.exists(filePath)) {
                 true
@@ -59,7 +57,7 @@ fun producePainterCached(
                 val cacheAgeHours = Environment.fileSystem.metadata(filePath).lastModifiedAtMillis?.let {
                     Clock.System.now().minus(Instant.fromEpochMilliseconds(it))
                 }?.inWholeHours
-                if (cacheAgeHours == null) true else cacheAgeHours >= 24
+                if (cacheAgeHours == null) true else cacheAgeHours >= maxAgeHours
             }
 
             if (download) {

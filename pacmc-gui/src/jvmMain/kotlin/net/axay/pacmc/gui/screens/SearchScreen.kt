@@ -197,7 +197,8 @@ fun ProjectIconImage(
 ) {
     val painter = producePainterCached(
         project.iconUrl?.ifEmpty { null } ?: "https://cdn.modrinth.com/placeholder.svg",
-        project.id
+        "project_icons",
+        "${project.id.repository.shortForm}_${project.id.id}",
     )
 
     if (painter != null) {
