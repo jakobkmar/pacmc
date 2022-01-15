@@ -12,10 +12,15 @@ kotlin {
     jvm()
 
     sourceSets {
+        named("commonMain") {
+            dependencies {
+                implementation(project(":pacmc-server:pacmc-server-model"))
+                implementation(project(":pacmc-app"))
+            }
+        }
+
         named("jvmMain") {
             dependencies {
-                implementation(project(":pacmc-app"))
-
                 implementation(compose.desktop.currentOs)
 
                 implementation(libs.devsrsouza.icons.tablericons)

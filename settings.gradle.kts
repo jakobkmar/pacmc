@@ -27,7 +27,7 @@ dependencyResolutionManagement {
         create("libs") {
             alias("kotlinx-serialization-json").to("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
             alias("kotlinx-coroutines-core").to("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
-            alias("kotlinx-datetime").to("org.jetbrains.kotlinx:kotlinx-datetime:0.3.1")
+            alias("kotlinx-datetime").to("org.jetbrains.kotlinx:kotlinx-datetime:0.3.2")
 
             version("ktor", "1.6.7")
             alias("ktor-client-core").to("io.ktor", "ktor-client-core").versionRef("ktor")
