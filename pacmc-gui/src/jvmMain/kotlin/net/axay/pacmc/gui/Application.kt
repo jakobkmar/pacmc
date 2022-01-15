@@ -27,6 +27,7 @@ import kotlinx.coroutines.launch
 import net.axay.pacmc.app.CommonApplication
 import net.axay.pacmc.app.database.realm
 import net.axay.pacmc.gui.screens.ArchiveScreen
+import net.axay.pacmc.gui.screens.NewsScreen
 import net.axay.pacmc.gui.screens.SearchScreen
 
 private enum class Screen(
@@ -71,6 +72,7 @@ fun main() {
                     when (currentScreen) {
                         Screen.SEARCH -> SearchScreen()
                         Screen.ARCHIVE -> ArchiveScreen()
+                        Screen.NEWS -> NewsScreen()
                     }
                 }
             }
