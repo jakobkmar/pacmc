@@ -1,6 +1,6 @@
 package net.axay.pacmc.server.feeds
 
-import net.axay.pacmc.server.model.HtmlMarkup.*
+import net.axay.pacmc.server.model.JsonMarkup.*
 import org.jsoup.nodes.Element
 
 object HtmlMarkupParser {

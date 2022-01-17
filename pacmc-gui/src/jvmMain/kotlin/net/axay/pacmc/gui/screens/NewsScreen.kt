@@ -1,20 +1,15 @@
 package net.axay.pacmc.gui.screens
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.produceState
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -24,8 +19,12 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import io.ktor.client.request.*
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import net.axay.pacmc.app.ktorClient
 import net.axay.pacmc.gui.cache.producePainterCached
+import net.axay.pacmc.gui.util.JsonMarkup
+import net.axay.pacmc.server.model.JsonMarkup
 import net.axay.pacmc.server.model.MinecraftArticle
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalUnitApi::class)
@@ -35,16 +34,34 @@ fun NewsScreen() {
         value = ktorClient.get("http://localhost:8080/news/minecraft")
     }
 
-    val currentNews = news
-    if (currentNews != null) {
-        LazyVerticalGrid(
-            cells = GridCells.Adaptive(500.dp),
-        ) {
-            items(currentNews) { searchResult ->
-                Box(contentAlignment = Alignment.TopCenter) {
-                    ArticleResult(searchResult)
+    var currentArticle by remember { mutableStateOf<String?>(null) }
+
+    if (currentArticle == null) {
+        val currentNews = news
+        if (currentNews != null) {
+            LazyVerticalGrid(
+                cells = GridCells.Adaptive(500.dp),
+            ) {
+                items(currentNews) { searchResult ->
+                    Box(
+                        contentAlignment = Alignment.TopCenter,
+                        modifier = Modifier.clickable {
+                            currentArticle = searchResult.id
+                        }
+                    ) {
+                        ArticleResult(searchResult)
+                    }
                 }
             }
+        }
+    } else {
+        val scrollState = rememberScrollState()
+
+        Box(
+            modifier = Modifier.fillMaxSize().verticalScroll(scrollState),
+            contentAlignment = Alignment.TopCenter
+        ) {
+            ArticleView(currentArticle!!)
         }
     }
 }
@@ -76,7 +93,7 @@ private fun ArticleResult(result: MinecraftArticle.SearchResult) {
                 Image(
                     imagePainter,
                     result.title,
-                    Modifier.fillMaxWidth().aspectRatio(headerImageRatio).shadow(4.dp),
+                    Modifier.fillMaxWidth().aspectRatio(headerImageRatio),
                     contentScale = ContentScale.FillWidth,
                 )
             } else {
@@ -94,5 +111,22 @@ private fun ArticleResult(result: MinecraftArticle.SearchResult) {
             textAlign = TextAlign.Center,
         )
         result.description?.let { Text(it, textAlign = TextAlign.Center) }
+    }
+}
+
+@Composable
+private fun ArticleView(articleId: String) {
+    val articleState by produceState<MinecraftArticle?>(null, key1 = articleId) {
+        value = ktorClient.get("http://localhost:8080/news/minecraft/$articleId")
+    }
+    val article = articleState
+
+    if (article != null) {
+        val rootNode = remember { Json.decodeFromString<JsonMarkup.RootNode>(article.contentJson) }
+        Box(Modifier.width(800.dp)) {
+            SelectionContainer {
+                JsonMarkup(rootNode)
+            }
+        }
     }
 }

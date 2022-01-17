@@ -3,7 +3,7 @@ package net.axay.pacmc.server.model
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-class HtmlMarkup {
+class JsonMarkup {
     @Serializable
     sealed class Node
 
