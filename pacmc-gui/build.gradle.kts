@@ -24,6 +24,8 @@ kotlin {
                 implementation(compose.desktop.currentOs)
 
                 implementation(libs.devsrsouza.icons.tablericons)
+                implementation(libs.colormath)
+                implementation(libs.colormath.compose)
 
                 val lwjglVersion = "3.3.0"
                 listOf("lwjgl", "lwjgl-nfd").forEach { lwjglDep ->

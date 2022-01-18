@@ -52,6 +52,10 @@ dependencyResolutionManagement {
 
             version("kmongo", "4.4.0")
             alias("kmongo").to("org.litote.kmongo", "kmongo-coroutine-serialization").versionRef("kmongo")
+
+            version("colormath", "3.2.0")
+            alias("colormath").to("com.github.ajalt.colormath", "colormath").versionRef("colormath")
+            alias("colormath-compose").to("com.github.ajalt.colormath.extensions", "colormath-ext-jetpack-compose").versionRef("colormath")
         }
     }
 }

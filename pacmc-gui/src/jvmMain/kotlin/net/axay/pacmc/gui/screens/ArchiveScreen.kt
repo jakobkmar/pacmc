@@ -5,89 +5,268 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.Button
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.ExperimentalUnitApi
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
+import com.github.ajalt.colormath.model.HSL
+import compose.icons.TablerIcons
+import compose.icons.tablericons.Brush
+import compose.icons.tablericons.Plant2
+import compose.icons.tablericons.Tool
 import io.realm.objects
 import io.realm.realmListOf
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.axay.pacmc.app.data.MinecraftVersion
 import net.axay.pacmc.app.data.ModLoader
 import net.axay.pacmc.app.database.model.DbArchive
 import net.axay.pacmc.app.database.realm
 import net.axay.pacmc.app.features.Archive
+import net.axay.pacmc.gui.screens.state.IdentifierState
+import net.axay.pacmc.gui.util.FileChooser
 import java.util.*
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class, ExperimentalUnitApi::class)
 @Composable
-fun ArchiveScreen() = Column(Modifier.padding(horizontal = 20.dp)) {
-    val archiveScope = rememberCoroutineScope()
+fun ArchiveScreen() = Box(Modifier.fillMaxSize()) {
+    val archiveScope = rememberCoroutineScope { Dispatchers.Default }
 
-    var archives by produceState<List<DbArchive>>(emptyList()) {
-        value = Archive.getArchives()
+    var archives by produceState(emptyList()) {
+        value = withContext(Dispatchers.IO) {
+            Archive.getArchives().toList()
+        }
     } as MutableState<List<DbArchive>>
 
-    Row {
-        Button(
-            onClick = {
-                archiveScope.launch {
-                    val uuid = UUID.randomUUID().toString()
-                    Archive.create(DbArchive(
-                        uuid,
-                        uuid,
-                        "/test/path",
-                        MinecraftVersion(1, 18, 1),
-                        ModLoader.FABRIC,
-                        realmListOf()
-                    ))
-                    archives = Archive.getArchives()
+    var newArchiveDialog by remember { mutableStateOf(false) }
+
+    if (newArchiveDialog) {
+        fun randomColor() = HSL((0..360).random(), 1f, 0.75f).toSRGB().run { Color(redInt, greenInt, blueInt) }
+
+        var displayName by remember { mutableStateOf("") }
+        val identifier = remember { IdentifierState() }
+        var path by remember { mutableStateOf("") }
+        var minecraftVersion by remember { mutableStateOf("") }
+        var color by remember { mutableStateOf(randomColor()) }
+
+        Column(Modifier.width(800.dp).padding(horizontal = 20.dp, vertical = 10.dp).align(Alignment.TopCenter)) {
+            Text("Create new archive", fontSize = TextUnit(25f, TextUnitType.Sp))
+
+            Spacer(Modifier.height(10.dp))
+            Row {
+                TextField(
+                    displayName,
+                    onValueChange = { input ->
+                        displayName = input
+                        if (!identifier.wroteOnceManually) {
+                            val identifierName = input.lowercase().replace(' ', '_')
+                                .filter { it in IdentifierState.allowedChars }
+                            identifier.set(identifierName, false)
+                        }
+                    },
+                    label = { Text("Display Name") },
+                    modifier = Modifier.weight(0.5f)
+                )
+                Spacer(Modifier.requiredWidth(10.dp))
+                TextField(
+                    identifier.value,
+                    onValueChange = { identifier.set(it, true) },
+                    label = { Text("Identifier") },
+                    modifier = Modifier.weight(0.5f),
+                    isError = identifier.isError()
+                )
+            }
+
+            Spacer(Modifier.height(15.dp))
+            Text(buildAnnotatedString {
+                append("Choose the ")
+                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                    append("path")
+                }
+                append(" where all downloaded project files will be stored")
+            })
+            Spacer(Modifier.height(5.dp))
+            Row(Modifier.height(50.dp)) {
+                TextField(
+                    path,
+                    onValueChange = { path = it },
+                    label = { Text("Path") },
+                    modifier = Modifier.weight(0.8f)
+                )
+                Spacer(Modifier.width(10.dp))
+                OutlinedButton(
+                    onClick = {
+                        archiveScope.launch {
+                            FileChooser.chooseDirectory()?.let { path = it }
+                        }
+                    },
+                    modifier = Modifier.fillMaxHeight().weight(0.3f)
+                ) {
+                    Text("Choose directory", fontWeight = FontWeight.SemiBold)
                 }
             }
-        ) {
-            Text("Add new archive")
-        }
 
-        Button(
-            onClick = {
-                archiveScope.launch {
-                    realm.write {
-                        objects<DbArchive>().delete()
+            Spacer(Modifier.height(10.dp))
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(10.dp)) {
+                Column(Modifier.width(200.dp)) {
+                    Text("Archive type", fontWeight = FontWeight.Bold)
+                    Text("Choose the type of resources you wish to install to this archive")
+                }
+                Spacer(Modifier.width(10.dp))
+                TabRow(
+                    0,
+                    backgroundColor = Color.Unspecified,
+                    modifier = Modifier.width(300.dp),
+                    divider = {},
+                ) {
+                    Tab(true, onClick = {}) {
+                        Icon(TablerIcons.Tool, "Modding Tool")
+                        Text("Mods", Modifier.padding(bottom = 4.dp))
                     }
-                    archives = Archive.getArchives()
+                    Tab(false, onClick = {}) {
+                        Icon(TablerIcons.Brush, "Texture Brush")
+                        Text("Textures", Modifier.padding(bottom = 4.dp))
+                    }
+                    Tab(false, onClick = {}) {
+                        Icon(TablerIcons.Plant2, "Shader Vegetation")
+                        Text("Shaders", Modifier.padding(bottom = 4.dp))
+                    }
                 }
             }
-        ) {
-            Text("Clear archives")
-        }
-    }
 
-    Box {
-        val listState = rememberLazyListState()
+            Spacer(Modifier.height(10.dp))
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(10.dp)) {
+                Column {
+                    Text("Archive color", fontWeight = FontWeight.Bold)
+                    Text("Click to randomize")
+                }
+                Spacer(Modifier.width(10.dp))
+                Box(
+                    Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(color, CircleShape)
+                        .border(BorderStroke(2.dp, Color.Black), CircleShape)
+                        .mouseClickable {
+                            color = randomColor()
+                        }
+                )
+            }
 
-        LazyColumn(
-            modifier = Modifier.fillMaxWidth().padding(end = 15.dp),
-            state = listState,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(archives) { archive ->
-                ArchiveItem(archive)
+//            TextField(
+//
+//                readOnly = true,
+//
+//            )
+//            CursorDropdownMenu(true) {
+//
+//            }
+
+            Row(Modifier.align(Alignment.End)) {
+                OutlinedButton(
+                    onClick = {
+                        newArchiveDialog = false
+                    },
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colors.error)
+                ) {
+                    Text("Cancel")
+                }
+                Spacer(Modifier.width(10.dp))
+                Button(
+                    onClick = {
+                        archiveScope.launch {
+//                            Archive.create(DbArchive(
+//                                identifier,
+//                                displayName,
+//                                path,
+//
+//                            ))
+                        }
+                    }
+                ) {
+                    Text("Create")
+                }
             }
         }
+    } else {
+        Column(Modifier.padding(horizontal = 20.dp)) {
+            Row {
+                OutlinedButton(
+                    onClick = {
+                        newArchiveDialog = true
+                    }
+                ) {
+                    Text("Add new archive")
+                }
+                Spacer(Modifier.width(8.dp))
+                OutlinedButton(
+                    onClick = {
+                        archiveScope.launch {
+                            realm.write {
+                                objects<DbArchive>().delete()
+                            }
+                            archives = Archive.getArchives()
+                        }
+                    }
+                ) {
+                    Text("Clear archives")
+                }
+                Spacer(Modifier.width(8.dp))
+                OutlinedButton(
+                    onClick = {
+                        archiveScope.launch {
+                            val uuid = UUID.randomUUID().toString()
+                            Archive.create(DbArchive(
+                                uuid,
+                                uuid,
+                                "/test/path",
+                                MinecraftVersion(1, 18, 1),
+                                ModLoader.FABRIC,
+                                realmListOf()
+                            ))
+                            archives = Archive.getArchives()
+                        }
+                    }
+                ) {
+                    Text("Add random archive")
+                }
+            }
 
-        VerticalScrollbar(
-            modifier = Modifier.fillMaxHeight().width(9.dp).align(Alignment.CenterEnd),
-            style = remember { defaultScrollbarStyle().copy(shape = RectangleShape) },
-            adapter = rememberScrollbarAdapter(listState)
-        )
+            Box {
+                val listState = rememberLazyListState()
+
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth().padding(end = 15.dp),
+                    state = listState,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(archives) { archive ->
+                        ArchiveItem(archive)
+                    }
+                }
+
+                VerticalScrollbar(
+                    modifier = Modifier.fillMaxHeight().width(9.dp).align(Alignment.CenterEnd),
+                    style = remember { defaultScrollbarStyle().copy(shape = RectangleShape) },
+                    adapter = rememberScrollbarAdapter(listState)
+                )
+            }
+        }
     }
 }
 
