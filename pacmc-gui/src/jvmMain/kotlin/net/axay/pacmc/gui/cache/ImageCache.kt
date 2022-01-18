@@ -13,6 +13,7 @@ import androidx.compose.ui.res.loadSvgPainter
 import co.touchlab.kermit.Logger
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
+import io.ktor.http.*
 import io.ktor.util.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -24,6 +25,7 @@ import org.jetbrains.skia.AnimationFrameInfo
 import org.jetbrains.skia.Bitmap
 import org.jetbrains.skia.Codec
 import org.jetbrains.skia.Data
+import kotlin.time.ExperimentalTime
 
 private fun cachePath(group: String, name: String) =
     Environment.cacheDir.resolve("gui/images/${group}/${name}")
@@ -37,6 +39,7 @@ private class AnimationPainterHolder(
     val framesInfo: Array<AnimationFrameInfo>,
 ) : PainterHolder()
 
+@OptIn(ExperimentalTime::class)
 @Composable
 fun producePainterCached(
     url: String,
