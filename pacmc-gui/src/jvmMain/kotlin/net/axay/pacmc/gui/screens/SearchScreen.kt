@@ -46,6 +46,7 @@ private class SearchResponseSuccess(
 
 private class SearchResponseFailure(
     val reason: String,
+    val fetchedTerm: String,
 ) : SearchResponse
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalUnitApi::class)
@@ -73,7 +74,7 @@ fun SearchScreen() {
                 loading = false
                 result.onFailure { exc ->
                     Logger.w("Failed to fetch search results for '${fetchTerm}' (${exc.message})")
-                    searchResponse = SearchResponseFailure(exc.message ?: "unknown reason")
+                    searchResponse = SearchResponseFailure((exc.message ?: "unknown reason") + " (${exc::class.simpleName})", fetchTerm)
                 }.onSuccess {
                     searchResponse = SearchResponseSuccess(it)
                 }
@@ -135,7 +136,7 @@ fun SearchScreen() {
                     Spacer(Modifier.height(5.dp))
                     Text(
                         buildString {
-                            appendLine("Did not receive a valid response for '${searchTerm}'")
+                            appendLine("Did not receive a valid response for '${currentResponse.fetchedTerm}'")
                             appendLine("Reason: ${currentResponse.reason}")
                         },
                         textAlign = TextAlign.Center
