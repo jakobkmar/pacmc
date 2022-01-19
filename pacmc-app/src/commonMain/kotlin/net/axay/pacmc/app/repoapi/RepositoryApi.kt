@@ -8,9 +8,12 @@ import net.axay.pacmc.app.ktorClient
 import net.axay.pacmc.app.repoapi.model.CommonProjectInfo
 import net.axay.pacmc.app.repoapi.model.CommonProjectVersion
 import net.axay.pacmc.repoapi.modrinth.ModrinthApi
+import net.axay.pacmc.repoapi.mojang.LauncherMetaApi
+import net.axay.pacmc.repoapi.mojang.model.VersionManifest
 
 object RepositoryApi {
-    private val modrinthApi = ModrinthApi(client = ktorClient)
+    private val modrinthApi = ModrinthApi(ktorClient)
+    private val launcherMetaApi = LauncherMetaApi(ktorClient)
 
     suspend fun search(searchTerm: String, repository: Repository?): List<CommonProjectInfo> {
         val results = mutableListOf<CommonProjectInfo>()
@@ -43,5 +46,11 @@ object RepositoryApi {
                 ?.map { CommonProjectVersion.fromModrinthProjectVersion(it) }
         }
         Repository.CURSEFORGE -> TODO()
+    }
+
+    suspend fun getMinecraftReleases(): List<MinecraftVersion>? {
+        val manifest = launcherMetaApi.getVersionManifest() ?: return null
+        return manifest.versions.filter { it.type == VersionManifest.Version.Type.RELEASE }
+            .mapNotNull { MinecraftVersion.fromString(it.id) }
     }
 }
