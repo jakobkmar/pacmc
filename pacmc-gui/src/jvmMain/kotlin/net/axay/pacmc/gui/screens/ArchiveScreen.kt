@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import com.github.ajalt.colormath.model.HSL
+import com.github.ajalt.colormath.model.RGBInt
 import compose.icons.TablerIcons
 import compose.icons.tablericons.Brush
 import compose.icons.tablericons.Plant2
@@ -38,8 +39,10 @@ import net.axay.pacmc.app.data.ModLoader
 import net.axay.pacmc.app.database.model.DbArchive
 import net.axay.pacmc.app.database.realm
 import net.axay.pacmc.app.features.Archive
+import net.axay.pacmc.app.repoapi.RepositoryApi
 import net.axay.pacmc.gui.screens.state.IdentifierState
 import net.axay.pacmc.gui.util.FileChooser
+import java.awt.Toolkit
 import java.util.*
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class, ExperimentalUnitApi::class)
@@ -56,12 +59,11 @@ fun ArchiveScreen() = Box(Modifier.fillMaxSize()) {
     var newArchiveDialog by remember { mutableStateOf(false) }
 
     if (newArchiveDialog) {
-        fun randomColor() = HSL((0..360).random(), 1f, 0.75f).toSRGB().run { Color(redInt, greenInt, blueInt) }
+        fun randomColor() = HSL((0..360).random(), 1f, 0.75f).toSRGB()
 
         var displayName by remember { mutableStateOf("") }
         val identifier = remember { IdentifierState() }
         var path by remember { mutableStateOf("") }
-        var minecraftVersion by remember { mutableStateOf("") }
         var color by remember { mutableStateOf(randomColor()) }
 
         Column(Modifier.width(800.dp).padding(horizontal = 20.dp, vertical = 10.dp).align(Alignment.TopCenter)) {
@@ -138,11 +140,11 @@ fun ArchiveScreen() = Box(Modifier.fillMaxSize()) {
                         Icon(TablerIcons.Tool, "Modding Tool")
                         Text("Mods", Modifier.padding(bottom = 4.dp))
                     }
-                    Tab(false, onClick = {}) {
+                    Tab(false, onClick = { kotlin.runCatching { Toolkit.getDefaultToolkit() }.getOrNull()?.beep() }) {
                         Icon(TablerIcons.Brush, "Texture Brush")
                         Text("Textures", Modifier.padding(bottom = 4.dp))
                     }
-                    Tab(false, onClick = {}) {
+                    Tab(false, onClick = { kotlin.runCatching { Toolkit.getDefaultToolkit() }.getOrNull()?.beep() }) {
                         Icon(TablerIcons.Plant2, "Shader Vegetation")
                         Text("Shaders", Modifier.padding(bottom = 4.dp))
                     }
@@ -160,7 +162,7 @@ fun ArchiveScreen() = Box(Modifier.fillMaxSize()) {
                     Modifier
                         .size(40.dp)
                         .clip(CircleShape)
-                        .background(color, CircleShape)
+                        .background(color.run { Color(redInt, greenInt, blueInt) }, CircleShape)
                         .border(BorderStroke(2.dp, Color.Black), CircleShape)
                         .mouseClickable {
                             color = randomColor()
@@ -168,14 +170,47 @@ fun ArchiveScreen() = Box(Modifier.fillMaxSize()) {
                 )
             }
 
-//            TextField(
-//
-//                readOnly = true,
-//
-//            )
-//            CursorDropdownMenu(true) {
-//
-//            }
+            val minecraftVersions by produceState<List<MinecraftVersion>?>(null) {
+                value = RepositoryApi.getMinecraftReleases()
+            }
+
+            var minecraftVersion by remember(minecraftVersions != null) { mutableStateOf(minecraftVersions?.firstOrNull()) }
+
+            Row(modifier = Modifier.padding(10.dp)) {
+                var selectMinecraftVersion by remember { mutableStateOf(false) }
+
+                Column(Modifier.width(200.dp)) {
+                    Text("Minecraft version", fontWeight = FontWeight.Bold)
+                    Text("Choose a preferred minecraft version")
+                }
+                OutlinedButton(
+                    onClick = {
+                        if (!selectMinecraftVersion) selectMinecraftVersion = true
+                    },
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Black)
+                ) {
+                    Text(minecraftVersion?.toString() ?: "Fetching version...", fontWeight = FontWeight.SemiBold)
+                }
+
+                if (selectMinecraftVersion) {
+                    CursorDropdownMenu(
+                        expanded = true,
+                        onDismissRequest = { selectMinecraftVersion = false }
+                    ) {
+                        minecraftVersions?.forEach {
+                            DropdownMenuItem(
+                                onClick = {
+                                    minecraftVersion = it
+                                    selectMinecraftVersion = false
+                                },
+                                modifier = Modifier.height(30.dp)
+                            ) {
+                                Text(it.toString())
+                            }
+                        }
+                    }
+                }
+            }
 
             Row(Modifier.align(Alignment.End)) {
                 OutlinedButton(
@@ -190,13 +225,19 @@ fun ArchiveScreen() = Box(Modifier.fillMaxSize()) {
                 Button(
                     onClick = {
                         archiveScope.launch {
-//                            Archive.create(DbArchive(
-//                                identifier,
-//                                displayName,
-//                                path,
-//
-//                            ))
+                            // TODO actual input validation
+                            Archive.create(DbArchive(
+                                identifier.value,
+                                displayName,
+                                path,
+                                minecraftVersion!!,
+                                ModLoader.FABRIC,
+                                realmListOf(),
+                                color.toRGBInt().argb.toInt()
+                            ))
                         }
+                        newArchiveDialog = false
+                        archives = Archive.getArchives()
                     }
                 ) {
                     Text("Create")
@@ -237,7 +278,8 @@ fun ArchiveScreen() = Box(Modifier.fillMaxSize()) {
                                 "/test/path",
                                 MinecraftVersion(1, 18, 1),
                                 ModLoader.FABRIC,
-                                realmListOf()
+                                realmListOf(),
+                                (0x000000..0xFFFFFF).random()
                             ))
                             archives = Archive.getArchives()
                         }
@@ -272,13 +314,21 @@ fun ArchiveScreen() = Box(Modifier.fillMaxSize()) {
 
 @Composable
 fun ArchiveItem(archive: DbArchive) {
-    Box(
+    Row(
         Modifier
             .clip(RoundedCornerShape(10.dp))
             .background(Color.White)
             .padding(16.dp)
             .fillMaxWidth()
     ) {
+        Box(
+            Modifier
+                .size(60.dp)
+                .align(Alignment.CenterVertically)
+                .background(RGBInt(archive.color.toUInt()).toSRGB().run { Color(redInt, greenInt, blueInt) }, RoundedCornerShape(15.dp))
+                .border(BorderStroke(4.dp, Color.Black), RoundedCornerShape(15.dp))
+        )
+        Spacer(Modifier.width(16.dp))
         SelectionContainer {
             Column {
                 Text(archive.displayName, fontWeight = FontWeight.Bold)
