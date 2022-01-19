@@ -235,9 +235,9 @@ fun ArchiveScreen() = Box(Modifier.fillMaxSize()) {
                                 realmListOf(),
                                 color.toRGBInt().argb.toInt()
                             ))
+                            archives = Archive.getArchives()
                         }
                         newArchiveDialog = false
-                        archives = Archive.getArchives()
                     }
                 ) {
                     Text("Create")
