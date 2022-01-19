@@ -23,12 +23,14 @@ data class VersionManifest(
         val time: Instant,
         val releaseTime: Instant,
         val sha1: String,
-        val complianceLevel: String,
+        val complianceLevel: Int,
     ) {
         @Serializable
         enum class Type {
             @SerialName("release") RELEASE,
-            @SerialName("snapshot") SNAPSHOT;
+            @SerialName("snapshot") SNAPSHOT,
+            @SerialName("old_beta") OLD_BETA,
+            @SerialName("old_alpha") OLD_ALPHA;
         }
     }
 }
