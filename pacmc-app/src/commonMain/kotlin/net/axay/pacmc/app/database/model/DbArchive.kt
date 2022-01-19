@@ -15,6 +15,7 @@ class DbArchive() : RealmObject {
     var minecraftVersion: String = ""
     var loader: String = ""
     var installed: RealmList<DbInstalledProject> = realmListOf()
+    var color: Int = 0
 
     fun readMinecraftVersion() = MinecraftVersion.fromString(minecraftVersion)
         ?: error("Invalid minecraft version string in database for archive '$name'")
@@ -29,6 +30,7 @@ class DbArchive() : RealmObject {
         minecraftVersion: MinecraftVersion,
         loader: ModLoader,
         installed: RealmList<DbInstalledProject>,
+        color: Int,
     ) : this() {
         this.name = name
         this.displayName = displayName
@@ -36,6 +38,7 @@ class DbArchive() : RealmObject {
         this.minecraftVersion = minecraftVersion.toString()
         this.loader = loader.name
         this.installed = installed
+        this.color = color
     }
 }
 
