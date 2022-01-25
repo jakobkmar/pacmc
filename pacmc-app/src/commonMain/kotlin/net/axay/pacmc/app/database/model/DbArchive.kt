@@ -42,6 +42,13 @@ class DbArchive() : RealmObject {
     }
 }
 
-class DbInstalledProject : RealmObject {
+class DbInstalledProject() : RealmObject {
     var id: String = ""
+
+    // for the current realm compiler plugin
+    constructor(
+        id: String,
+    ) : this() {
+        this.id = id
+    }
 }
