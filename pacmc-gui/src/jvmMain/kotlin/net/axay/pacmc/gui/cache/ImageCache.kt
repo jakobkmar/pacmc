@@ -11,15 +11,13 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.res.loadSvgPainter
 import co.touchlab.kermit.Logger
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
 import io.ktor.http.*
-import io.ktor.util.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import net.axay.pacmc.app.Environment
+import net.axay.pacmc.app.downloadFile
 import net.axay.pacmc.app.ktorClient
 import org.jetbrains.skia.AnimationFrameInfo
 import org.jetbrains.skia.Bitmap
@@ -65,9 +63,9 @@ fun producePainterCached(
 
             if (download) {
                 try {
-                    val bytes = ktorClient.get<HttpResponse>(url).content.toByteArray()
-                    Environment.fileSystem.createDirectories(filePath.parent!!)
-                    Environment.fileSystem.write(filePath) { write(bytes) }
+                    ktorClient.downloadFile(url, filePath) {
+                        userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:96.0) Gecko/20100101 Firefox/96.0")
+                    }
                 } catch (exc: Exception) {
                     Logger.w("Failed to download image $url (${exc.message})")
                 }
