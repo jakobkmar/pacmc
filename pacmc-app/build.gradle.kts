@@ -1,6 +1,6 @@
 plugins {
     `kotlin-mp-script`
-    id("io.realm.kotlin") version "0.8.0"
+    alias(libs.plugins.realm)
 }
 
 kotlin {
