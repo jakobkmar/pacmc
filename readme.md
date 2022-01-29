@@ -5,10 +5,20 @@
 The aim of this project is to massively reduce the effort you have to put in to installing - and most importantly -
 keeping your mods up to date.
 
-The current version of pacmc is already pretty useful and works, however keep an eye on this project, as it will
-receive major new features and improvements in the near future!
+The current version of pacmc is already pretty useful and works, however keep an eye on this project, as it will receive
+major new features and improvements in the near future!
 
 To install pacmc, visit the [**Installation** section](#installation).
+
+> I am currently focusing on my exams at the university, meaning **I have to pause this project for 3 weeks or so**.
+> That does not mean it is abandoned!
+> An important thing which might happen in that time is that **Curseforge shuts down its old API, which will probably
+> impact pacmc**. Please create an issue if this affects you.
+> Support for the new Curseforge API will be added soon.
+>
+> **Contributions for the following things will be very welcome**:
+> - an icon for pacmc
+> - an OpenGL 3D skin renderer
 
 ## Usage
 
@@ -50,6 +60,7 @@ can add more (for example to manage mods on a server, which `pacmc` is designed 
 #### Init the default archive
 
 To add the `.minecraft` folder as an archive:
+
 ```zsh
 pacmc init
 ```
@@ -127,6 +138,5 @@ _when installing using a search term, you may be prompted to select a mod from a
 If the installation methods above don't fit your needs, you can also install pacmc manually. Keep in mind though, that
 this way pacmc won't receive updates automatically.
 
-Download one of the released archives from the [releases page](https://github.com/bluefireoly/pacmc/releases).
-Extract the archive. Inside there will be a `bin` directory.
-Run the shell script using `./pacmc`.
+Download one of the released archives from the [releases page](https://github.com/bluefireoly/pacmc/releases). Extract
+the archive. Inside there will be a `bin` directory. Run the shell script using `./pacmc`.
