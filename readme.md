@@ -10,7 +10,7 @@ major new features and improvements in the near future!
 
 To install pacmc, visit the [**Installation** section](#installation).
 
-> I am currently focusing on my exams at the university, meaning **I have to pause this project for 3 weeks or so**.
+> I am currently focusing on my exams at the university, meaning **I have to pause this project until March 16th**.
 > That does not mean it is abandoned!
 > An important thing which might happen in that time is that **Curseforge shuts down its old API, which will probably
 > impact pacmc**. Please create an issue if this affects you.
