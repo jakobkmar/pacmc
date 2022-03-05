@@ -40,7 +40,7 @@ dependencyResolutionManagement {
             alias("kermit").to("co.touchlab:kermit:1.0.0")
             alias("okio").to("com.squareup.okio:okio:3.0.0")
 
-            version("realm", "0.8.2")
+            version("realm", "0.10.0")
             alias("realm-base").to("io.realm.kotlin", "library-base").versionRef("realm")
             alias("realm").toPluginId("io.realm.kotlin").versionRef("realm")
 
@@ -50,10 +50,10 @@ dependencyResolutionManagement {
             alias("jackson-kotlin").to("com.fasterxml.jackson.module" , "jackson-module-kotlin").versionRef("jackson")
             alias("jackson-xml").to("com.fasterxml.jackson.dataformat" , "jackson-dataformat-xml").versionRef("jackson")
 
-            alias("slfj4-simple").to("org.slf4j:slf4j-simple:1.7.33")
+            alias("slfj4-simple").to("org.slf4j:slf4j-simple:1.7.36")
             alias("jsoup").to("org.jsoup:jsoup:1.14.3")
 
-            version("kmongo", "4.4.0")
+            version("kmongo", "4.5.0")
             alias("kmongo").to("org.litote.kmongo", "kmongo-coroutine-serialization").versionRef("kmongo")
 
             version("colormath", "3.2.0")

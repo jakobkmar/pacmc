@@ -29,7 +29,7 @@ import compose.icons.TablerIcons
 import compose.icons.tablericons.Brush
 import compose.icons.tablericons.Plant2
 import compose.icons.tablericons.Tool
-import io.realm.objects
+import io.realm.query
 import io.realm.realmListOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -259,7 +259,7 @@ fun ArchiveScreen() = Box(Modifier.fillMaxSize()) {
                     onClick = {
                         archiveScope.launch {
                             realm.write {
-                                objects<DbArchive>().delete()
+                                delete(query<DbArchive>().find())
                             }
                             archives = Archive.getArchives()
                         }

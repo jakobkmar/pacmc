@@ -4,7 +4,7 @@ import io.ktor.client.call.*
 import io.ktor.client.features.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
-import io.realm.objects
+import io.realm.query
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import net.axay.pacmc.app.Environment
@@ -18,7 +18,7 @@ import okio.Path.Companion.toPath
 
 class Archive(private val name: String) {
     companion object {
-        fun getArchives() = realm.objects<DbArchive>()
+        fun getArchives() = realm.query<DbArchive>().find()
 
         suspend fun create(dbArchive: DbArchive) {
             realm.write {
@@ -30,7 +30,7 @@ class Archive(private val name: String) {
     private lateinit var dbArchive: DbArchive
 
     private fun updateFromDb(): DbArchive? {
-        dbArchive = realm.objects<DbArchive>().query("name == $0 LIMIT(1)", name).firstOrNull() ?: return null
+        dbArchive = realm.query<DbArchive>("name == $0", name).limit(1).first().find() ?: return null
         return dbArchive
     }
 

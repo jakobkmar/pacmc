@@ -7,13 +7,11 @@ import net.axay.pacmc.app.database.model.DbArchive
 import net.axay.pacmc.app.database.model.DbInstalledProject
 
 val realm = run {
-    val config = RealmConfiguration.Builder()
-        .path(
-            Environment.dataLocalDir.resolve("db2/pacmc_db").also {
-                Environment.fileSystem.createDirectories(it.parent!!)
-            }.toString()
+    val config = RealmConfiguration.Builder(setOf(DbArchive::class, DbInstalledProject::class))
+        .directory(
+            Environment.dataLocalDir.resolve("db2").toString()
         )
-        .schema(DbArchive::class, DbInstalledProject::class)
+        .name("pacmc_db")
         .build()
     Realm.open(config)
 }
