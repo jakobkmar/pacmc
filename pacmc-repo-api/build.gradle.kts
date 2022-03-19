@@ -27,7 +27,8 @@ openApiGenerate {
 }
 
 tasks {
-    this.openApiGenerate {
+    val downloadModrinthOpenApi by registering {
+        group = openApiGenerate.get().group
         doFirst {
             println("Downloading Modrinth OpenAPI file...")
             val openApiFile = file("$projectDir/modrinth-openapi.yaml")
@@ -36,6 +37,10 @@ tasks {
             }
             println("Finished downloading Modrinth OpenAPI file.")
         }
+    }
+
+    this.openApiGenerate {
+        dependsOn(downloadModrinthOpenApi)
         doLast {
             file("$buildDir/generated/modrinth-api/src/commonMain/kotlin/net/axay")
                 .copyRecursively(file("$projectDir/src/commonMain/kotlin/net/axay"), overwrite = true)
