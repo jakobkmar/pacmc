@@ -10,11 +10,11 @@ major new features and improvements in the near future!
 
 To install pacmc, visit the [**Installation** section](#installation).
 
-> I am currently focusing on my exams at the university, meaning **I have to pause this project until March 16th**.
-> That does not mean it is abandoned!
-> An important thing which might happen in that time is that **Curseforge shuts down its old API, which will probably
-> impact pacmc**. Please create an issue if this affects you.
-> Support for the new Curseforge API will be added soon.
+> I am currently rewriting pacmc to use the Modrinth v2 API as well as the new Curseforge API.
+> Until then, you might experience issues while pacmc is still using the old APIs of these
+> two platforms.
+> 
+> The rewrite will also introduce some major improvements and new features, so stay tuned!
 >
 > **Contributions for the following things will be very welcome**:
 > - an icon for pacmc
