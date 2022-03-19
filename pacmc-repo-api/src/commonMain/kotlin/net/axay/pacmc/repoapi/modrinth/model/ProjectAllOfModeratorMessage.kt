@@ -26,23 +26,19 @@ import kotlinx.serialization.descriptors.*
 import kotlinx.serialization.encoding.*
 
 /**
- * The license of the project
+ * A message that a moderator sent regarding the project
  *
- * @param id The license id of a project, retrieved from the licenses get route
- * @param name The long name of a license
- * @param url The URL to this license
+ * @param message The message that a moderator has left for the project
+ * @param body The longer body of the message that a moderator has left for the project
  */
 @Serializable
-data class EditableProjectAllOfLicense (
+data class ProjectAllOfModeratorMessage (
 
-    /* The license id of a project, retrieved from the licenses get route */
-    @SerialName(value = "id") val id: kotlin.String? = null,
+    /* The message that a moderator has left for the project */
+    @SerialName(value = "message") val message: kotlin.String? = null,
 
-    /* The long name of a license */
-    @SerialName(value = "name") val name: kotlin.String? = null,
-
-    /* The URL to this license */
-    @SerialName(value = "url") val url: kotlin.String? = null
+    /* The longer body of the message that a moderator has left for the project */
+    @SerialName(value = "body") val body: kotlin.String? = null
 
 )
 

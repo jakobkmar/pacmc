@@ -20,29 +20,56 @@
 
 package net.axay.pacmc.repoapi.modrinth.model
 
+import net.axay.pacmc.repoapi.modrinth.model.CreatableReport
+import net.axay.pacmc.repoapi.modrinth.model.ReportAllOf
 
 import kotlinx.serialization.*
 import kotlinx.serialization.descriptors.*
 import kotlinx.serialization.encoding.*
 
 /**
- * The license of the project
+ * 
  *
- * @param id The license id of a project, retrieved from the licenses get route
- * @param name The long name of a license
- * @param url The URL to this license
+ * @param reportType The type of the report being sent
+ * @param itemId The ID of the item (project, version, or user) being reported
+ * @param itemType The type of the item being reported
+ * @param body The extended explanation of the report
+ * @param reporter The ID of the user who reported the item
+ * @param created The time at which the report was created
  */
 @Serializable
-data class EditableProjectAllOfLicense (
+data class Report (
 
-    /* The license id of a project, retrieved from the licenses get route */
-    @SerialName(value = "id") val id: kotlin.String? = null,
+    /* The type of the report being sent */
+    @SerialName(value = "report_type") @Required val reportType: kotlin.String,
 
-    /* The long name of a license */
-    @SerialName(value = "name") val name: kotlin.String? = null,
+    /* The ID of the item (project, version, or user) being reported */
+    @SerialName(value = "item_id") @Required val itemId: kotlin.String,
 
-    /* The URL to this license */
-    @SerialName(value = "url") val url: kotlin.String? = null
+    /* The type of the item being reported */
+    @SerialName(value = "item_type") @Required val itemType: Report.ItemType,
 
-)
+    /* The extended explanation of the report */
+    @SerialName(value = "body") @Required val body: kotlin.String,
+
+    /* The ID of the user who reported the item */
+    @SerialName(value = "reporter") @Required val reporter: kotlin.String,
+
+    /* The time at which the report was created */
+    @SerialName(value = "created") @Required val created: kotlin.String
+
+) {
+
+    /**
+     * The type of the item being reported
+     *
+     * Values: project,user,version
+     */
+    @Serializable
+    enum class ItemType(val value: kotlin.String) {
+        @SerialName(value = "project") project("project"),
+        @SerialName(value = "user") user("user"),
+        @SerialName(value = "version") version("version");
+    }
+}
 

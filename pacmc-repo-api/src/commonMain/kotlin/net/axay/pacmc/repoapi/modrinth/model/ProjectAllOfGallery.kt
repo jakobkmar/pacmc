@@ -26,23 +26,31 @@ import kotlinx.serialization.descriptors.*
 import kotlinx.serialization.encoding.*
 
 /**
- * The license of the project
+ * 
  *
- * @param id The license id of a project, retrieved from the licenses get route
- * @param name The long name of a license
- * @param url The URL to this license
+ * @param url The URL of the gallery image
+ * @param featured Whether the image is featured in the gallery
+ * @param created The date and time the gallery image was created
+ * @param title The title of the gallery image
+ * @param description The description of the gallery image
  */
 @Serializable
-data class EditableProjectAllOfLicense (
+data class ProjectAllOfGallery (
 
-    /* The license id of a project, retrieved from the licenses get route */
-    @SerialName(value = "id") val id: kotlin.String? = null,
+    /* The URL of the gallery image */
+    @SerialName(value = "url") @Required val url: kotlin.String,
 
-    /* The long name of a license */
-    @SerialName(value = "name") val name: kotlin.String? = null,
+    /* Whether the image is featured in the gallery */
+    @SerialName(value = "featured") @Required val featured: kotlin.Boolean,
 
-    /* The URL to this license */
-    @SerialName(value = "url") val url: kotlin.String? = null
+    /* The date and time the gallery image was created */
+    @SerialName(value = "created") @Required val created: kotlin.String,
+
+    /* The title of the gallery image */
+    @SerialName(value = "title") val title: kotlin.String? = null,
+
+    /* The description of the gallery image */
+    @SerialName(value = "description") val description: kotlin.String? = null
 
 )
 

@@ -1,9 +1,9 @@
 /**
  * Labrinth
  *
- * This API is documented in the **OpenAPI format** and is available for download [here](/openapi.yaml).  # Cross-Origin Resource Sharing This API features Cross-Origin Resource Sharing (CORS) implemented in compliance with  [W3C spec](https://www.w3.org/TR/cors/). This allows for cross-domain communication from the browser. All responses have a wildcard same-origin which makes them completely public and accessible to everyone, including any code on any site.  # Authentication This API uses GitHub tokens for authentication. The token is in the `Authorization` header of the request. You can get a token [here](#operation/initAuth).   Example:  ```  Authorization: gho_pJ9dGXVKpfzZp4PUHSxYEq9hjk0h288Gwj4S  ``` 
+ * This API is documented in the **OpenAPI format** and is available for download [here](/openapi.yaml).  There are some undocumented routes. These routes are not meant for public use, such as the routes for adding new items to tags.  ## Cross-Origin Resource Sharing This API features Cross-Origin Resource Sharing (CORS) implemented in compliance with the [W3C spec](https://www.w3.org/TR/cors/). This allows for cross-domain communication from the browser. All responses have a wildcard same-origin which makes them completely public and accessible to everyone, including any code on any site.  ## Authentication This API uses GitHub tokens for authentication. The token is in the `Authorization` header of the request. You can get a token [here](#operation/initAuth).    Example:  ```  Authorization: gho_pJ9dGXVKpfzZp4PUHSxYEq9hjk0h288Gwj4S  ```  ## Ratelimits The API has a ratelimit defined per IP. Limits and remaining amounts are given in the response headers. The `X-Ratelimit-Limit` header is the maximum number of requests that can be made in a minute. The `X-Ratelimit-Remaining` header is the number of requests remaining in the current ratelimit window. The `X-Ratelimit-Reset` header is the time in seconds until the ratelimit window resets. 
  *
- * The version of the OpenAPI document: 13187de (v2)
+ * The version of the OpenAPI document: f3234a6 (v2)
  * 
  *
  * Please note:
@@ -66,7 +66,19 @@ data class Notification (
     @SerialName(value = "actions") @Required val actions: kotlin.collections.List<kotlin.String>,
 
     /* The type of notification */
-    @SerialName(value = "type") val type: kotlin.String? = null
+    @SerialName(value = "type") val type: Notification.Type? = null
 
-)
+) {
+
+    /**
+     * The type of notification
+     *
+     * Values: projectUpdate,teamInvite
+     */
+    @Serializable
+    enum class Type(val value: kotlin.String) {
+        @SerialName(value = "project_update") projectUpdate("project_update"),
+        @SerialName(value = "team_invite") teamInvite("team_invite");
+    }
+}
 

@@ -1,9 +1,9 @@
 /**
  * Labrinth
  *
- * This API is documented in the **OpenAPI format** and is available for download [here](/openapi.yaml).  # Cross-Origin Resource Sharing This API features Cross-Origin Resource Sharing (CORS) implemented in compliance with  [W3C spec](https://www.w3.org/TR/cors/). This allows for cross-domain communication from the browser. All responses have a wildcard same-origin which makes them completely public and accessible to everyone, including any code on any site.  # Authentication This API uses GitHub tokens for authentication. The token is in the `Authorization` header of the request. You can get a token [here](#operation/initAuth).   Example:  ```  Authorization: gho_pJ9dGXVKpfzZp4PUHSxYEq9hjk0h288Gwj4S  ``` 
+ * This API is documented in the **OpenAPI format** and is available for download [here](/openapi.yaml).  There are some undocumented routes. These routes are not meant for public use, such as the routes for adding new items to tags.  ## Cross-Origin Resource Sharing This API features Cross-Origin Resource Sharing (CORS) implemented in compliance with the [W3C spec](https://www.w3.org/TR/cors/). This allows for cross-domain communication from the browser. All responses have a wildcard same-origin which makes them completely public and accessible to everyone, including any code on any site.  ## Authentication This API uses GitHub tokens for authentication. The token is in the `Authorization` header of the request. You can get a token [here](#operation/initAuth).    Example:  ```  Authorization: gho_pJ9dGXVKpfzZp4PUHSxYEq9hjk0h288Gwj4S  ```  ## Ratelimits The API has a ratelimit defined per IP. Limits and remaining amounts are given in the response headers. The `X-Ratelimit-Limit` header is the maximum number of requests that can be made in a minute. The `X-Ratelimit-Remaining` header is the number of requests remaining in the current ratelimit window. The `X-Ratelimit-Reset` header is the time in seconds until the ratelimit window resets. 
  *
- * The version of the OpenAPI document: 13187de (v2)
+ * The version of the OpenAPI document: f3234a6 (v2)
  * 
  *
  * Please note:
@@ -24,6 +24,8 @@ import net.axay.pacmc.repoapi.modrinth.model.EditableProject
 import net.axay.pacmc.repoapi.modrinth.model.EditableProjectAllOfDonationUrls
 import net.axay.pacmc.repoapi.modrinth.model.EditableProjectAllOfLicense
 import net.axay.pacmc.repoapi.modrinth.model.ProjectAllOf
+import net.axay.pacmc.repoapi.modrinth.model.ProjectAllOfGallery
+import net.axay.pacmc.repoapi.modrinth.model.ProjectAllOfModeratorMessage
 import net.axay.pacmc.repoapi.modrinth.model.ServerRenderedProject
 
 import kotlinx.serialization.*
@@ -38,7 +40,7 @@ import kotlinx.serialization.encoding.*
  * @param categories A list of the categories that the project is in
  * @param clientSide The client side support of the project
  * @param serverSide The server side support of the project
- * @param body A long form description of the mod
+ * @param body A long form description of the project
  * @param status The status of the project
  * @param license 
  * @param projectType The project type of the project
@@ -48,16 +50,17 @@ import kotlinx.serialization.encoding.*
  * @param published The date the project was published
  * @param updated The date the project was last updated
  * @param followers The total number of users following the project
- * @param versions A list of the version IDs of the project
  * @param slug The slug of a project, used for vanity URLs
- * @param bodyUrl The link to the long description of the project
+ * @param bodyUrl The link to the long description of the project (only present for old projects)
  * @param issuesUrl An optional link to where to submit bugs or issues with the project
  * @param sourceUrl An optional link to the source code of the project
  * @param wikiUrl An optional link to the project's wiki page or other relevant information
  * @param discordUrl An optional invite link to the project's discord
  * @param donationUrls A list of donation links for the project
  * @param iconUrl The URL of the project's icon
- * @param moderatorMessage A message that a moderator sent regarding the project
+ * @param moderatorMessage 
+ * @param versions A list of the version IDs of the project (will never be empty unless `draft` status)
+ * @param gallery A list of images that have been uploaded to the project's gallery
  */
 @Serializable
 data class Project (
@@ -77,7 +80,7 @@ data class Project (
     /* The server side support of the project */
     @SerialName(value = "server_side") @Required val serverSide: Project.ServerSide,
 
-    /* A long form description of the mod */
+    /* A long form description of the project */
     @SerialName(value = "body") @Required val body: kotlin.String,
 
     /* The status of the project */
@@ -106,13 +109,10 @@ data class Project (
     /* The total number of users following the project */
     @SerialName(value = "followers") @Required val followers: kotlin.Int,
 
-    /* A list of the version IDs of the project */
-    @SerialName(value = "versions") @Required val versions: kotlin.collections.List<kotlin.String>,
-
     /* The slug of a project, used for vanity URLs */
     @SerialName(value = "slug") val slug: kotlin.String? = null,
 
-    /* The link to the long description of the project */
+    /* The link to the long description of the project (only present for old projects) */
     @Deprecated(message = "This property is deprecated.")
     @SerialName(value = "body_url") val bodyUrl: kotlin.String? = "null",
 
@@ -134,8 +134,13 @@ data class Project (
     /* The URL of the project's icon */
     @SerialName(value = "icon_url") val iconUrl: kotlin.String? = null,
 
-    /* A message that a moderator sent regarding the project */
-    @SerialName(value = "moderator_message") val moderatorMessage: kotlin.String? = null
+    @SerialName(value = "moderator_message") val moderatorMessage: ProjectAllOfModeratorMessage? = null,
+
+    /* A list of the version IDs of the project (will never be empty unless `draft` status) */
+    @SerialName(value = "versions") val versions: kotlin.collections.List<kotlin.String>? = null,
+
+    /* A list of images that have been uploaded to the project's gallery */
+    @SerialName(value = "gallery") val gallery: kotlin.collections.List<ProjectAllOfGallery>? = null
 
 ) {
 
@@ -164,7 +169,7 @@ data class Project (
     /**
      * The status of the project
      *
-     * Values: approved,rejected,draft,unlisted,processing,unknown
+     * Values: approved,rejected,draft,unlisted,archived,processing,unknown
      */
     @Serializable
     enum class Status(val value: kotlin.String) {
@@ -172,6 +177,7 @@ data class Project (
         @SerialName(value = "rejected") rejected("rejected"),
         @SerialName(value = "draft") draft("draft"),
         @SerialName(value = "unlisted") unlisted("unlisted"),
+        @SerialName(value = "archived") archived("archived"),
         @SerialName(value = "processing") processing("processing"),
         @SerialName(value = "unknown") unknown("unknown");
     }

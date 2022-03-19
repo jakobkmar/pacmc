@@ -26,23 +26,19 @@ import kotlinx.serialization.descriptors.*
 import kotlinx.serialization.encoding.*
 
 /**
- * The license of the project
+ * 
  *
- * @param id The license id of a project, retrieved from the licenses get route
- * @param name The long name of a license
- * @param url The URL to this license
+ * @param reporter The ID of the user who reported the item
+ * @param created The time at which the report was created
  */
 @Serializable
-data class EditableProjectAllOfLicense (
+data class ReportAllOf (
 
-    /* The license id of a project, retrieved from the licenses get route */
-    @SerialName(value = "id") val id: kotlin.String? = null,
+    /* The ID of the user who reported the item */
+    @SerialName(value = "reporter") @Required val reporter: kotlin.String,
 
-    /* The long name of a license */
-    @SerialName(value = "name") val name: kotlin.String? = null,
-
-    /* The URL to this license */
-    @SerialName(value = "url") val url: kotlin.String? = null
+    /* The time at which the report was created */
+    @SerialName(value = "created") @Required val created: kotlin.String
 
 )
 

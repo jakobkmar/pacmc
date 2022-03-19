@@ -1,9 +1,9 @@
 /**
  * Labrinth
  *
- * This API is documented in the **OpenAPI format** and is available for download [here](/openapi.yaml).  # Cross-Origin Resource Sharing This API features Cross-Origin Resource Sharing (CORS) implemented in compliance with  [W3C spec](https://www.w3.org/TR/cors/). This allows for cross-domain communication from the browser. All responses have a wildcard same-origin which makes them completely public and accessible to everyone, including any code on any site.  # Authentication This API uses GitHub tokens for authentication. The token is in the `Authorization` header of the request. You can get a token [here](#operation/initAuth).   Example:  ```  Authorization: gho_pJ9dGXVKpfzZp4PUHSxYEq9hjk0h288Gwj4S  ``` 
+ * This API is documented in the **OpenAPI format** and is available for download [here](/openapi.yaml).  There are some undocumented routes. These routes are not meant for public use, such as the routes for adding new items to tags.  ## Cross-Origin Resource Sharing This API features Cross-Origin Resource Sharing (CORS) implemented in compliance with the [W3C spec](https://www.w3.org/TR/cors/). This allows for cross-domain communication from the browser. All responses have a wildcard same-origin which makes them completely public and accessible to everyone, including any code on any site.  ## Authentication This API uses GitHub tokens for authentication. The token is in the `Authorization` header of the request. You can get a token [here](#operation/initAuth).    Example:  ```  Authorization: gho_pJ9dGXVKpfzZp4PUHSxYEq9hjk0h288Gwj4S  ```  ## Ratelimits The API has a ratelimit defined per IP. Limits and remaining amounts are given in the response headers. The `X-Ratelimit-Limit` header is the maximum number of requests that can be made in a minute. The `X-Ratelimit-Remaining` header is the number of requests remaining in the current ratelimit window. The `X-Ratelimit-Reset` header is the time in seconds until the ratelimit window resets. 
  *
- * The version of the OpenAPI document: 13187de (v2)
+ * The version of the OpenAPI document: f3234a6 (v2)
  * 
  *
  * Please note:
@@ -32,13 +32,13 @@ import kotlinx.serialization.encoding.*
  *
  * @param username The user's username
  * @param id The user's id
+ * @param githubId The user's github id
+ * @param avatarUrl The user's avatar url
  * @param created The time at which the user was created
  * @param role The user's role
  * @param name The user's display name
- * @param email The user's email
+ * @param email The user's email (only your own is ever displayed)
  * @param bio A description of the user
- * @param githubId The user's github id
- * @param avatarUrl The user's avatar url
  */
 @Serializable
 data class User (
@@ -49,6 +49,12 @@ data class User (
     /* The user's id */
     @SerialName(value = "id") @Required val id: kotlin.String,
 
+    /* The user's github id */
+    @SerialName(value = "github_id") @Required val githubId: kotlin.Int,
+
+    /* The user's avatar url */
+    @SerialName(value = "avatar_url") @Required val avatarUrl: kotlin.String,
+
     /* The time at which the user was created */
     @SerialName(value = "created") @Required val created: kotlin.String,
 
@@ -58,17 +64,11 @@ data class User (
     /* The user's display name */
     @SerialName(value = "name") val name: kotlin.String? = null,
 
-    /* The user's email */
+    /* The user's email (only your own is ever displayed) */
     @SerialName(value = "email") val email: kotlin.String? = null,
 
     /* A description of the user */
-    @SerialName(value = "bio") val bio: kotlin.String? = null,
-
-    /* The user's github id */
-    @SerialName(value = "github_id") val githubId: kotlin.Int? = null,
-
-    /* The user's avatar url */
-    @SerialName(value = "avatar_url") val avatarUrl: kotlin.String? = null
+    @SerialName(value = "bio") val bio: kotlin.String? = null
 
 ) {
 
