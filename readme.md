@@ -10,7 +10,7 @@ major new features and improvements in the near future!
 
 To install pacmc, visit the [**Installation** section](#installation).
 
-[Chat and ask questions on **Matrix**](https://matrix.to/#/#kotlinmc:axay.net) (or
+Chat and ask questions on [**Matrix**](https://matrix.to/#/#kotlinmc:axay.net) (or
 [Discord](https://discord.com/invite/CJDUVuJ))
 
 > I am currently rewriting pacmc to use the Modrinth v2 API as well as the new Curseforge API.
