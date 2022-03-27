@@ -19,6 +19,9 @@ include("pacmc-app")
 include("pacmc-cli")
 include("pacmc-gui")
 
+// legacy
+include("pacmc-cli-old")
+
 enableFeaturePreview("VERSION_CATALOGS")
 
 dependencyResolutionManagement {
