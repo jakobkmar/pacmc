@@ -15,8 +15,8 @@ data class CommonProjectVersion(
     companion object {
         fun fromModrinthProjectVersion(version: net.axay.pacmc.repoapi.modrinth.model.Version) = CommonProjectVersion(
             id = version.id,
-            datePublished = Instant.parse(version.datePublished),
-            files = version.files?.map { File(it.url, it.primary) }.orEmpty(),
+            datePublished = version.datePublished,
+            files = version.files.map { File(it.url, it.primary) },
         )
     }
 }

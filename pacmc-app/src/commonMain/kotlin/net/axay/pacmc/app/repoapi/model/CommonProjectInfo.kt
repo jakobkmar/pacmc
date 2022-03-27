@@ -15,9 +15,9 @@ data class CommonProjectInfo(
         fun fromModrinthProjectResult(projectResult: net.axay.pacmc.repoapi.modrinth.model.ProjectResult) = CommonProjectInfo(
             id = ModId(Repository.MODRINTH, projectResult.projectId),
             slug = projectResult.slug,
-            name = projectResult.title,
+            name = projectResult.title!!,
             author = projectResult.author,
-            description = projectResult.description,
+            description = projectResult.description!!,
             iconUrl = projectResult.iconUrl,
         )
     }
