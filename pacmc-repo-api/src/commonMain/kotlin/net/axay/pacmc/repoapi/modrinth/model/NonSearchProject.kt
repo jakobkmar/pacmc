@@ -6,7 +6,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-public data class EditableProject(
+public data class NonSearchProject(
   /**
    * The slug of a project, used for vanity URLs
    *
@@ -83,53 +83,27 @@ public data class EditableProject(
    * A list of donation links for the project
    */
   @SerialName("donation_urls")
-  public val donationUrls: List<NonSearchProject.DonationUrls>? = null,
-  /**
-   * The license ID of a project, retrieved from the license tag route
-   *
-   * **Example**: `"lgpl-3"`
-   */
-  @SerialName("license_id")
-  public val licenseId: String? = null,
-  /**
-   * The URL to this license
-   *
-   * **Example**: `"https://cdn.modrinth.com/licenses/lgpl-3.txt"`
-   */
-  @SerialName("license_url")
-  public val licenseUrl: String? = null,
-  /**
-   * The status of the project
-   *
-   * **Example**: `"approved"`
-   */
-  public val status: EditableProject.Status? = null,
-  /**
-   * The title of the moderators' message for the project
-   */
-  @SerialName("moderation_message")
-  public val moderationMessage: String? = null,
-  /**
-   * The body of the moderators' message for the project
-   */
-  @SerialName("moderation_message_body")
-  public val moderationMessageBody: String? = null
+  public val donationUrls: List<NonSearchProject.DonationUrls>? = null
 ) {
   @Serializable
-  public enum class Status {
-    @SerialName("approved")
-    Approved,
-    @SerialName("rejected")
-    Rejected,
-    @SerialName("draft")
-    Draft,
-    @SerialName("unlisted")
-    Unlisted,
-    @SerialName("archived")
-    Archived,
-    @SerialName("processing")
-    Processing,
-    @SerialName("unknown")
-    Unknown,
-  }
+  public data class DonationUrls(
+    /**
+     * The ID of the donation platform
+     *
+     * **Example**: `"patreon"`
+     */
+    public val id: String? = null,
+    /**
+     * The donation platform this link is to
+     *
+     * **Example**: `"Patreon"`
+     */
+    public val platform: String? = null,
+    /**
+     * The URL of the donation platform and user
+     *
+     * **Example**: `"https://www.patreon.com/my_user"`
+     */
+    public val url: String? = null
+  )
 }

@@ -1,12 +1,13 @@
 package net.axay.pacmc.repoapi.modrinth.model
 
+import kotlin.Boolean
 import kotlin.String
 import kotlin.collections.List
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-public data class EditableProject(
+public data class CreatableProject(
   /**
    * The slug of a project, used for vanity URLs
    *
@@ -99,37 +100,57 @@ public data class EditableProject(
   @SerialName("license_url")
   public val licenseUrl: String? = null,
   /**
-   * The status of the project
+   * **Example**: `"modpack"`
+   */
+  @SerialName("project_type")
+  public val projectType: CreatableProject.ProjectType,
+  /**
+   * A list of initial versions to upload with the created project (required unless `is_draft` is
+   * true)
+   */
+  @SerialName("initial_versions")
+  public val initialVersions: List<EditableVersion>? = null,
+  /**
+   * Whether the project should be saved as a draft instead of being sent to moderation for review
    *
-   * **Example**: `"approved"`
+   * **Example**: `true`
    */
-  public val status: EditableProject.Status? = null,
-  /**
-   * The title of the moderators' message for the project
-   */
-  @SerialName("moderation_message")
-  public val moderationMessage: String? = null,
-  /**
-   * The body of the moderators' message for the project
-   */
-  @SerialName("moderation_message_body")
-  public val moderationMessageBody: String? = null
+  @SerialName("is_draft")
+  public val isDraft: Boolean? = null,
+  @SerialName("gallery_items")
+  public val galleryItems: List<CreatableProject.GalleryItems>? = null
 ) {
   @Serializable
-  public enum class Status {
-    @SerialName("approved")
-    Approved,
-    @SerialName("rejected")
-    Rejected,
-    @SerialName("draft")
-    Draft,
-    @SerialName("unlisted")
-    Unlisted,
-    @SerialName("archived")
-    Archived,
-    @SerialName("processing")
-    Processing,
-    @SerialName("unknown")
-    Unknown,
+  public enum class ProjectType {
+    @SerialName("mod")
+    Mod,
+    @SerialName("modpack")
+    Modpack,
   }
+
+  @Serializable
+  public data class GalleryItems(
+    /**
+     * The name of the multipart item where the gallery media is located
+     */
+    public val item: String? = null,
+    /**
+     * Whether the image is featured in the gallery
+     *
+     * **Example**: `true`
+     */
+    public val featured: Boolean? = null,
+    /**
+     * The title of the gallery image
+     *
+     * **Example**: `"My awesome screenshot!"`
+     */
+    public val title: String? = null,
+    /**
+     * The description of the gallery image
+     *
+     * **Example**: `"This awesome screenshot shows all of the blocks in my mod!"`
+     */
+    public val description: String? = null
+  )
 }

@@ -1,7 +1,15 @@
+import net.axay.openapigenerator.OpenApiGenerateTask
+
 plugins {
     `kotlin-mp-script`
     kotlin("plugin.serialization")
-    id("org.openapi.generator") version "5.3.0"
+    id("net.axay.openapigenerator") version "0.1.0"
+}
+
+buildscript {
+    dependencies {
+        classpath("net.axay:openapigenerator-jvm:0.0.1")
+    }
 }
 
 kotlin {
@@ -18,32 +26,12 @@ kotlin {
     }
 }
 
-openApiGenerate {
-    generatorName.set("kotlin")
-    library.set("multiplatform")
-    inputSpec.set("$projectDir/modrinth-openapi.yaml")
-    outputDir.set("$buildDir/generated/modrinth-api")
-    modelPackage.set("net.axay.pacmc.repoapi.modrinth.model")
-}
-
 tasks {
-    val downloadModrinthOpenApi by registering {
-        group = openApiGenerate.get().group
-        doFirst {
-            println("Downloading Modrinth OpenAPI file...")
-            val openApiFile = file("$projectDir/modrinth-openapi.yaml")
-            uri("https://docs.modrinth.com/openapi.yaml").toURL().openStream().use {
-                it.copyTo(openApiFile.outputStream())
-            }
-            println("Finished downloading Modrinth OpenAPI file.")
-        }
-    }
+    register<OpenApiGenerateTask>("generateModrinthApi") {
+        group = "generate"
 
-    this.openApiGenerate {
-        dependsOn(downloadModrinthOpenApi)
-        doLast {
-            file("$buildDir/generated/modrinth-api/src/commonMain/kotlin/net/axay")
-                .copyRecursively(file("$projectDir/src/commonMain/kotlin/net/axay"), overwrite = true)
-        }
+        specUrl.set("https://docs.modrinth.com/openapi.yaml")
+        outputDirectory.set(file("src/commonMain/kotlin"))
+        packageName.set("net.axay.pacmc.repoapi.modrinth.model")
     }
 }

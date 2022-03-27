@@ -6,7 +6,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-public data class EditableProject(
+public data class ModifiableProject(
   /**
    * The slug of a project, used for vanity URLs
    *
@@ -97,39 +97,5 @@ public data class EditableProject(
    * **Example**: `"https://cdn.modrinth.com/licenses/lgpl-3.txt"`
    */
   @SerialName("license_url")
-  public val licenseUrl: String? = null,
-  /**
-   * The status of the project
-   *
-   * **Example**: `"approved"`
-   */
-  public val status: EditableProject.Status? = null,
-  /**
-   * The title of the moderators' message for the project
-   */
-  @SerialName("moderation_message")
-  public val moderationMessage: String? = null,
-  /**
-   * The body of the moderators' message for the project
-   */
-  @SerialName("moderation_message_body")
-  public val moderationMessageBody: String? = null
-) {
-  @Serializable
-  public enum class Status {
-    @SerialName("approved")
-    Approved,
-    @SerialName("rejected")
-    Rejected,
-    @SerialName("draft")
-    Draft,
-    @SerialName("unlisted")
-    Unlisted,
-    @SerialName("archived")
-    Archived,
-    @SerialName("processing")
-    Processing,
-    @SerialName("unknown")
-    Unknown,
-  }
-}
+  public val licenseUrl: String? = null
+)
