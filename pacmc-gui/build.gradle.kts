@@ -1,6 +1,6 @@
 plugins {
     `kotlin-mp-script`
-    id("org.jetbrains.compose") version "1.0.1"
+    id("org.jetbrains.compose") version "1.1.1"
 }
 
 repositories {
@@ -27,7 +27,7 @@ kotlin {
                 implementation(libs.colormath)
                 implementation(libs.colormath.compose)
 
-                val lwjglVersion = "3.3.0"
+                val lwjglVersion = "3.3.1"
                 listOf("lwjgl", "lwjgl-nfd").forEach { lwjglDep ->
                     implementation("org.lwjgl:${lwjglDep}:${lwjglVersion}")
                     listOf(
