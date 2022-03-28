@@ -7,8 +7,9 @@ import net.axay.pacmc.cli.launchJob
 import net.axay.pacmc.cli.terminal
 import net.axay.pacmc.cli.terminal.printProject
 
-class Search : CliktCommand(
-    "Search for mods"
+class SearchCommand : CliktCommand(
+    name = "search",
+    help = "Search for mods",
 ) {
     private val query by argument()
 

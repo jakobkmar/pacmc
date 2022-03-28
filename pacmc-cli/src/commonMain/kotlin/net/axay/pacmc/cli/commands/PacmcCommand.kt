@@ -3,11 +3,12 @@ package net.axay.pacmc.cli.commands
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.subcommands
 
-class Pacmc : CliktCommand(
-    "The root command of pacmc"
+class PacmcCommand : CliktCommand(
+    name = "pacmc",
+    help = "The root command of pacmc",
 ) {
     init {
-        subcommands(Search())
+        subcommands(SearchCommand(), Install())
     }
 
     override fun run() = Unit
