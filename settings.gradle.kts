@@ -62,6 +62,9 @@ dependencyResolutionManagement {
             version("colormath", "3.2.0")
             alias("colormath").to("com.github.ajalt.colormath", "colormath").versionRef("colormath")
             alias("colormath-compose").to("com.github.ajalt.colormath.extensions", "colormath-ext-jetpack-compose").versionRef("colormath")
+
+            alias("clikt").to("com.github.ajalt.clikt:clikt:3.4.0")
+            alias("mordant").to("com.github.ajalt.mordant:mordant:2.0.0-beta5")
         }
     }
 }
