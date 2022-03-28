@@ -43,7 +43,7 @@ dependencyResolutionManagement {
             alias("kermit").to("co.touchlab:kermit:1.0.0")
             alias("okio").to("com.squareup.okio:okio:3.0.0")
 
-            version("realm", "0.10.0")
+            version("realm", "0.10.1")
             alias("realm-base").to("io.realm.kotlin", "library-base").versionRef("realm")
             alias("realm").toPluginId("io.realm.kotlin").versionRef("realm")
 
