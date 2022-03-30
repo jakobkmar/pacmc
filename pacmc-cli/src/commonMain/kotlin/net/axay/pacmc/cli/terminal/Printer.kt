@@ -14,7 +14,7 @@ private val Repository.textColor
 
 fun Terminal.printProject(project: CommonProjectInfo) = println(buildString {
     append(project.id.repository.run { textColor(displayName.lowercase() + "/") })
-    append(TextColors.white(TextStyles.bold(TextStyles.underline(project.slug))))
+    append(TextColors.white(TextStyles.bold(TextStyles.underline(project.slug.slug))))
     project.latestVersion?.let { append(" ${TextColors.brightCyan(it.toString())}") }
     append(" ${TextStyles.italic("by")} ${project.author}")
     appendLine()
