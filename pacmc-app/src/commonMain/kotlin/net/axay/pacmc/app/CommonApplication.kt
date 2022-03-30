@@ -5,6 +5,7 @@ import net.axay.pacmc.app.database.realm
 
 object CommonApplication {
     var openedRealm = false
+        internal set
 
     fun init() {
         Logger.setTag("pacmc")
