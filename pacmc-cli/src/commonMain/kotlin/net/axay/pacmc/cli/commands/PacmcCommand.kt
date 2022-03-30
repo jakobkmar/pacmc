@@ -8,7 +8,7 @@ class PacmcCommand : CliktCommand(
     help = "The root command of pacmc",
 ) {
     init {
-        subcommands(SearchCommand(), Install())
+        subcommands(SearchCommand(), InstallCommand())
     }
 
     override fun run() = Unit
