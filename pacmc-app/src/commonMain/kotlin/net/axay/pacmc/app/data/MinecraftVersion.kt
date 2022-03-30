@@ -21,6 +21,16 @@ data class MinecraftVersion(
         return 0
     }
 
+    /**
+     * Negative if `this` version is smaller than [other], zero if they are equal,
+     * positive if `this` version is greater than [other]. Null if the major
+     * versions do not match.
+     */
+    fun minorDistance(other: MinecraftVersion) = when {
+        this.bigMajor != other.bigMajor || this.major != other.major -> null
+        else -> this.minor - other.minor
+    }
+
     companion object {
         fun fromString(versionString: String): MinecraftVersion? {
             val splitString = versionString.trim().split('.')
