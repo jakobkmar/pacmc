@@ -3,6 +3,9 @@ package net.axay.pacmc.app.features
 import io.realm.query
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import net.axay.pacmc.app.data.MinecraftVersion
 import net.axay.pacmc.app.data.ModFile
 import net.axay.pacmc.app.data.ModId
@@ -49,38 +52,41 @@ class Archive(private val name: String) {
         val loader = dbArchive.readLoader()
         val minecraftVersion = dbArchive.readMinecraftVersion()
 
-        suspend fun resolveTransitively(
-            modIds: Set<ModId>,
-            alreadyResolved: MutableSet<ModId>,
-        ): List<CommonProjectVersion> {
-
-            val versions = modIds.pmap { modId ->
-                if (modId in alreadyResolved) return@pmap null
-
-                val projectVersions = RepositoryApi.getProjectVersions(modId, listOf(loader), listOf(minecraftVersion))
-                projectVersions?.findBest(minecraftVersion)
-            }.filterNotNull()
-
-            val dependencies = versions.pmap { version ->
-                version.dependencies.pmap {
-                    when (it) {
-                        is CommonProjectVersion.Dependency.ProjectDependency -> it.id
-                        is CommonProjectVersion.Dependency.VersionDependency -> RepositoryApi.getProjectVersion(it.id, version.modId.repository)?.modId
-                    }
-                }.filterNotNull()
-            }.flatten().toSet()
-
-            if (dependencies.isEmpty()) return versions
-
-            alreadyResolved += versions.map { it.modId }
-            return versions + resolveTransitively(dependencies, alreadyResolved)
-        }
+        val checkedModIds = HashSet<ModId>()
+        val checkedModIdsMutex = Mutex()
 
         val versions = mutableListOf<CommonProjectVersion>()
         val dependencyVersions = mutableListOf<CommonProjectVersion>()
 
-        resolveTransitively(modIds, mutableSetOf()).forEach {
-            (if (it.modId in modIds) versions else dependencyVersions) += it
+        val finalListMutex = Mutex()
+
+        coroutineScope {
+            suspend fun resolveTransitively(modId: ModId) {
+
+                if (!checkedModIdsMutex.withLock { checkedModIds.add(modId) }) return
+
+                val version = RepositoryApi.getProjectVersions(modId, listOf(loader), listOf(minecraftVersion))
+                    ?.findBest(minecraftVersion) ?: return
+
+                finalListMutex.withLock {
+                    (if (modId in modIds) versions else dependencyVersions) += version
+                }
+
+                version.dependencies.forEach {
+                    launch {
+                        val dependencyModId = when (it) {
+                            is CommonProjectVersion.Dependency.ProjectDependency -> it.id
+                            is CommonProjectVersion.Dependency.VersionDependency -> RepositoryApi.getProjectVersion(it.id, version.modId.repository)?.modId
+                        }
+
+                        if (dependencyModId != null) {
+                            resolveTransitively(dependencyModId)
+                        }
+                    }
+                }
+            }
+
+            modIds.forEach { launch { resolveTransitively(it) } }
         }
 
         return ResolveResult(versions, dependencyVersions)
