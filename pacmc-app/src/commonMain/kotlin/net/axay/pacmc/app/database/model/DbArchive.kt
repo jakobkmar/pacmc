@@ -6,7 +6,9 @@ import io.realm.annotations.Index
 import io.realm.annotations.PrimaryKey
 import io.realm.realmListOf
 import net.axay.pacmc.app.data.MinecraftVersion
+import net.axay.pacmc.app.data.ModId
 import net.axay.pacmc.app.data.ModLoader
+import okio.Path.Companion.toPath
 
 class DbArchive() : RealmObject {
     @PrimaryKey @Index var name: String = ""
@@ -16,6 +18,8 @@ class DbArchive() : RealmObject {
     var loader: String = ""
     var installed: RealmList<DbInstalledProject> = realmListOf()
     var color: Int = 0
+
+    fun readPath() = path.toPath()
 
     fun readMinecraftVersion() = MinecraftVersion.fromString(minecraftVersion)
         ?: error("Invalid minecraft version string in database for archive '$name'")
@@ -43,12 +47,19 @@ class DbArchive() : RealmObject {
 }
 
 class DbInstalledProject() : RealmObject {
+    var repository: String = ""
     var id: String = ""
+    var dependency: Boolean = false
+
+    fun matches(modId: ModId) = modId.id == id && modId.repository.name == repository
 
     // for the current realm compiler plugin
     constructor(
-        id: String,
+        modId: ModId,
+        dependency: Boolean,
     ) : this() {
-        this.id = id
+        this.repository = modId.repository.name
+        this.id = modId.id
+        this.dependency = dependency
     }
 }
