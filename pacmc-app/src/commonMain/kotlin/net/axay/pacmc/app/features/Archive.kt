@@ -1,9 +1,8 @@
 package net.axay.pacmc.app.features
 
+import io.realm.TypedRealm
 import io.realm.query
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import net.axay.pacmc.app.data.MinecraftVersion
@@ -18,7 +17,6 @@ import net.axay.pacmc.app.ktorClient
 import net.axay.pacmc.app.repoapi.RepositoryApi
 import net.axay.pacmc.app.repoapi.model.CommonProjectVersion
 import net.axay.pacmc.app.utils.pmap
-import okio.Path.Companion.toPath
 import kotlin.math.absoluteValue
 
 class Archive(private val name: String) {
@@ -32,12 +30,8 @@ class Archive(private val name: String) {
         }
     }
 
-    private lateinit var dbArchive: DbArchive
-
-    private fun updateFromDb(): DbArchive? {
-        dbArchive = realm.query<DbArchive>("name == $0", name).limit(1).first().find() ?: return null
-        return dbArchive
-    }
+    private fun TypedRealm.findArchive() = query<DbArchive>("name == $0", name).first().find()
+        ?: error("The archive '$name' is not present in the database")
 
     class ResolveResult(
         val versions: List<CommonProjectVersion>,
@@ -45,7 +39,7 @@ class Archive(private val name: String) {
     )
 
     suspend fun resolve(modSlugs: List<ModSlug>): ResolveResult {
-        updateFromDb()
+        val dbArchive = realm.findArchive()
 
         val modIds = modSlugs.pmap { RepositoryApi.getBasicProjectInfo(it)?.id }.filterNotNull().toSet()
 
@@ -116,40 +110,44 @@ class Archive(private val name: String) {
             }
         }?.first
 
+    enum class InstallResult {
+        SUCCESS,
+        NO_PROJECT_INFO,
+        NO_FILE,
+        ALREADY_INSTALLED,
+    }
+
     suspend fun install(
-        modId: ModId,
+        version: CommonProjectVersion,
+        isDependency: Boolean,
         downloadProgress: (Double) -> Unit,
-    ) = coroutineScope scope@{
-        updateFromDb() ?: return@scope
+    ): InstallResult = coroutineScope scope@{
 
-        if (dbArchive.installed.any { it.id == modId.id }) return@scope
+        val modId = version.modId
+        val modInfoDeferred = async { RepositoryApi.getBasicProjectInfo(modId) }
 
-        val projectVersionsDeferred = async {
-            RepositoryApi.getProjectVersions(
-                modId,
-                listOf(dbArchive.readLoader()),
-                listOf(dbArchive.readMinecraftVersion())
-            )
-        }
-        val projectInfoDeferred = async {
-            RepositoryApi.getProject(modId)
+        val dbArchive = realm.findArchive()
+        if (dbArchive.installed.any { it.matches(modId) }) {
+            return@scope InstallResult.ALREADY_INSTALLED
         }
 
-        val version = projectVersionsDeferred.await()?.maxByOrNull { it.datePublished } ?: return@scope
+        val downloadFile = version.files.firstOrNull { it.primary }
+            ?: return@scope InstallResult.NO_FILE
 
-        val downloadFile = version.files.firstOrNull { it.primary } ?: return@scope
-
-        val fileName = ModFile(modId.repository.shortForm, projectInfoDeferred.await()?.slug?.slug, modId.id).fileName
+        val modInfo = modInfoDeferred.await()
+            ?: return@scope InstallResult.NO_PROJECT_INFO
+        val fileName = ModFile(modId.repository.shortForm, modInfo.slug.slug, modId.id).fileName
 
         ktorClient.downloadFile(
             downloadFile.url,
-            dbArchive.path.toPath().resolve(fileName),
+            dbArchive.readPath().resolve(fileName),
             downloadProgress
         )
 
         realm.write {
-            dbArchive.installed.add(DbInstalledProject(modId.id))
-            copyToRealm(dbArchive)
+            findLatest(dbArchive)!!.installed.add(DbInstalledProject(modId, isDependency))
         }
+
+        InstallResult.SUCCESS
     }
 }
