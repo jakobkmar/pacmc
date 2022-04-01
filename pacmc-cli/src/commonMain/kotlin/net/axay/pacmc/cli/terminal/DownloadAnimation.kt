@@ -12,17 +12,23 @@ private const val PROGRESS_BAR_WIDTH = 30
 class DownloadAnimation {
     private var maxWidth = 0
 
-    private val finished = LinkedHashSet<String>()
-    private val inProgress = LinkedHashMap<String, Double>()
+    private val finished = LinkedHashMap<String, AnimationState>()
+    private val inProgress = LinkedHashMap<String, AnimationState>()
 
-    fun update(item: String, progress: Double) {
+    class AnimationState(
+        val progress: Double,
+        val message: String? = null,
+        val color: TextColors? = null,
+    )
+
+    fun update(item: String, state: AnimationState) {
         terminal.cursor.move { up(finished.size + inProgress.size) }
 
-        if (progress >= 1) {
+        if (state.progress >= 1) {
             inProgress -= item
-            finished += item
+            finished[item] = state
         } else {
-            inProgress[item] = progress
+            inProgress[item] = state
         }
         maxWidth = max(maxWidth, item.length)
 
@@ -30,21 +36,19 @@ class DownloadAnimation {
     }
 
     private fun printAll() {
-        for (text in finished) {
-            printProgress(text, 1.0)
-        }
-
-        inProgress.forEach { (text, progress) -> printProgress(text, progress) }
+        finished.forEach { (text, state) -> printProgress(text, state) }
+        inProgress.forEach { (text, state) -> printProgress(text, state) }
     }
 
-    private fun printProgress(text: String, progress: Double) {
+    private fun printProgress(text: String, state: AnimationState) {
+        val progress = state.progress
 
         val lineWidth = max(min((progress * PROGRESS_BAR_WIDTH).roundToInt(), PROGRESS_BAR_WIDTH), 0)
         val string = buildString {
             append(TextColors.brightCyan(text.padEnd(maxWidth, ' ')))
             append(" [")
             if (lineWidth > 0) {
-                val color = if (progress >= 1) TextColors.green else TextColors.brightYellow
+                val color = state.color ?: (if (progress >= 1) TextColors.green else TextColors.brightYellow)
                 append(color("─".repeat(lineWidth - 1) + ">"))
             }
             append(" ".repeat(PROGRESS_BAR_WIDTH - lineWidth))
@@ -53,11 +57,10 @@ class DownloadAnimation {
 
         terminal.print(string)
         terminal.cursor.move { clearLineAfterCursor() }
-        terminal.println(
-            if (progress < 1)
-                TextColors.brightWhite("${(progress * 100).roundToInt()}%")
-            else
-                TextColors.brightGreen(TextStyles.bold("done"))
-        )
+        terminal.println(when {
+            state.message != null -> state.message
+            progress < 1 -> TextColors.brightWhite("${(progress * 100).roundToInt()}%")
+            else -> TextColors.brightGreen(TextStyles.bold("done"))
+        })
     }
 }

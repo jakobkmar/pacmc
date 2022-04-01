@@ -110,11 +110,11 @@ class Archive(private val name: String) {
             }
         }?.first
 
-    enum class InstallResult {
-        SUCCESS,
-        NO_PROJECT_INFO,
-        NO_FILE,
-        ALREADY_INSTALLED,
+    enum class InstallResult(val success: Boolean) {
+        SUCCESS(true),
+        ALREADY_INSTALLED(true),
+        NO_PROJECT_INFO(false),
+        NO_FILE(false),
     }
 
     suspend fun install(
