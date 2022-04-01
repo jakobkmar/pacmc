@@ -131,7 +131,7 @@ class Archive(private val name: String) {
             return@scope InstallResult.ALREADY_INSTALLED
         }
 
-        val downloadFile = version.files.firstOrNull { it.primary }
+        val downloadFile = (version.files.firstOrNull { it.primary } ?: version.files.singleOrNull())
             ?: return@scope InstallResult.NO_FILE
 
         val modInfo = modInfoDeferred.await()
