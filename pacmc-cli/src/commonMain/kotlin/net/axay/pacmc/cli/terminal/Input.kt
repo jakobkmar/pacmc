@@ -10,8 +10,8 @@ fun Terminal.askYesOrNo(question: String, default: Boolean? = null): Boolean {
             "n", "no" -> false
             "y", "yes" -> true
             "" -> {
-                cursor.move { up(1) }
                 if (default == null) continue else {
+                    cursor.move { up(1) }
                     println("$question $keyString ${if (default) "yes" else "no"}")
                     default
                 }
