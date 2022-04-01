@@ -48,6 +48,8 @@ suspend inline fun HttpClient.downloadFile(
             }
         }
         Environment.fileSystem.atomicMove(partPath, path)
+
+        downloadProgress(1.0)
     } finally {
         Environment.fileSystem.delete(partPath, mustExist = false)
     }
