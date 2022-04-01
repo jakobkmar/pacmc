@@ -5,6 +5,7 @@ import io.realm.query
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import net.axay.pacmc.app.Environment
 import net.axay.pacmc.app.data.MinecraftVersion
 import net.axay.pacmc.app.data.ModFile
 import net.axay.pacmc.app.data.ModId
@@ -121,33 +122,48 @@ class Archive(private val name: String) {
         version: CommonProjectVersion,
         isDependency: Boolean,
         downloadProgress: (Double) -> Unit,
-    ): InstallResult = coroutineScope scope@{
+    ): InstallResult {
 
         val modId = version.modId
-        val modInfoDeferred = async { RepositoryApi.getBasicProjectInfo(modId) }
+        val fileNameDeferred = CoroutineScope(Dispatchers.Default).async {
+            val projectInfo = RepositoryApi.getBasicProjectInfo(modId) ?: return@async null
+            ModFile(modId.repository.shortForm, projectInfo.slug.slug, modId.id).fileName
+        }
 
         val dbArchive = realm.findArchive()
-        if (dbArchive.installed.any { it.matches(modId) }) {
-            return@scope InstallResult.ALREADY_INSTALLED
-        }
 
-        val downloadFile = (version.files.firstOrNull { it.primary } ?: version.files.singleOrNull())
-            ?: return@scope InstallResult.NO_FILE
-
-        val modInfo = modInfoDeferred.await()
-            ?: return@scope InstallResult.NO_PROJECT_INFO
-        val fileName = ModFile(modId.repository.shortForm, modInfo.slug.slug, modId.id).fileName
-
-        ktorClient.downloadFile(
-            downloadFile.url,
-            dbArchive.readPath().resolve(fileName),
-            downloadProgress
-        )
+        val shouldDownload = if (dbArchive.installed.any { it.matches(modId) }) {
+            val fileName = fileNameDeferred.await() ?: return InstallResult.NO_PROJECT_INFO
+            !Environment.fileSystem.exists(dbArchive.readPath().resolve(fileName))
+        } else true
 
         realm.write {
-            findLatest(dbArchive)!!.installed.add(DbInstalledProject(modId, isDependency))
+            findLatest(dbArchive)!!.apply {
+                val presentProject = installed.find { it.matches(modId) }
+                if (presentProject != null) {
+                    if (presentProject.dependency && !isDependency) {
+                        installed.removeAll { it.matches(modId) }
+                    } else return@write
+                }
+                installed.add(DbInstalledProject(modId, isDependency))
+            }
         }
 
-        InstallResult.SUCCESS
+        if (shouldDownload) {
+            val downloadFile = (version.files.firstOrNull { it.primary } ?: version.files.singleOrNull())
+                ?: return InstallResult.NO_FILE
+
+            val fileName = fileNameDeferred.await() ?: return InstallResult.NO_PROJECT_INFO
+
+            ktorClient.downloadFile(
+                downloadFile.url,
+                dbArchive.readPath().resolve(fileName),
+                downloadProgress
+            )
+
+            return InstallResult.SUCCESS
+        } else {
+            return InstallResult.ALREADY_INSTALLED
+        }
     }
 }
