@@ -31,7 +31,10 @@ suspend inline fun HttpClient.downloadFile(
 
     if (downloadProgress != null) {
         onDownload { bytesSentTotal, contentLength ->
-            downloadProgress(bytesSentTotal.toDouble() / contentLength.toDouble())
+            val progress = bytesSentTotal.toDouble() / contentLength.toDouble()
+            if (!progress.isNaN()) {
+                downloadProgress(progress)
+            }
         }
     }
 }.execute { response ->
