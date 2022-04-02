@@ -11,7 +11,6 @@ import io.ktor.client.statement.*
 import io.ktor.client.utils.*
 import io.ktor.utils.io.*
 import io.ktor.utils.io.core.*
-import kotlinx.coroutines.launch
 import okio.Path
 
 val ktorClient = HttpClient(CIO) {
@@ -22,23 +21,18 @@ val ktorClient = HttpClient(CIO) {
     }
 }
 
-// this is basically 'downloadFile' with ignored 'downloadProgress'
-// reason: Suspend functional parameters with default values are not yet supported in inline functions
 suspend inline fun HttpClient.downloadFile(
     url: String,
     path: Path,
-    builder: HttpRequestBuilder.() -> Unit = {},
-) = downloadFile(url, path, {}, builder)
-
-suspend inline fun HttpClient.downloadFile(
-    url: String,
-    path: Path,
-    crossinline downloadProgress: suspend (Double) -> Unit,
+    noinline downloadProgress: (suspend (Double) -> Unit)? = null,
     builder: HttpRequestBuilder.() -> Unit = {},
 ) = get<HttpStatement>(url) {
     builder(this)
-    onDownload { bytesSentTotal, contentLength ->
-        downloadProgress(bytesSentTotal.toDouble() / contentLength.toDouble())
+
+    if (downloadProgress != null) {
+        onDownload { bytesSentTotal, contentLength ->
+            downloadProgress(bytesSentTotal.toDouble() / contentLength.toDouble())
+        }
     }
 }.execute { response ->
     val channel = response.receive<ByteReadChannel>()
@@ -58,7 +52,7 @@ suspend inline fun HttpClient.downloadFile(
         }
         Environment.fileSystem.atomicMove(partPath, path)
 
-        downloadProgress(1.0)
+        downloadProgress?.invoke(1.0)
     } finally {
         Environment.fileSystem.delete(partPath, mustExist = false)
     }
