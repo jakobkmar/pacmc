@@ -2,6 +2,8 @@ package net.axay.pacmc.cli.terminal
 
 import com.github.ajalt.mordant.rendering.TextColors
 import com.github.ajalt.mordant.rendering.TextStyles
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import net.axay.pacmc.cli.terminal
 import kotlin.math.max
 import kotlin.math.min
@@ -15,24 +17,28 @@ class DownloadAnimation {
     private val finished = LinkedHashMap<String, AnimationState>()
     private val inProgress = LinkedHashMap<String, AnimationState>()
 
+    private val updateMutex = Mutex()
+
     class AnimationState(
         val progress: Double,
         val message: String? = null,
         val color: TextColors? = null,
     )
 
-    fun update(item: String, state: AnimationState) {
-        terminal.cursor.move { up(finished.size + inProgress.size) }
+    suspend fun update(item: String, state: AnimationState) {
+        updateMutex.withLock {
+            terminal.cursor.move { up(finished.size + inProgress.size) }
 
-        if (state.progress >= 1) {
-            inProgress -= item
-            finished[item] = state
-        } else {
-            inProgress[item] = state
+            if (state.progress >= 1) {
+                inProgress -= item
+                finished[item] = state
+            } else {
+                inProgress[item] = state
+            }
+            maxWidth = max(maxWidth, item.length)
+
+            printAll()
         }
-        maxWidth = max(maxWidth, item.length)
-
-        printAll()
     }
 
     private fun printAll() {

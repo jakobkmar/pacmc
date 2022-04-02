@@ -121,7 +121,7 @@ class Archive(private val name: String) {
     suspend fun install(
         version: CommonProjectVersion,
         isDependency: Boolean,
-        downloadProgress: (Double) -> Unit,
+        downloadProgress: suspend (Double) -> Unit,
     ): InstallResult {
 
         val modId = version.modId
