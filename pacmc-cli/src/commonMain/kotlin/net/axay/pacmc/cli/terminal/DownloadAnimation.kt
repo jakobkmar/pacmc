@@ -45,7 +45,7 @@ class DownloadAnimation {
 
         val lineWidth = max(min((progress * PROGRESS_BAR_WIDTH).roundToInt(), PROGRESS_BAR_WIDTH), 0)
         val string = buildString {
-            append(TextColors.brightCyan(text.padEnd(maxWidth, ' ')))
+            append(TextColors.brightCyan(text.padStart(maxWidth + 1, ' ')))
             append(" [")
             if (lineWidth > 0) {
                 val color = state.color ?: (if (progress >= 1) TextColors.green else TextColors.brightYellow)
