@@ -42,6 +42,7 @@ import net.axay.pacmc.app.features.Archive
 import net.axay.pacmc.app.repoapi.RepositoryApi
 import net.axay.pacmc.gui.screens.state.IdentifierState
 import net.axay.pacmc.gui.util.FileChooser
+import okio.Path.Companion.toPath
 import java.awt.Toolkit
 import java.util.*
 
@@ -229,7 +230,7 @@ fun ArchiveScreen() = Box(Modifier.fillMaxSize()) {
                             Archive.create(DbArchive(
                                 identifier.value,
                                 displayName,
-                                path,
+                                path.toPath(),
                                 minecraftVersion!!,
                                 ModLoader.FABRIC,
                                 realmListOf(),
@@ -275,7 +276,7 @@ fun ArchiveScreen() = Box(Modifier.fillMaxSize()) {
                             Archive.create(DbArchive(
                                 uuid,
                                 uuid,
-                                "/test/path",
+                                "/test/path".toPath(),
                                 MinecraftVersion(1, 18, 1),
                                 ModLoader.FABRIC,
                                 realmListOf(),
