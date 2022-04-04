@@ -4,6 +4,8 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.subcommands
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.options.option
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import net.axay.pacmc.app.Environment
 import net.axay.pacmc.app.data.MinecraftVersion
@@ -45,7 +47,7 @@ class ArchiveCommand : CliktCommand(
                 }
             }
 
-            val minecraftVersionDeferred = async {
+            val minecraftVersionDeferred = CoroutineScope(Dispatchers.Default).async {
                 optionalMinecraftVersion ?: RepositoryApi.getMinecraftReleases()?.maxOrNull()
             }
 
@@ -56,7 +58,7 @@ class ArchiveCommand : CliktCommand(
                 return@launchJob
             }
 
-            if (!Environment.fileSystem.exists(archivePath) || Environment.fileSystem.metadata(archivePath).isDirectory) {
+            if (!Environment.fileSystem.exists(archivePath) || !Environment.fileSystem.metadata(archivePath).isDirectory) {
                 terminal.warning("The given path '$archivePathString' is not a valid directory!")
                 return@launchJob
             }
