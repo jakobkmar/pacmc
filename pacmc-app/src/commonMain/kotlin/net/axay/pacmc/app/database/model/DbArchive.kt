@@ -5,9 +5,11 @@ import io.realm.RealmObject
 import io.realm.annotations.Index
 import io.realm.annotations.PrimaryKey
 import io.realm.realmListOf
+import io.realm.toRealmList
 import net.axay.pacmc.app.data.MinecraftVersion
 import net.axay.pacmc.app.data.ModId
 import net.axay.pacmc.app.data.ModLoader
+import okio.Path
 import okio.Path.Companion.toPath
 
 class DbArchive() : RealmObject {
@@ -30,18 +32,18 @@ class DbArchive() : RealmObject {
     constructor(
         name: String,
         displayName: String,
-        path: String,
+        path: Path,
         minecraftVersion: MinecraftVersion,
         loader: ModLoader,
-        installed: RealmList<DbInstalledProject>,
+        installed: List<DbInstalledProject>,
         color: Int,
     ) : this() {
         this.name = name
         this.displayName = displayName
-        this.path = path
+        this.path = path.toString()
         this.minecraftVersion = minecraftVersion.toString()
         this.loader = loader.name
-        this.installed = installed
+        this.installed = installed.toRealmList()
         this.color = color
     }
 }
