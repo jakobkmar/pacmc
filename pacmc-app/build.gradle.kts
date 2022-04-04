@@ -18,6 +18,7 @@ kotlin {
                 api(libs.ktor.client.cio)
                 api(libs.kotlinx.coroutines.core)
                 api(libs.kermit)
+                api(libs.colormath)
             }
         }
 
