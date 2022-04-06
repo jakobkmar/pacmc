@@ -4,6 +4,9 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.subcommands
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.colormath.model.RGBInt
+import com.github.ajalt.mordant.rendering.TextColors
+import com.github.ajalt.mordant.rendering.TextStyles
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -14,6 +17,7 @@ import net.axay.pacmc.app.database.model.DbArchive
 import net.axay.pacmc.app.features.Archive
 import net.axay.pacmc.app.repoapi.RepositoryApi
 import net.axay.pacmc.app.utils.ColorUtils
+import net.axay.pacmc.app.utils.OperatingSystem
 import net.axay.pacmc.cli.launchJob
 import net.axay.pacmc.cli.terminal
 import okio.Path.Companion.toPath
@@ -23,7 +27,7 @@ class ArchiveCommand : CliktCommand(
     help = "Manage archives",
 ) {
     init {
-        subcommands(Create())
+        subcommands(Create(), List())
     }
 
     override fun run() = Unit
@@ -86,6 +90,30 @@ class ArchiveCommand : CliktCommand(
                 emptyList(),
                 ColorUtils.randomLightColor().toRGBInt().argb.toInt()
             ))
+        }
+    }
+
+    class List : CliktCommand(
+        name = "list",
+        help = "List all archives",
+    ) {
+        override fun run() {
+            val archives = Archive.getArchivesList()
+            archives.forEachIndexed { index, archive ->
+                val isLast = index == archives.lastIndex
+
+                val color = TextColors.color(RGBInt(archive.color.toUInt()))
+                val coloredChar = if (OperatingSystem.notWindows) "●" else TextStyles.bold(">")
+
+                terminal.print("${if (isLast) '└' else '├'}─${color(coloredChar)}")
+                terminal.print(" " + TextColors.brightWhite(TextStyles.bold(archive.name)))
+                terminal.print(" " + TextColors.brightCyan(TextStyles.bold(archive.minecraftVersion)))
+                if (archive.name != archive.displayName) {
+                    terminal.print(" (${archive.displayName})")
+                }
+                terminal.println()
+                terminal.println("${if (isLast) ' ' else '│'}     ${TextColors.gray(archive.path)}")
+            }
         }
     }
 }

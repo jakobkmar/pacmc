@@ -23,6 +23,7 @@ import kotlin.math.absoluteValue
 class Archive(private val name: String) {
     companion object {
         fun getArchives() = realm.query<DbArchive>().find()
+        fun getArchivesList() = getArchives().toList()
 
         suspend fun create(dbArchive: DbArchive) {
             realm.write {
