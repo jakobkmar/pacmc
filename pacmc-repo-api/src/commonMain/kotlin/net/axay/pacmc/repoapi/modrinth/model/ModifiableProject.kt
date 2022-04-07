@@ -8,43 +8,19 @@ import kotlinx.serialization.Serializable
 @Serializable
 public data class ModifiableProject(
   /**
-   * The slug of a project, used for vanity URLs
+   * The license ID of a project, retrieved from the license tag route
    *
-   * **Example**: `"my_project"`
+   * **Example**: `"lgpl-3"`
    */
-  public val slug: String? = null,
+  @SerialName("license_id")
+  public val licenseId: String? = null,
   /**
-   * The title or name of the project
+   * The URL to this license
    *
-   * **Example**: `"My Project"`
+   * **Example**: `"https://cdn.modrinth.com/licenses/lgpl-3.txt"`
    */
-  public val title: String? = null,
-  /**
-   * A short description of the project
-   *
-   * **Example**: `"A short description"`
-   */
-  public val description: String? = null,
-  /**
-   * A list of the categories that the project is in
-   *
-   * **Example**: `["technology","adventure","fabric"]`
-   */
-  public val categories: List<String>? = null,
-  /**
-   * The client side support of the project
-   *
-   * **Example**: `"required"`
-   */
-  @SerialName("client_side")
-  public val clientSide: BaseProject.ClientSide? = null,
-  /**
-   * The server side support of the project
-   *
-   * **Example**: `"optional"`
-   */
-  @SerialName("server_side")
-  public val serverSide: BaseProject.ServerSide? = null,
+  @SerialName("license_url")
+  public val licenseUrl: String? = null,
   /**
    * A long form description of the project
    *
@@ -85,17 +61,41 @@ public data class ModifiableProject(
   @SerialName("donation_urls")
   public val donationUrls: List<NonSearchProject.DonationUrls>? = null,
   /**
-   * The license ID of a project, retrieved from the license tag route
+   * The slug of a project, used for vanity URLs
    *
-   * **Example**: `"lgpl-3"`
+   * **Example**: `"my_project"`
    */
-  @SerialName("license_id")
-  public val licenseId: String? = null,
+  public val slug: String? = null,
   /**
-   * The URL to this license
+   * The title or name of the project
    *
-   * **Example**: `"https://cdn.modrinth.com/licenses/lgpl-3.txt"`
+   * **Example**: `"My Project"`
    */
-  @SerialName("license_url")
-  public val licenseUrl: String? = null
+  public val title: String? = null,
+  /**
+   * A short description of the project
+   *
+   * **Example**: `"A short description"`
+   */
+  public val description: String? = null,
+  /**
+   * A list of the categories that the project is in
+   *
+   * **Example**: `["technology","adventure","fabric"]`
+   */
+  public val categories: List<String>? = null,
+  /**
+   * The client side support of the project
+   *
+   * **Example**: `"required"`
+   */
+  @SerialName("client_side")
+  public val clientSide: BaseProject.ClientSide? = null,
+  /**
+   * The server side support of the project
+   *
+   * **Example**: `"optional"`
+   */
+  @SerialName("server_side")
+  public val serverSide: BaseProject.ServerSide? = null,
 )

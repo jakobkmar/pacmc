@@ -1,11 +1,10 @@
 package net.axay.pacmc.repoapi.modrinth.model
 
 import kotlin.String
-import kotlin.collections.List
 import kotlinx.serialization.Serializable
 
 @Serializable
-public data class DonationPlatformTagArrayElement(
+public data class DonationPlatformTag(
   /**
    * The short identifier of the donation platform
    *
@@ -17,7 +16,5 @@ public data class DonationPlatformTagArrayElement(
    *
    * **Example**: `"Buy Me a Coffee"`
    */
-  public val name: String
+  public val name: String,
 )
-
-public typealias DonationPlatformTag = List<DonationPlatformTagArrayElement>

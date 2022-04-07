@@ -11,102 +11,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 public data class Project(
   /**
-   * The slug of a project, used for vanity URLs
-   *
-   * **Example**: `"my_project"`
-   */
-  public val slug: String? = null,
-  /**
-   * The title or name of the project
-   *
-   * **Example**: `"My Project"`
-   */
-  public val title: String? = null,
-  /**
-   * A short description of the project
-   *
-   * **Example**: `"A short description"`
-   */
-  public val description: String? = null,
-  /**
-   * A list of the categories that the project is in
-   *
-   * **Example**: `["technology","adventure","fabric"]`
-   */
-  public val categories: List<String>? = null,
-  /**
-   * The client side support of the project
-   *
-   * **Example**: `"required"`
-   */
-  @SerialName("client_side")
-  public val clientSide: BaseProject.ClientSide? = null,
-  /**
-   * The server side support of the project
-   *
-   * **Example**: `"optional"`
-   */
-  @SerialName("server_side")
-  public val serverSide: BaseProject.ServerSide? = null,
-  /**
-   * A long form description of the project
-   *
-   * **Example**: `"A long body describing my project in detail"`
-   */
-  public val body: String? = null,
-  /**
-   * An optional link to where to submit bugs or issues with the project
-   *
-   * **Example**: `"https://github.com/my_user/my_project/issues"`
-   */
-  @SerialName("issues_url")
-  public val issuesUrl: String? = null,
-  /**
-   * An optional link to the source code of the project
-   *
-   * **Example**: `"https://github.com/my_user/my_project"`
-   */
-  @SerialName("source_url")
-  public val sourceUrl: String? = null,
-  /**
-   * An optional link to the project's wiki page or other relevant information
-   *
-   * **Example**: `"https://github.com/my_user/my_project/wiki"`
-   */
-  @SerialName("wiki_url")
-  public val wikiUrl: String? = null,
-  /**
-   * An optional invite link to the project's discord
-   *
-   * **Example**: `"https://discord.gg/AaBbCcDd"`
-   */
-  @SerialName("discord_url")
-  public val discordUrl: String? = null,
-  /**
-   * A list of donation links for the project
-   */
-  @SerialName("donation_urls")
-  public val donationUrls: List<NonSearchProject.DonationUrls>? = null,
-  /**
-   * The project type of the project
-   *
-   * **Example**: `"mod"`
-   */
-  @SerialName("project_type")
-  public val projectType: ServerRenderedProject.ProjectType,
-  /**
-   * The total number of downloads of the project
-   */
-  public val downloads: Int,
-  /**
-   * The URL of the project's icon
-   *
-   * **Example**:
-   * `"https://cdn.modrinth.com/data/AABBCCDD/b46513nd83hb4792a9a0e1fn28fgi6090c1842639.png"`
-   */
-  @SerialName("icon_url")
-  public val iconUrl: String? = null,
-  /**
    * The ID of the project, encoded as a base62 string
    *
    * **Example**: `"AABBCCDD"`
@@ -163,7 +67,103 @@ public data class Project(
   /**
    * A list of images that have been uploaded to the project's gallery
    */
-  public val gallery: List<Project.Gallery>? = null
+  public val gallery: List<Project.Gallery>? = null,
+  /**
+   * A long form description of the project
+   *
+   * **Example**: `"A long body describing my project in detail"`
+   */
+  public val body: String,
+  /**
+   * An optional link to where to submit bugs or issues with the project
+   *
+   * **Example**: `"https://github.com/my_user/my_project/issues"`
+   */
+  @SerialName("issues_url")
+  public val issuesUrl: String? = null,
+  /**
+   * An optional link to the source code of the project
+   *
+   * **Example**: `"https://github.com/my_user/my_project"`
+   */
+  @SerialName("source_url")
+  public val sourceUrl: String? = null,
+  /**
+   * An optional link to the project's wiki page or other relevant information
+   *
+   * **Example**: `"https://github.com/my_user/my_project/wiki"`
+   */
+  @SerialName("wiki_url")
+  public val wikiUrl: String? = null,
+  /**
+   * An optional invite link to the project's discord
+   *
+   * **Example**: `"https://discord.gg/AaBbCcDd"`
+   */
+  @SerialName("discord_url")
+  public val discordUrl: String? = null,
+  /**
+   * A list of donation links for the project
+   */
+  @SerialName("donation_urls")
+  public val donationUrls: List<NonSearchProject.DonationUrls>? = null,
+  /**
+   * The slug of a project, used for vanity URLs
+   *
+   * **Example**: `"my_project"`
+   */
+  public val slug: String,
+  /**
+   * The title or name of the project
+   *
+   * **Example**: `"My Project"`
+   */
+  public val title: String,
+  /**
+   * A short description of the project
+   *
+   * **Example**: `"A short description"`
+   */
+  public val description: String,
+  /**
+   * A list of the categories that the project is in
+   *
+   * **Example**: `["technology","adventure","fabric"]`
+   */
+  public val categories: List<String>,
+  /**
+   * The client side support of the project
+   *
+   * **Example**: `"required"`
+   */
+  @SerialName("client_side")
+  public val clientSide: BaseProject.ClientSide,
+  /**
+   * The server side support of the project
+   *
+   * **Example**: `"optional"`
+   */
+  @SerialName("server_side")
+  public val serverSide: BaseProject.ServerSide,
+  /**
+   * The project type of the project
+   *
+   * **Example**: `"mod"`
+   */
+  @SerialName("project_type")
+  public val projectType: ServerRenderedProject.ProjectType,
+  /**
+   * The total number of downloads of the project
+   */
+  public val downloads: Int,
+  /**
+   * The URL of the project's icon
+   *
+   * **Example**:
+   * `"https://cdn.modrinth.com/data/AABBCCDD/b46513nd83hb4792a9a0e1fn28fgi6090c1842639.png"`
+   */
+  @SerialName("icon_url")
+  public val iconUrl: String? = null,
 ) {
   @Serializable
   public data class ModeratorMessage(
@@ -174,7 +174,7 @@ public data class Project(
     /**
      * The longer body of the message that a moderator has left for the project
      */
-    public val body: String? = null
+    public val body: String? = null,
   )
 
   @Serializable
@@ -214,7 +214,7 @@ public data class Project(
      *
      * **Example**: `"https://cdn.modrinth.com/licenses/lgpl-3.txt"`
      */
-    public val url: String? = null
+    public val url: String? = null,
   )
 
   @Serializable
@@ -247,6 +247,6 @@ public data class Project(
     /**
      * The date and time the gallery image was created
      */
-    public val created: Instant
+    public val created: Instant,
   )
 }

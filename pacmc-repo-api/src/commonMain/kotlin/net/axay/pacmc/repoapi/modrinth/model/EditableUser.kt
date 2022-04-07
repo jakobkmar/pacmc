@@ -26,5 +26,5 @@ public data class EditableUser(
    *
    * **Example**: `"My short biography"`
    */
-  public val bio: String? = null
+  public val bio: String? = null,
 )

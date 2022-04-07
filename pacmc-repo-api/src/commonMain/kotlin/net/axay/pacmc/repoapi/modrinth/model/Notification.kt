@@ -59,7 +59,7 @@ public data class Notification(
   /**
    * A list of actions that can be performed
    */
-  public val actions: List<Notification.Actions>
+  public val actions: List<Notification.Actions>,
 ) {
   @Serializable
   public enum class Type {

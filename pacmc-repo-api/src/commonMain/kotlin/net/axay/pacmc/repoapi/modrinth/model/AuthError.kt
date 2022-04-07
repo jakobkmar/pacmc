@@ -16,5 +16,5 @@ public data class AuthError(
    *
    * **Example**: `"Authentication Error: Invalid Authentication Credentials"`
    */
-  public val description: String
+  public val description: String,
 )

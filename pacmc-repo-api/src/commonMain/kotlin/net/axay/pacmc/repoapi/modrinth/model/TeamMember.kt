@@ -44,5 +44,5 @@ public data class TeamMember(
    *
    * **Example**: `true`
    */
-  public val accepted: Boolean
+  public val accepted: Boolean,
 )

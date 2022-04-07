@@ -6,7 +6,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-public data class LoaderTagArrayElement(
+public data class LoaderTag(
   /**
    * The SVG icon of a loader
    *
@@ -36,7 +36,5 @@ public data class LoaderTagArrayElement(
    * **Example**: `["mod","modpack"]`
    */
   @SerialName("supported_project_types")
-  public val supportedProjectTypes: List<String>
+  public val supportedProjectTypes: List<String>,
 )
-
-public typealias LoaderTag = List<LoaderTagArrayElement>

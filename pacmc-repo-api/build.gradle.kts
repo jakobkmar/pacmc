@@ -3,7 +3,7 @@ import net.axay.openapigenerator.OpenApiGenerateTask
 plugins {
     `kotlin-mp-script`
     kotlin("plugin.serialization")
-    id("net.axay.openapigenerator") version "0.1.0"
+    id("net.axay.openapigenerator") version "0.1.2"
 }
 
 buildscript {

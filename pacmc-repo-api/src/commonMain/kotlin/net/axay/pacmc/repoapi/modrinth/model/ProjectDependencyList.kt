@@ -12,5 +12,5 @@ public data class ProjectDependencyList(
   /**
    * Versions that the project depends upon
    */
-  public val versions: List<Version>? = null
+  public val versions: List<Version>? = null,
 )

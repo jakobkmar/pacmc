@@ -8,23 +8,37 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 public data class CreatableVersion(
-  public val `data`: CreatableVersion.Data
+  public val `data`: CreatableVersion.Data,
 ) {
   @Serializable
   public data class Data(
+    /**
+     * The ID of the project this version is for
+     *
+     * **Example**: `"AABBCCDD"`
+     */
+    @SerialName("project_id")
+    public val projectId: String,
+    @SerialName("file_parts")
+    public val fileParts: List<String>,
+    /**
+     * The multipart field name of the primary file
+     */
+    @SerialName("primary_file")
+    public val primaryFile: String? = null,
     /**
      * The name of this version
      *
      * **Example**: `"Version 1.0.0"`
      */
-    public val name: String? = null,
+    public val name: String,
     /**
      * The version number. Ideally will follow semantic versioning
      *
      * **Example**: `"1.0.0"`
      */
     @SerialName("version_number")
-    public val versionNumber: String? = null,
+    public val versionNumber: String,
     /**
      * The changelog for this version
      *
@@ -41,39 +55,25 @@ public data class CreatableVersion(
      * **Example**: `["1.16.5","1.17.1"]`
      */
     @SerialName("game_versions")
-    public val gameVersions: List<String>? = null,
+    public val gameVersions: List<String>,
     /**
      * The release channel for this version
      *
      * **Example**: `"release"`
      */
     @SerialName("version_type")
-    public val versionType: BaseVersion.VersionType? = null,
+    public val versionType: BaseVersion.VersionType,
     /**
      * The mod loaders that this version supports
      *
      * **Example**: `["fabric","forge"]`
      */
-    public val loaders: List<String>? = null,
+    public val loaders: List<String>,
     /**
      * Whether the version is featured or not
      *
      * **Example**: `true`
      */
-    public val featured: Boolean? = null,
-    /**
-     * The ID of the project this version is for
-     *
-     * **Example**: `"AABBCCDD"`
-     */
-    @SerialName("project_id")
-    public val projectId: String,
-    @SerialName("file_parts")
-    public val fileParts: List<String>,
-    /**
-     * The multipart field name of the primary file
-     */
-    @SerialName("primary_file")
-    public val primaryFile: String? = null
+    public val featured: Boolean,
   )
 }

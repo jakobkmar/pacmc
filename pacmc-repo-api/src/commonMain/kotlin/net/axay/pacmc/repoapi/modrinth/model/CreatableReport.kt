@@ -32,7 +32,7 @@ public data class CreatableReport(
    *
    * **Example**: `"This is a reupload of my mod, AABBCCDD!"`
    */
-  public val body: String
+  public val body: String,
 ) {
   @Serializable
   public enum class ItemType {

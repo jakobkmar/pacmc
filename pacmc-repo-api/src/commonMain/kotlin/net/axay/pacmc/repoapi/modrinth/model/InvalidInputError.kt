@@ -16,5 +16,5 @@ public data class InvalidInputError(
    *
    * **Example**: `"Error while parsing multipart payload"`
    */
-  public val description: String
+  public val description: String,
 )

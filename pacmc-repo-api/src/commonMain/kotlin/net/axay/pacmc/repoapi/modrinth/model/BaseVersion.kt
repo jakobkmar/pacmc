@@ -56,7 +56,7 @@ public data class BaseVersion(
    *
    * **Example**: `true`
    */
-  public val featured: Boolean? = null
+  public val featured: Boolean? = null,
 ) {
   @Serializable
   public data class Dependencies(
@@ -80,7 +80,7 @@ public data class BaseVersion(
      * **Example**: `"required"`
      */
     @SerialName("dependency_type")
-    public val dependencyType: Dependencies.DependencyType
+    public val dependencyType: Dependencies.DependencyType,
   ) {
     @Serializable
     public enum class DependencyType {

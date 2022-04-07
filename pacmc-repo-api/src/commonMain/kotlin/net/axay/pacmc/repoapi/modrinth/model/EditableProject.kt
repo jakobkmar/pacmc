@@ -8,43 +8,35 @@ import kotlinx.serialization.Serializable
 @Serializable
 public data class EditableProject(
   /**
-   * The slug of a project, used for vanity URLs
+   * The status of the project
    *
-   * **Example**: `"my_project"`
+   * **Example**: `"approved"`
    */
-  public val slug: String? = null,
+  public val status: EditableProject.Status? = null,
   /**
-   * The title or name of the project
-   *
-   * **Example**: `"My Project"`
+   * The title of the moderators' message for the project
    */
-  public val title: String? = null,
+  @SerialName("moderation_message")
+  public val moderationMessage: String? = null,
   /**
-   * A short description of the project
-   *
-   * **Example**: `"A short description"`
+   * The body of the moderators' message for the project
    */
-  public val description: String? = null,
+  @SerialName("moderation_message_body")
+  public val moderationMessageBody: String? = null,
   /**
-   * A list of the categories that the project is in
+   * The license ID of a project, retrieved from the license tag route
    *
-   * **Example**: `["technology","adventure","fabric"]`
+   * **Example**: `"lgpl-3"`
    */
-  public val categories: List<String>? = null,
+  @SerialName("license_id")
+  public val licenseId: String? = null,
   /**
-   * The client side support of the project
+   * The URL to this license
    *
-   * **Example**: `"required"`
+   * **Example**: `"https://cdn.modrinth.com/licenses/lgpl-3.txt"`
    */
-  @SerialName("client_side")
-  public val clientSide: BaseProject.ClientSide? = null,
-  /**
-   * The server side support of the project
-   *
-   * **Example**: `"optional"`
-   */
-  @SerialName("server_side")
-  public val serverSide: BaseProject.ServerSide? = null,
+  @SerialName("license_url")
+  public val licenseUrl: String? = null,
   /**
    * A long form description of the project
    *
@@ -85,35 +77,43 @@ public data class EditableProject(
   @SerialName("donation_urls")
   public val donationUrls: List<NonSearchProject.DonationUrls>? = null,
   /**
-   * The license ID of a project, retrieved from the license tag route
+   * The slug of a project, used for vanity URLs
    *
-   * **Example**: `"lgpl-3"`
+   * **Example**: `"my_project"`
    */
-  @SerialName("license_id")
-  public val licenseId: String? = null,
+  public val slug: String? = null,
   /**
-   * The URL to this license
+   * The title or name of the project
    *
-   * **Example**: `"https://cdn.modrinth.com/licenses/lgpl-3.txt"`
+   * **Example**: `"My Project"`
    */
-  @SerialName("license_url")
-  public val licenseUrl: String? = null,
+  public val title: String? = null,
   /**
-   * The status of the project
+   * A short description of the project
    *
-   * **Example**: `"approved"`
+   * **Example**: `"A short description"`
    */
-  public val status: EditableProject.Status? = null,
+  public val description: String? = null,
   /**
-   * The title of the moderators' message for the project
+   * A list of the categories that the project is in
+   *
+   * **Example**: `["technology","adventure","fabric"]`
    */
-  @SerialName("moderation_message")
-  public val moderationMessage: String? = null,
+  public val categories: List<String>? = null,
   /**
-   * The body of the moderators' message for the project
+   * The client side support of the project
+   *
+   * **Example**: `"required"`
    */
-  @SerialName("moderation_message_body")
-  public val moderationMessageBody: String? = null
+  @SerialName("client_side")
+  public val clientSide: BaseProject.ClientSide? = null,
+  /**
+   * The server side support of the project
+   *
+   * **Example**: `"optional"`
+   */
+  @SerialName("server_side")
+  public val serverSide: BaseProject.ServerSide? = null,
 ) {
   @Serializable
   public enum class Status {

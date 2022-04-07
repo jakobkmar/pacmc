@@ -1,11 +1,10 @@
 package net.axay.pacmc.repoapi.modrinth.model
 
 import kotlin.String
-import kotlin.collections.List
 import kotlinx.serialization.Serializable
 
 @Serializable
-public data class LicenseTagArrayElement(
+public data class LicenseTag(
   /**
    * The short identifier of the license
    *
@@ -17,7 +16,5 @@ public data class LicenseTagArrayElement(
    *
    * **Example**: `"GNU Lesser General Public License v3"`
    */
-  public val name: String
+  public val name: String,
 )
-
-public typealias LicenseTag = List<LicenseTagArrayElement>

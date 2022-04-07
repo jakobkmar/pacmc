@@ -8,6 +8,16 @@ import kotlinx.serialization.Serializable
 @Serializable
 public data class Report(
   /**
+   * The ID of the user who reported the item
+   *
+   * **Example**: `"UUVVWWXX"`
+   */
+  public val reporter: String,
+  /**
+   * The time at which the report was created
+   */
+  public val created: Instant,
+  /**
    * The type of the report being sent
    *
    * **Example**: `"copyright"`
@@ -34,14 +44,4 @@ public data class Report(
    * **Example**: `"This is a reupload of my mod, AABBCCDD!"`
    */
   public val body: String,
-  /**
-   * The ID of the user who reported the item
-   *
-   * **Example**: `"UUVVWWXX"`
-   */
-  public val reporter: String,
-  /**
-   * The time at which the report was created
-   */
-  public val created: Instant
 )

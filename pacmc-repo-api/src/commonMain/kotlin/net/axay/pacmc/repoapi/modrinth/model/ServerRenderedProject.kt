@@ -9,6 +9,25 @@ import kotlinx.serialization.Serializable
 @Serializable
 public data class ServerRenderedProject(
   /**
+   * The project type of the project
+   *
+   * **Example**: `"mod"`
+   */
+  @SerialName("project_type")
+  public val projectType: ServerRenderedProject.ProjectType,
+  /**
+   * The total number of downloads of the project
+   */
+  public val downloads: Int,
+  /**
+   * The URL of the project's icon
+   *
+   * **Example**:
+   * `"https://cdn.modrinth.com/data/AABBCCDD/b46513nd83hb4792a9a0e1fn28fgi6090c1842639.png"`
+   */
+  @SerialName("icon_url")
+  public val iconUrl: String? = null,
+  /**
    * The slug of a project, used for vanity URLs
    *
    * **Example**: `"my_project"`
@@ -46,25 +65,6 @@ public data class ServerRenderedProject(
    */
   @SerialName("server_side")
   public val serverSide: BaseProject.ServerSide? = null,
-  /**
-   * The project type of the project
-   *
-   * **Example**: `"mod"`
-   */
-  @SerialName("project_type")
-  public val projectType: ServerRenderedProject.ProjectType,
-  /**
-   * The total number of downloads of the project
-   */
-  public val downloads: Int,
-  /**
-   * The URL of the project's icon
-   *
-   * **Example**:
-   * `"https://cdn.modrinth.com/data/AABBCCDD/b46513nd83hb4792a9a0e1fn28fgi6090c1842639.png"`
-   */
-  @SerialName("icon_url")
-  public val iconUrl: String? = null
 ) {
   @Serializable
   public enum class ProjectType {

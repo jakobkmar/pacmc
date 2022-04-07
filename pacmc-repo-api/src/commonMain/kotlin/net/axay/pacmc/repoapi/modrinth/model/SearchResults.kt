@@ -29,5 +29,5 @@ public data class SearchResults(
    * **Example**: `10`
    */
   @SerialName("total_hits")
-  public val totalHits: Int
+  public val totalHits: Int,
 )

@@ -2,13 +2,12 @@ package net.axay.pacmc.repoapi.modrinth.model
 
 import kotlin.Boolean
 import kotlin.String
-import kotlin.collections.List
 import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-public data class GameVersionTagArrayElement(
+public data class GameVersionTag(
   /**
    * The name/number of the game version
    *
@@ -21,7 +20,7 @@ public data class GameVersionTagArrayElement(
    * **Example**: `"release"`
    */
   @SerialName("version_type")
-  public val versionType: GameVersionTagArrayElement.VersionType,
+  public val versionType: GameVersionTag.VersionType,
   /**
    * The date of the game version release
    */
@@ -31,7 +30,7 @@ public data class GameVersionTagArrayElement(
    *
    * **Example**: `true`
    */
-  public val major: Boolean
+  public val major: Boolean,
 ) {
   @Serializable
   public enum class VersionType {
@@ -45,5 +44,3 @@ public data class GameVersionTagArrayElement(
     Beta,
   }
 }
-
-public typealias GameVersionTag = List<GameVersionTagArrayElement>

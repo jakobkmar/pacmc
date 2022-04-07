@@ -1,12 +1,11 @@
 package net.axay.pacmc.repoapi.modrinth.model
 
 import kotlin.String
-import kotlin.collections.List
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-public data class CategoryTagArrayElement(
+public data class CategoryTag(
   /**
    * The SVG icon of a category
    *
@@ -27,7 +26,5 @@ public data class CategoryTagArrayElement(
    * **Example**: `"mod"`
    */
   @SerialName("project_type")
-  public val projectType: String
+  public val projectType: String,
 )
-
-public typealias CategoryTag = List<CategoryTagArrayElement>

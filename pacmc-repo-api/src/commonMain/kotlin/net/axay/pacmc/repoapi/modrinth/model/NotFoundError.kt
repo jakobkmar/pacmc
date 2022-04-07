@@ -16,5 +16,5 @@ public data class NotFoundError(
    *
    * **Example**: `"the requested route does not exist"`
    */
-  public val description: String
+  public val description: String,
 )

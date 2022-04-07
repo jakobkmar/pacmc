@@ -9,6 +9,13 @@ import kotlinx.serialization.Serializable
 @Serializable
 public data class EditableVersion(
   /**
+   * The hash format and the hash of the new primary file
+   *
+   * **Example**: `["sha1","aaaabbbbccccddddeeeeffffgggghhhhiiiijjjj"]`
+   */
+  @SerialName("primary_file")
+  public val primaryFile: List<String>? = null,
+  /**
    * The name of this version
    *
    * **Example**: `"Version 1.0.0"`
@@ -57,11 +64,4 @@ public data class EditableVersion(
    * **Example**: `true`
    */
   public val featured: Boolean? = null,
-  /**
-   * The hash format and the hash of the new primary file
-   *
-   * **Example**: `["sha1","aaaabbbbccccddddeeeeffffgggghhhhiiiijjjj"]`
-   */
-  @SerialName("primary_file")
-  public val primaryFile: List<String>? = null
 )

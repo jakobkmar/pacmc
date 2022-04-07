@@ -44,7 +44,7 @@ public data class BaseProject(
    * **Example**: `"optional"`
    */
   @SerialName("server_side")
-  public val serverSide: BaseProject.ServerSide? = null
+  public val serverSide: BaseProject.ServerSide? = null,
 ) {
   @Serializable
   public enum class ClientSide {

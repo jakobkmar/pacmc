@@ -9,49 +9,45 @@ import kotlinx.serialization.Serializable
 @Serializable
 public data class CreatableProject(
   /**
-   * The slug of a project, used for vanity URLs
-   *
-   * **Example**: `"my_project"`
+   * **Example**: `"modpack"`
    */
-  public val slug: String? = null,
+  @SerialName("project_type")
+  public val projectType: CreatableProject.ProjectType,
   /**
-   * The title or name of the project
-   *
-   * **Example**: `"My Project"`
+   * A list of initial versions to upload with the created project (required unless `is_draft` is
+   * true)
    */
-  public val title: String? = null,
+  @SerialName("initial_versions")
+  public val initialVersions: List<EditableVersion>? = null,
   /**
-   * A short description of the project
+   * Whether the project should be saved as a draft instead of being sent to moderation for review
    *
-   * **Example**: `"A short description"`
+   * **Example**: `true`
    */
-  public val description: String? = null,
+  @SerialName("is_draft")
+  public val isDraft: Boolean? = null,
+  @SerialName("gallery_items")
+  public val galleryItems: List<CreatableProject.GalleryItems>? = null,
   /**
-   * A list of the categories that the project is in
+   * The license ID of a project, retrieved from the license tag route
    *
-   * **Example**: `["technology","adventure","fabric"]`
+   * **Example**: `"lgpl-3"`
    */
-  public val categories: List<String>? = null,
+  @SerialName("license_id")
+  public val licenseId: String,
   /**
-   * The client side support of the project
+   * The URL to this license
    *
-   * **Example**: `"required"`
+   * **Example**: `"https://cdn.modrinth.com/licenses/lgpl-3.txt"`
    */
-  @SerialName("client_side")
-  public val clientSide: BaseProject.ClientSide? = null,
-  /**
-   * The server side support of the project
-   *
-   * **Example**: `"optional"`
-   */
-  @SerialName("server_side")
-  public val serverSide: BaseProject.ServerSide? = null,
+  @SerialName("license_url")
+  public val licenseUrl: String? = null,
   /**
    * A long form description of the project
    *
    * **Example**: `"A long body describing my project in detail"`
    */
-  public val body: String? = null,
+  public val body: String,
   /**
    * An optional link to where to submit bugs or issues with the project
    *
@@ -86,39 +82,43 @@ public data class CreatableProject(
   @SerialName("donation_urls")
   public val donationUrls: List<NonSearchProject.DonationUrls>? = null,
   /**
-   * The license ID of a project, retrieved from the license tag route
+   * The slug of a project, used for vanity URLs
    *
-   * **Example**: `"lgpl-3"`
+   * **Example**: `"my_project"`
    */
-  @SerialName("license_id")
-  public val licenseId: String? = null,
+  public val slug: String,
   /**
-   * The URL to this license
+   * The title or name of the project
    *
-   * **Example**: `"https://cdn.modrinth.com/licenses/lgpl-3.txt"`
+   * **Example**: `"My Project"`
    */
-  @SerialName("license_url")
-  public val licenseUrl: String? = null,
+  public val title: String,
   /**
-   * **Example**: `"modpack"`
-   */
-  @SerialName("project_type")
-  public val projectType: CreatableProject.ProjectType,
-  /**
-   * A list of initial versions to upload with the created project (required unless `is_draft` is
-   * true)
-   */
-  @SerialName("initial_versions")
-  public val initialVersions: List<EditableVersion>? = null,
-  /**
-   * Whether the project should be saved as a draft instead of being sent to moderation for review
+   * A short description of the project
    *
-   * **Example**: `true`
+   * **Example**: `"A short description"`
    */
-  @SerialName("is_draft")
-  public val isDraft: Boolean? = null,
-  @SerialName("gallery_items")
-  public val galleryItems: List<CreatableProject.GalleryItems>? = null
+  public val description: String,
+  /**
+   * A list of the categories that the project is in
+   *
+   * **Example**: `["technology","adventure","fabric"]`
+   */
+  public val categories: List<String>? = null,
+  /**
+   * The client side support of the project
+   *
+   * **Example**: `"required"`
+   */
+  @SerialName("client_side")
+  public val clientSide: BaseProject.ClientSide,
+  /**
+   * The server side support of the project
+   *
+   * **Example**: `"optional"`
+   */
+  @SerialName("server_side")
+  public val serverSide: BaseProject.ServerSide,
 ) {
   @Serializable
   public enum class ProjectType {
@@ -151,6 +151,6 @@ public data class CreatableProject(
      *
      * **Example**: `"This awesome screenshot shows all of the blocks in my mod!"`
      */
-    public val description: String? = null
+    public val description: String? = null,
   )
 }

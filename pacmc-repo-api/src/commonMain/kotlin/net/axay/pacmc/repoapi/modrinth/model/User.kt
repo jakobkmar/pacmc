@@ -9,28 +9,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 public data class User(
   /**
-   * The user's username
-   *
-   * **Example**: `"my_user"`
-   */
-  public val username: String,
-  /**
-   * The user's display name
-   *
-   * **Example**: `"My User"`
-   */
-  public val name: String? = null,
-  /**
-   * The user's email (only your own is ever displayed)
-   */
-  public val email: String? = null,
-  /**
-   * A description of the user
-   *
-   * **Example**: `"My short biography"`
-   */
-  public val bio: String? = null,
-  /**
    * The user's id
    *
    * **Example**: `"EEFFGGHH"`
@@ -59,7 +37,29 @@ public data class User(
    *
    * **Example**: `"developer"`
    */
-  public val role: User.Role
+  public val role: User.Role,
+  /**
+   * The user's username
+   *
+   * **Example**: `"my_user"`
+   */
+  public val username: String,
+  /**
+   * The user's display name
+   *
+   * **Example**: `"My User"`
+   */
+  public val name: String? = null,
+  /**
+   * The user's email (only your own is ever displayed)
+   */
+  public val email: String? = null,
+  /**
+   * A description of the user
+   *
+   * **Example**: `"My short biography"`
+   */
+  public val bio: String? = null,
 ) {
   @Serializable
   public enum class Role {
