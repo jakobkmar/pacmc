@@ -40,10 +40,13 @@ class Archive(private val name: String) {
         val dependencyVersions: List<CommonProjectVersion>,
     )
 
-    suspend fun resolve(modSlugs: List<ModSlug>): ResolveResult {
-        val dbArchive = realm.findArchive()
-
+    suspend fun resolve(modSlugs: Set<ModSlug>): ResolveResult {
         val modIds = modSlugs.pmap { RepositoryApi.getBasicProjectInfo(it)?.id }.filterNotNull().toSet()
+        return resolve(modIds)
+    }
+
+    private suspend fun resolve(modIds: Set<ModId>): ResolveResult {
+        val dbArchive = realm.findArchive()
 
         val loader = dbArchive.readLoader()
         val minecraftVersion = dbArchive.readMinecraftVersion()
@@ -133,20 +136,20 @@ class Archive(private val name: String) {
 
         val dbArchive = realm.findArchive()
 
-        val shouldDownload = if (dbArchive.installed.any { it.matches(modId) }) {
+        val shouldDownload = if (dbArchive.installed.any { it.readModId() == modId }) {
             val fileName = fileNameDeferred.await() ?: return InstallResult.NO_PROJECT_INFO
             !Environment.fileSystem.exists(dbArchive.readPath().resolve(fileName))
         } else true
 
         realm.write {
             findLatest(dbArchive)!!.apply {
-                val presentProject = installed.find { it.matches(modId) }
+                val presentProject = installed.find { it.readModId() == modId }
                 if (presentProject != null) {
                     if (presentProject.dependency && !isDependency) {
-                        installed.removeAll { it.matches(modId) }
+                        installed.removeAll { it.readModId() == modId }
                     } else return@write
                 }
-                installed.add(DbInstalledProject(modId, isDependency))
+                installed.add(DbInstalledProject(version, isDependency))
             }
         }
 
@@ -166,5 +169,34 @@ class Archive(private val name: String) {
         } else {
             return InstallResult.ALREADY_INSTALLED
         }
+    }
+
+    class UpdateResult(
+        val updateVersions: List<CommonProjectVersion>,
+        val updateDependencyVersions: List<CommonProjectVersion>,
+        val addedDependencyVersions: List<CommonProjectVersion>,
+        val removedDependencies: Set<ModId>,
+    )
+
+    suspend fun resolveUpdate(): UpdateResult {
+        val dbArchive = realm.findArchive()
+
+        val installedVersions = mutableMapOf<ModId, String>()
+        val installedDependencyVersions = mutableMapOf<ModId, String>()
+        dbArchive.installed.forEach {
+            (if (it.dependency) installedDependencyVersions else installedVersions)[it.readModId()] = it.version
+        }
+
+        val resolveResult = resolve(installedVersions.keys)
+
+        return UpdateResult(
+            updateVersions = resolveResult.versions
+                .filter { it.modId in installedVersions && installedVersions[it.modId] != it.id },
+            updateDependencyVersions = resolveResult.dependencyVersions
+                .filter { it.modId in installedDependencyVersions && installedDependencyVersions[it.modId] != it.id },
+            addedDependencyVersions = resolveResult.dependencyVersions
+                .filter { it.modId !in installedDependencyVersions },
+            removedDependencies = installedDependencyVersions.keys - resolveResult.dependencyVersions.mapTo(mutableSetOf()) { it.modId },
+        )
     }
 }
