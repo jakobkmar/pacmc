@@ -35,7 +35,7 @@ class InstallCommand : CliktCommand(
 
         val archive = Archive(archiveName!!)
 
-        val resolveResult = archive.resolve(modSlugNames.map { ModSlug(Repository.MODRINTH, it) })
+        val resolveResult = archive.resolve(modSlugNames.mapTo(mutableSetOf()) { ModSlug(Repository.MODRINTH, it) })
         terminal.println()
 
         terminal.println("Installing the following:")
