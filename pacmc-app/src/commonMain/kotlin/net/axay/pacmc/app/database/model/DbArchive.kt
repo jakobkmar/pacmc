@@ -9,6 +9,8 @@ import io.realm.toRealmList
 import net.axay.pacmc.app.data.MinecraftVersion
 import net.axay.pacmc.app.data.ModId
 import net.axay.pacmc.app.data.ModLoader
+import net.axay.pacmc.app.data.Repository
+import net.axay.pacmc.app.repoapi.model.CommonProjectVersion
 import okio.Path
 import okio.Path.Companion.toPath
 
@@ -52,16 +54,18 @@ class DbInstalledProject() : RealmObject {
     var repository: String = ""
     var id: String = ""
     var dependency: Boolean = false
+    var version: String = ""
 
-    fun matches(modId: ModId) = modId.id == id && modId.repository.name == repository
+    fun readModId() = ModId(Repository.valueOf(repository), id)
 
     // for the current realm compiler plugin
     constructor(
-        modId: ModId,
-        dependency: Boolean,
+        version: CommonProjectVersion,
+        isDependency: Boolean,
     ) : this() {
-        this.repository = modId.repository.name
-        this.id = modId.id
-        this.dependency = dependency
+        this.repository = version.modId.repository.name
+        this.id = version.modId.id
+        this.dependency = isDependency
+        this.version = version.id
     }
 }
