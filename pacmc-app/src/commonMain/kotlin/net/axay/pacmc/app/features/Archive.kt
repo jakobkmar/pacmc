@@ -18,6 +18,7 @@ import net.axay.pacmc.app.ktorClient
 import net.axay.pacmc.app.repoapi.RepositoryApi
 import net.axay.pacmc.app.repoapi.model.CommonProjectVersion
 import net.axay.pacmc.app.utils.pmap
+import kotlin.jvm.JvmName
 import kotlin.math.absoluteValue
 
 class Archive(private val name: String) {
@@ -40,6 +41,7 @@ class Archive(private val name: String) {
         val dependencyVersions: List<CommonProjectVersion>,
     )
 
+    @JvmName("resolveWithModSlug")
     suspend fun resolve(modSlugs: Set<ModSlug>): ResolveResult {
         val modIds = modSlugs.pmap { RepositoryApi.getBasicProjectInfo(it)?.id }.filterNotNull().toSet()
         return resolve(modIds)
