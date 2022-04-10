@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 import net.axay.pacmc.app.data.ModSlug
 import net.axay.pacmc.app.data.Repository
 import net.axay.pacmc.app.features.Archive
+import net.axay.pacmc.app.repoapi.model.CommonProjectVersion
 import net.axay.pacmc.cli.launchJob
 import net.axay.pacmc.cli.terminal
 import net.axay.pacmc.cli.terminal.DownloadAnimation
@@ -18,7 +19,7 @@ import net.axay.pacmc.cli.terminal.askYesOrNo
 
 class InstallCommand : CliktCommand(
     name = "install",
-    help = "Install a mod",
+    help = "Install content to an archive",
 ) {
     private val modSlugNames by argument(
         "mods",
@@ -40,13 +41,13 @@ class InstallCommand : CliktCommand(
 
         terminal.println("Installing the following:")
         resolveResult.versions.forEach { version ->
-            terminal.println(TextColors.brightGreen("  " + version.files.first().name.removeSuffix(".jar")))
+            terminal.println(TextColors.brightGreen("  " + version.files.primaryName()))
         }
 
         terminal.println()
         terminal.println("Installing the following dependencies:")
         resolveResult.dependencyVersions.forEach { version ->
-            terminal.println(TextColors.brightYellow("  " + version.files.first().name.removeSuffix(".jar")))
+            terminal.println(TextColors.brightYellow("  " + version.files.primaryName()))
         }
 
         terminal.println()
@@ -81,3 +82,6 @@ class InstallCommand : CliktCommand(
         }.joinAll()
     }
 }
+
+fun List<CommonProjectVersion.File>.primaryName() =
+    (find { it.primary } ?: firstOrNull())?.name?.removeSuffix(".jar") ?: "unknown_file"
