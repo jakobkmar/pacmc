@@ -28,43 +28,43 @@ dependencyResolutionManagement {
     @Suppress("UnstableApiUsage")
     versionCatalogs {
         create("libs") {
-            alias("kotlinx-serialization-json").to("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
-            alias("kotlinx-coroutines-core").to("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
-            alias("kotlinx-datetime").to("org.jetbrains.kotlinx:kotlinx-datetime:0.3.2")
+            library("kotlinx-serialization-json", "org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
+            library("kotlinx-coroutines-core", "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
+            library("kotlinx-datetime", "org.jetbrains.kotlinx:kotlinx-datetime:0.3.2")
 
             version("ktor", "1.6.8")
-            alias("ktor-client-core").to("io.ktor", "ktor-client-core").versionRef("ktor")
-            alias("ktor-client-serialization").to("io.ktor", "ktor-client-serialization").versionRef("ktor")
-            alias("ktor-client-cio").to("io.ktor", "ktor-client-cio").versionRef("ktor")
-            alias("ktor-server-core").to("io.ktor", "ktor-server-core").versionRef("ktor")
-            alias("ktor-server-netty").to("io.ktor", "ktor-server-netty").versionRef("ktor")
-            alias("ktor-server-serialization").to("io.ktor", "ktor-serialization").versionRef("ktor")
+            library("ktor-client-core", "io.ktor", "ktor-client-core").versionRef("ktor")
+            library("ktor-client-serialization", "io.ktor", "ktor-client-serialization").versionRef("ktor")
+            library("ktor-client-cio", "io.ktor", "ktor-client-cio").versionRef("ktor")
+            library("ktor-server-core", "io.ktor", "ktor-server-core").versionRef("ktor")
+            library("ktor-server-netty", "io.ktor", "ktor-server-netty").versionRef("ktor")
+            library("ktor-server-serialization", "io.ktor", "ktor-serialization").versionRef("ktor")
 
-            alias("kermit").to("co.touchlab:kermit:1.0.0")
-            alias("okio").to("com.squareup.okio:okio:3.0.0")
+            library("kermit", "co.touchlab:kermit:1.0.0")
+            library("okio", "com.squareup.okio:okio:3.0.0")
 
             version("realm", "0.10.2")
-            alias("realm-base").to("io.realm.kotlin", "library-base").versionRef("realm")
-            alias("realm").toPluginId("io.realm.kotlin").versionRef("realm")
+            library("realm-base", "io.realm.kotlin", "library-base").versionRef("realm")
+            plugin("realm", "io.realm.kotlin").versionRef("realm")
 
-            alias("devsrsouza.icons.tablericons").to("br.com.devsrsouza.compose.icons.jetbrains:tabler-icons:1.0.0")
+            library("devsrsouza.icons.tablericons", "br.com.devsrsouza.compose.icons.jetbrains:tabler-icons:1.0.0")
 
             version("jackson", "2.13.1")
-            alias("jackson-kotlin").to("com.fasterxml.jackson.module" , "jackson-module-kotlin").versionRef("jackson")
-            alias("jackson-xml").to("com.fasterxml.jackson.dataformat" , "jackson-dataformat-xml").versionRef("jackson")
+            library("jackson-kotlin", "com.fasterxml.jackson.module" , "jackson-module-kotlin").versionRef("jackson")
+            library("jackson-xml", "com.fasterxml.jackson.dataformat" , "jackson-dataformat-xml").versionRef("jackson")
 
-            alias("slfj4-simple").to("org.slf4j:slf4j-simple:1.7.36")
-            alias("jsoup").to("org.jsoup:jsoup:1.14.3")
+            library("slfj4-simple", "org.slf4j:slf4j-simple:1.7.36")
+            library("jsoup", "org.jsoup:jsoup:1.14.3")
 
             version("kmongo", "4.5.0")
-            alias("kmongo").to("org.litote.kmongo", "kmongo-coroutine-serialization").versionRef("kmongo")
+            library("kmongo", "org.litote.kmongo", "kmongo-coroutine-serialization").versionRef("kmongo")
 
             version("colormath", "3.2.0")
-            alias("colormath").to("com.github.ajalt.colormath", "colormath").versionRef("colormath")
-            alias("colormath-compose").to("com.github.ajalt.colormath.extensions", "colormath-ext-jetpack-compose").versionRef("colormath")
+            library("colormath", "com.github.ajalt.colormath", "colormath").versionRef("colormath")
+            library("colormath-compose", "com.github.ajalt.colormath.extensions", "colormath-ext-jetpack-compose").versionRef("colormath")
 
-            alias("clikt").to("com.github.ajalt.clikt:clikt:3.4.0")
-            alias("mordant").to("com.github.ajalt.mordant:mordant:2.0.0-beta5")
+            library("clikt", "com.github.ajalt.clikt:clikt:3.4.0")
+            library("mordant", "com.github.ajalt.mordant:mordant:2.0.0-beta5")
         }
     }
 }
