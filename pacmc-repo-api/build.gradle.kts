@@ -30,6 +30,8 @@ tasks {
     register<OpenApiGenerateTask>("generateModrinthApi") {
         group = "generate"
 
+        deleteOldOutput.set(true)
+
         specUrl.set("https://docs.modrinth.com/openapi.yaml")
         outputDirectory.set(file("src/commonMain/kotlin"))
         packageName.set("net.axay.pacmc.repoapi.modrinth.model")
