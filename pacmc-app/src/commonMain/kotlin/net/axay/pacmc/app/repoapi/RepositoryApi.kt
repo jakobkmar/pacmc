@@ -12,10 +12,20 @@ import net.axay.pacmc.app.ktorClient
 import net.axay.pacmc.app.repoapi.model.CommonBasicProjectInfo
 import net.axay.pacmc.app.repoapi.model.CommonProjectInfo
 import net.axay.pacmc.app.repoapi.model.CommonProjectVersion
+import net.axay.pacmc.repoapi.RequestContext
 import net.axay.pacmc.repoapi.modrinth.ModrinthApi
 import net.axay.pacmc.repoapi.mojang.LauncherMetaApi
 import net.axay.pacmc.repoapi.mojang.model.VersionManifest
 import kotlin.time.Duration.Companion.days
+
+// TODO refactor this class with context receivers once they are available
+
+inline fun <R> repoApiContext(
+    cachePolicy: RequestContext.CachePolicy = RequestContext.CachePolicy.CACHED_OR_FRESH,
+    block: RepositoryApi.(context: RequestContext) -> R,
+): R {
+    return block(RepositoryApi, RequestContext(cachePolicy))
+}
 
 object RepositoryApi {
     private val cache = MemoryDiskCache<String, String, String>(
@@ -37,11 +47,11 @@ object RepositoryApi {
     private val modrinthApi = ModrinthApi(ktorClient, cache)
     private val launcherMetaApi = LauncherMetaApi(ktorClient, cache)
 
-    suspend fun search(searchTerm: String, repository: Repository?): List<CommonProjectInfo> {
+    suspend fun RequestContext.search(searchTerm: String, repository: Repository?): List<CommonProjectInfo> {
         val results = mutableListOf<CommonProjectInfo>()
 
         if (repository == null || repository == Repository.MODRINTH) {
-            results += modrinthApi.searchProjects(searchTerm, limit = 20)?.hits.orEmpty().map {
+            results += with(modrinthApi) { searchProjects(searchTerm, limit = 20) }?.hits.orEmpty().map {
                 CommonProjectInfo.fromModrinthProjectResult(it)
             }
         }
@@ -53,35 +63,35 @@ object RepositoryApi {
         return results
     }
 
-    suspend fun getProject(idOrSlug: IdOrSlug): CommonProjectInfo? = when (idOrSlug.repository) {
+    suspend fun RequestContext.getProject(idOrSlug: IdOrSlug): CommonProjectInfo? = when (idOrSlug.repository) {
         Repository.MODRINTH -> TODO()
         Repository.CURSEFORGE -> TODO()
     }
 
-    suspend fun getBasicProjectInfo(idOrSlug: IdOrSlug): CommonBasicProjectInfo? = when (idOrSlug.repository) {
-        Repository.MODRINTH -> modrinthApi.getProject(idOrSlug.idOrSlug)?.let(CommonBasicProjectInfo::fromModrinthProject)
+    suspend fun RequestContext.getBasicProjectInfo(idOrSlug: IdOrSlug): CommonBasicProjectInfo? = when (idOrSlug.repository) {
+        Repository.MODRINTH -> with(modrinthApi) { getProject(idOrSlug.idOrSlug) }?.let(CommonBasicProjectInfo::fromModrinthProject)
         Repository.CURSEFORGE -> TODO()
     }
 
-    suspend fun getProjectVersion(id: String, repository: Repository): CommonProjectVersion? = when (repository) {
-        Repository.MODRINTH -> modrinthApi.getProjectVersion(id)?.let(CommonProjectVersion::fromModrinthProjectVersion)
+    suspend fun RequestContext.getProjectVersion(id: String, repository: Repository): CommonProjectVersion? = when (repository) {
+        Repository.MODRINTH -> with(modrinthApi) { getProjectVersion(id) }?.let(CommonProjectVersion::fromModrinthProjectVersion)
         Repository.CURSEFORGE -> TODO()
     }
 
-    suspend fun getProjectVersions(
+    suspend fun RequestContext.getProjectVersions(
         idOrSlug: IdOrSlug,
         loaders: List<ModLoader>? = null,
         gameVersions: List<MinecraftVersion>? = null,
     ) = when (idOrSlug.repository) {
         Repository.MODRINTH -> {
-            modrinthApi.getProjectVersions(idOrSlug.idOrSlug, loaders?.map { it.identifier }, gameVersions?.map { it.toString() })
+            with(modrinthApi) { getProjectVersions(idOrSlug.idOrSlug, loaders?.map { it.identifier }, gameVersions?.map { it.toString() }) }
                 ?.map { CommonProjectVersion.fromModrinthProjectVersion(it) }
         }
         Repository.CURSEFORGE -> TODO()
     }
 
-    suspend fun getMinecraftReleases(): List<MinecraftVersion>? {
-        val manifest = launcherMetaApi.getVersionManifest() ?: return null
+    suspend fun RequestContext.getMinecraftReleases(): List<MinecraftVersion>? {
+        val manifest = with(launcherMetaApi) { getVersionManifest() } ?: return null
         return manifest.versions.filter { it.type == VersionManifest.Version.Type.RELEASE }
             .mapNotNull { MinecraftVersion.fromString(it.id) }
     }

@@ -13,7 +13,7 @@ abstract class AbstractRepositoryApi {
     protected abstract val client: HttpClient
     protected abstract val cache: Cache<String, String, String>?
 
-    protected suspend inline fun <reified T> repoRequest(
+    protected suspend inline fun <reified T> RequestContext.repoRequest(
         url: String,
         crossinline block: HttpRequestBuilder.() -> Unit = {},
     ): T? {
@@ -25,11 +25,28 @@ abstract class AbstractRepositoryApi {
         }
         require(finalUrl.isNotEmpty())
 
-        val responseString = cache?.let {
-            it.getOrPutOrNull(finalUrl.removePrefix("${apiUrl}/")) {
-                statement.executeOrNull()?.bodyAsText()
-            } ?: return null
-        } ?: statement.executeOrNull()?.bodyAsText()
+        val cacheKey = finalUrl.removePrefix("${apiUrl}/")
+        val curCache = cache
+
+        val responseString = when (cachePolicy) {
+            RequestContext.CachePolicy.ONLY_CACHED -> curCache?.get(cacheKey)
+            RequestContext.CachePolicy.ONLY_FRESH -> {
+                val response = statement.executeOrNull()?.bodyAsText()
+                if (response != null) {
+                    cache?.put(cacheKey, response)
+                }
+                response
+            }
+            RequestContext.CachePolicy.CACHED_OR_FRESH -> {
+                if (curCache != null) {
+                    curCache.getOrPutOrNull(cacheKey) {
+                        statement.executeOrNull()?.bodyAsText()
+                    }
+                } else {
+                    statement.executeOrNull()?.bodyAsText()
+                }
+            }
+        }
 
         return Json.decodeFromString(responseString ?: return null)
     }

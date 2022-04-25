@@ -18,7 +18,9 @@ import net.axay.pacmc.app.downloadFile
 import net.axay.pacmc.app.ktorClient
 import net.axay.pacmc.app.repoapi.RepositoryApi
 import net.axay.pacmc.app.repoapi.model.CommonProjectVersion
+import net.axay.pacmc.app.repoapi.repoApiContext
 import net.axay.pacmc.app.utils.pmap
+import net.axay.pacmc.repoapi.RequestContext
 import kotlin.jvm.JvmName
 import kotlin.math.absoluteValue
 
@@ -44,7 +46,7 @@ class Archive(private val name: String) {
 
     @JvmName("resolveWithModSlug")
     suspend fun resolve(modSlugs: Set<ModSlug>): ResolveResult {
-        val modIds = modSlugs.pmap { RepositoryApi.getBasicProjectInfo(it)?.id }.filterNotNull().toSet()
+        val modIds = modSlugs.pmap { repoApiContext { c -> c.getBasicProjectInfo(it) }?.id }.filterNotNull().toSet()
         return resolve(modIds)
     }
 
@@ -67,8 +69,9 @@ class Archive(private val name: String) {
 
                 if (!checkedModIdsMutex.withLock { checkedModIds.add(modId) }) return
 
-                val version = RepositoryApi.getProjectVersions(modId, listOf(loader), listOf(minecraftVersion))
-                    ?.findBest(minecraftVersion) ?: return
+                val version = repoApiContext(RequestContext.CachePolicy.ONLY_FRESH) {
+                    it.getProjectVersions(modId, listOf(loader), listOf(minecraftVersion))
+                }?.findBest(minecraftVersion) ?: return
 
                 finalListMutex.withLock {
                     (if (modId in modIds) versions else dependencyVersions) += version
@@ -78,7 +81,9 @@ class Archive(private val name: String) {
                     launch {
                         val dependencyModId = when (it) {
                             is CommonProjectVersion.Dependency.ProjectDependency -> it.id
-                            is CommonProjectVersion.Dependency.VersionDependency -> RepositoryApi.getProjectVersion(it.id, version.modId.repository)?.modId
+                            is CommonProjectVersion.Dependency.VersionDependency -> repoApiContext(RequestContext.CachePolicy.ONLY_FRESH) { c ->
+                                c.getProjectVersion(it.id, version.modId.repository)?.modId
+                            }
                         }
 
                         if (dependencyModId != null) {
@@ -133,7 +138,7 @@ class Archive(private val name: String) {
 
         val modId = version.modId
         val fileNameDeferred = CoroutineScope(Dispatchers.Default).async {
-            val projectInfo = RepositoryApi.getBasicProjectInfo(modId) ?: return@async null
+            val projectInfo = repoApiContext { it.getBasicProjectInfo(modId) } ?: return@async null
             ModFile(modId.repository.shortForm, projectInfo.slug.slug, modId.id).fileName
         }
 

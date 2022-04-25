@@ -4,6 +4,7 @@ import io.ktor.client.*
 import io.ktor.client.request.*
 import net.axay.memoire.Cache
 import net.axay.pacmc.repoapi.AbstractRepositoryApi
+import net.axay.pacmc.repoapi.RequestContext
 import net.axay.pacmc.repoapi.modrinth.model.*
 
 class ModrinthApi(
@@ -15,7 +16,7 @@ class ModrinthApi(
     private fun List<String>.joinQuotedStrings() =
         joinToString("\", ", "[\"", "\"]")
 
-    suspend fun searchProjects(
+    suspend fun RequestContext.searchProjects(
         query: String,
         facets: String? = null,
         index: String? = null,
@@ -31,10 +32,10 @@ class ModrinthApi(
         parameter("filters", filters)
     }
 
-    suspend fun getProject(idOrSlug: String) =
+    suspend fun RequestContext.getProject(idOrSlug: String) =
         repoRequest<Project>("/project/${idOrSlug}")
 
-    suspend fun getProjectVersions(
+    suspend fun RequestContext.getProjectVersions(
         idOrSlug: String,
         loaders: List<String>? = null,
         gameVersions: List<String>? = null,
@@ -45,18 +46,18 @@ class ModrinthApi(
         parameter("featured", featured)
     }
 
-    suspend fun getProjectVersion(id: String) =
+    suspend fun RequestContext.getProjectVersion(id: String) =
         repoRequest<Version>("/version/${id}")
 
-    suspend fun getUser(idOrUsername: String) =
+    suspend fun RequestContext.getUser(idOrUsername: String) =
         repoRequest<User>("/user/${idOrUsername}")
 
-    suspend fun getUserProjects(idOrUsername: String) =
+    suspend fun RequestContext.getUserProjects(idOrUsername: String) =
         repoRequest<List<Project>>("/user/${idOrUsername}/projects")
 
-    suspend fun getTeamMembers(id: String) =
+    suspend fun RequestContext.getTeamMembers(id: String) =
         repoRequest<List<TeamMember>>("/team/${id}/members")
 
-    suspend fun getProjectTeamMembers(idOrSlug: String) =
+    suspend fun RequestContext.getProjectTeamMembers(idOrSlug: String) =
         repoRequest<List<TeamMember>>("/project/${idOrSlug}/members")
 }
