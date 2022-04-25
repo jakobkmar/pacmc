@@ -3,6 +3,7 @@ package net.axay.pacmc.app.features
 import io.realm.TypedRealm
 import io.realm.query
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import net.axay.pacmc.app.Environment
@@ -33,8 +34,8 @@ class Archive(private val name: String) {
         }
     }
 
-    private fun TypedRealm.findArchive() = query<DbArchive>("name == $0", name).first().find()
-        ?: error("The archive '$name' is not present in the database")
+    private suspend fun TypedRealm.findArchive() = query<DbArchive>("name == $0", name)
+        .first().asFlow().first().obj ?: error("The archive '$name' is not present in the database")
 
     class ResolveResult(
         val versions: List<CommonProjectVersion>,
