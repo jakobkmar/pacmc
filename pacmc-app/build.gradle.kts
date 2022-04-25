@@ -19,6 +19,7 @@ kotlin {
                 api(libs.kotlinx.coroutines.core)
                 api(libs.kermit)
                 api(libs.colormath)
+                implementation(libs.memoire.both)
             }
         }
 
