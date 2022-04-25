@@ -48,6 +48,10 @@ dependencyResolutionManagement {
             library("realm-base", "io.realm.kotlin", "library-base").versionRef("realm")
             plugin("realm", "io.realm.kotlin").versionRef("realm")
 
+            version("memoire", "0.1.0")
+            library("memoire-core", "net.axay", "memoire-core").versionRef("memoire")
+            library("memoire-both", "net.axay", "memoire-both").versionRef("memoire")
+
             library("devsrsouza.icons.tablericons", "br.com.devsrsouza.compose.icons.jetbrains:tabler-icons:1.0.0")
 
             version("jackson", "2.13.1")
