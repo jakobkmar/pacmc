@@ -32,13 +32,14 @@ dependencyResolutionManagement {
             library("kotlinx-coroutines-core", "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
             library("kotlinx-datetime", "org.jetbrains.kotlinx:kotlinx-datetime:0.3.2")
 
-            version("ktor", "1.6.8")
+            version("ktor", "2.0.0")
             library("ktor-client-core", "io.ktor", "ktor-client-core").versionRef("ktor")
-            library("ktor-client-serialization", "io.ktor", "ktor-client-serialization").versionRef("ktor")
+            library("ktor-client-contentnegotiation", "io.ktor", "ktor-client-content-negotiation").versionRef("ktor")
             library("ktor-client-cio", "io.ktor", "ktor-client-cio").versionRef("ktor")
             library("ktor-server-core", "io.ktor", "ktor-server-core").versionRef("ktor")
             library("ktor-server-netty", "io.ktor", "ktor-server-netty").versionRef("ktor")
-            library("ktor-server-serialization", "io.ktor", "ktor-serialization").versionRef("ktor")
+            library("ktor-server-contentnegotiation", "io.ktor", "ktor-server-content-negotiation").versionRef("ktor")
+            library("ktor-json", "io.ktor", "ktor-serialization-kotlinx-json").versionRef("ktor")
 
             library("kermit", "co.touchlab:kermit:1.0.0")
             library("okio", "com.squareup.okio:okio:3.0.0")
