@@ -14,13 +14,16 @@ buildscript {
 
 kotlin {
     jvm()
+    linuxX64()
 
     sourceSets {
         named("commonMain") {
             dependencies {
                 api(libs.ktor.client.core)
-                api(libs.ktor.client.serialization)
+                api(libs.ktor.client.contentnegotiation)
+                api(libs.ktor.json)
                 api(libs.kotlinx.datetime)
+                api(libs.memoire.core)
             }
         }
     }

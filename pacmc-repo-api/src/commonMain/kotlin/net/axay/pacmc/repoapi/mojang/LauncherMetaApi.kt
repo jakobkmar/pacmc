@@ -1,12 +1,14 @@
 package net.axay.pacmc.repoapi.mojang
 
 import io.ktor.client.*
+import net.axay.memoire.Cache
 import net.axay.pacmc.repoapi.AbstractRepositoryApi
 import net.axay.pacmc.repoapi.mojang.model.VersionManifest
 
 class LauncherMetaApi(
     override val client: HttpClient,
     override val apiUrl: String = "https://launchermeta.mojang.com/mc",
+    override val cache: Cache<String, String, String>?,
 ) : AbstractRepositoryApi() {
 
     suspend fun getVersionManifest() =
