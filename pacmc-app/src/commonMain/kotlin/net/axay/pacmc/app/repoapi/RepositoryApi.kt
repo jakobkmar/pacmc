@@ -1,5 +1,9 @@
 package net.axay.pacmc.app.repoapi
 
+import net.axay.memoire.CacheValidationConfig
+import net.axay.memoire.DiskCacheConfig
+import net.axay.memoire.MemoryDiskCache
+import net.axay.pacmc.app.Environment
 import net.axay.pacmc.app.data.IdOrSlug
 import net.axay.pacmc.app.data.MinecraftVersion
 import net.axay.pacmc.app.data.ModLoader
@@ -11,10 +15,27 @@ import net.axay.pacmc.app.repoapi.model.CommonProjectVersion
 import net.axay.pacmc.repoapi.modrinth.ModrinthApi
 import net.axay.pacmc.repoapi.mojang.LauncherMetaApi
 import net.axay.pacmc.repoapi.mojang.model.VersionManifest
+import kotlin.time.Duration.Companion.days
 
 object RepositoryApi {
-    private val modrinthApi = ModrinthApi(ktorClient)
-    private val launcherMetaApi = LauncherMetaApi(ktorClient)
+    private val cache = MemoryDiskCache<String, String, String>(
+        diskConfig = DiskCacheConfig(
+            Environment.fileSystem,
+            Environment.cacheDir.resolve("requests"),
+            keyToFileName = {
+                okio.Buffer().writeUtf8(it).sha256().hex()
+            },
+            deserializer = { readUtf8() },
+            serializer = { writeUtf8(it) },
+        ),
+        validationConfig = CacheValidationConfig(
+            expireAfterWrite = 7.days,
+            expireAfterAccess = null,
+        )
+    )
+
+    private val modrinthApi = ModrinthApi(ktorClient, cache)
+    private val launcherMetaApi = LauncherMetaApi(ktorClient, cache)
 
     suspend fun search(searchTerm: String, repository: Repository?): List<CommonProjectInfo> {
         val results = mutableListOf<CommonProjectInfo>()

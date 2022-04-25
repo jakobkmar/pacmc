@@ -26,7 +26,7 @@ abstract class AbstractRepositoryApi {
         require(finalUrl.isNotEmpty())
 
         val responseString = cache?.let {
-            it.getOrPutOrNull(finalUrl) {
+            it.getOrPutOrNull(finalUrl.removePrefix("${apiUrl}/")) {
                 statement.executeOrNull()?.bodyAsText()
             } ?: return null
         } ?: statement.executeOrNull()?.bodyAsText()

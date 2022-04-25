@@ -7,8 +7,8 @@ import net.axay.pacmc.repoapi.mojang.model.VersionManifest
 
 class LauncherMetaApi(
     override val client: HttpClient,
-    override val apiUrl: String = "https://launchermeta.mojang.com/mc",
     override val cache: Cache<String, String, String>?,
+    override val apiUrl: String = "https://launchermeta.mojang.com/mc",
 ) : AbstractRepositoryApi() {
 
     suspend fun getVersionManifest() =

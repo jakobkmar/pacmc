@@ -8,8 +8,8 @@ import net.axay.pacmc.repoapi.modrinth.model.*
 
 class ModrinthApi(
     override val client: HttpClient,
-    override val apiUrl: String = "https://api.modrinth.com/v2",
     override val cache: Cache<String, String, String>?,
+    override val apiUrl: String = "https://api.modrinth.com/v2",
 ) : AbstractRepositoryApi() {
 
     private fun List<String>.joinQuotedStrings() =
