@@ -29,15 +29,15 @@ abstract class AbstractRepositoryApi {
         val curCache = cache
 
         val responseString = when (cachePolicy) {
-            RequestContext.CachePolicy.ONLY_CACHED -> curCache?.get(cacheKey)
-            RequestContext.CachePolicy.ONLY_FRESH -> {
+            CachePolicy.ONLY_CACHED -> curCache?.get(cacheKey)
+            CachePolicy.ONLY_FRESH -> {
                 val response = statement.executeOrNull()?.bodyAsText()
                 if (response != null) {
                     cache?.put(cacheKey, response)
                 }
                 response
             }
-            RequestContext.CachePolicy.CACHED_OR_FRESH -> {
+            CachePolicy.CACHED_OR_FRESH -> {
                 if (curCache != null) {
                     curCache.getOrPutOrNull(cacheKey) {
                         statement.executeOrNull()?.bodyAsText()

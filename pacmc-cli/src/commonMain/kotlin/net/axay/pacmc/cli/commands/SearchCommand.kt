@@ -2,10 +2,11 @@ package net.axay.pacmc.cli.commands
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
-import net.axay.pacmc.app.repoapi.RepositoryApi
+import net.axay.pacmc.app.repoapi.repoApiContext
 import net.axay.pacmc.cli.launchJob
 import net.axay.pacmc.cli.terminal
 import net.axay.pacmc.cli.terminal.printProject
+import net.axay.pacmc.repoapi.CachePolicy
 
 class SearchCommand : CliktCommand(
     name = "search",
@@ -16,7 +17,7 @@ class SearchCommand : CliktCommand(
     override fun run() = launchJob {
         terminal.println("Searching with the given query '$query'")
 
-        val searchResults = RepositoryApi.search(query, null)
+        val searchResults = repoApiContext(CachePolicy.ONLY_FRESH) { it.search(query, null) }
         terminal.println()
 
         if (searchResults.isEmpty()) {

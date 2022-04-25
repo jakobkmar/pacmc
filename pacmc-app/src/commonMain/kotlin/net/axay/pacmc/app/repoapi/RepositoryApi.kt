@@ -12,6 +12,7 @@ import net.axay.pacmc.app.ktorClient
 import net.axay.pacmc.app.repoapi.model.CommonBasicProjectInfo
 import net.axay.pacmc.app.repoapi.model.CommonProjectInfo
 import net.axay.pacmc.app.repoapi.model.CommonProjectVersion
+import net.axay.pacmc.repoapi.CachePolicy
 import net.axay.pacmc.repoapi.RequestContext
 import net.axay.pacmc.repoapi.modrinth.ModrinthApi
 import net.axay.pacmc.repoapi.mojang.LauncherMetaApi
@@ -21,7 +22,7 @@ import kotlin.time.Duration.Companion.days
 // TODO refactor this class with context receivers once they are available
 
 inline fun <R> repoApiContext(
-    cachePolicy: RequestContext.CachePolicy = RequestContext.CachePolicy.CACHED_OR_FRESH,
+    cachePolicy: CachePolicy = CachePolicy.CACHED_OR_FRESH,
     block: RepositoryApi.(context: RequestContext) -> R,
 ): R {
     return block(RepositoryApi, RequestContext(cachePolicy))

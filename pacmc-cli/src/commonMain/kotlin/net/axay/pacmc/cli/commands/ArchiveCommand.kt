@@ -15,11 +15,12 @@ import net.axay.pacmc.app.data.MinecraftVersion
 import net.axay.pacmc.app.data.ModLoader
 import net.axay.pacmc.app.database.model.DbArchive
 import net.axay.pacmc.app.features.Archive
-import net.axay.pacmc.app.repoapi.RepositoryApi
+import net.axay.pacmc.app.repoapi.repoApiContext
 import net.axay.pacmc.app.utils.ColorUtils
 import net.axay.pacmc.app.utils.OperatingSystem
 import net.axay.pacmc.cli.launchJob
 import net.axay.pacmc.cli.terminal
+import net.axay.pacmc.repoapi.CachePolicy
 import okio.Path.Companion.toPath
 
 class ArchiveCommand : CliktCommand(
@@ -52,7 +53,7 @@ class ArchiveCommand : CliktCommand(
             }
 
             val minecraftVersionDeferred = CoroutineScope(Dispatchers.Default).async {
-                optionalMinecraftVersion ?: RepositoryApi.getMinecraftReleases()?.maxOrNull()
+                optionalMinecraftVersion ?: repoApiContext(CachePolicy.ONLY_FRESH) { it.getMinecraftReleases() }?.maxOrNull()
             }
 
             val archivePath = try {

@@ -16,11 +16,10 @@ import net.axay.pacmc.app.database.model.DbInstalledProject
 import net.axay.pacmc.app.database.realm
 import net.axay.pacmc.app.downloadFile
 import net.axay.pacmc.app.ktorClient
-import net.axay.pacmc.app.repoapi.RepositoryApi
 import net.axay.pacmc.app.repoapi.model.CommonProjectVersion
 import net.axay.pacmc.app.repoapi.repoApiContext
 import net.axay.pacmc.app.utils.pmap
-import net.axay.pacmc.repoapi.RequestContext
+import net.axay.pacmc.repoapi.CachePolicy
 import kotlin.jvm.JvmName
 import kotlin.math.absoluteValue
 
@@ -69,7 +68,7 @@ class Archive(private val name: String) {
 
                 if (!checkedModIdsMutex.withLock { checkedModIds.add(modId) }) return
 
-                val version = repoApiContext(RequestContext.CachePolicy.ONLY_FRESH) {
+                val version = repoApiContext(CachePolicy.ONLY_FRESH) {
                     it.getProjectVersions(modId, listOf(loader), listOf(minecraftVersion))
                 }?.findBest(minecraftVersion) ?: return
 
@@ -81,7 +80,7 @@ class Archive(private val name: String) {
                     launch {
                         val dependencyModId = when (it) {
                             is CommonProjectVersion.Dependency.ProjectDependency -> it.id
-                            is CommonProjectVersion.Dependency.VersionDependency -> repoApiContext(RequestContext.CachePolicy.ONLY_FRESH) { c ->
+                            is CommonProjectVersion.Dependency.VersionDependency -> repoApiContext(CachePolicy.ONLY_FRESH) { c ->
                                 c.getProjectVersion(it.id, version.modId.repository)?.modId
                             }
                         }
