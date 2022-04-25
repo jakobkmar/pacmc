@@ -1,21 +1,19 @@
 package net.axay.pacmc.app
 
 import io.ktor.client.*
-import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
-import io.ktor.client.features.*
-import io.ktor.client.features.json.*
-import io.ktor.client.features.json.serializer.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.client.utils.*
-import io.ktor.utils.io.*
+import io.ktor.serialization.kotlinx.json.*
 import io.ktor.utils.io.core.*
 import okio.Path
 
 val ktorClient = HttpClient(CIO) {
-    install(JsonFeature) {
-        serializer = KotlinxSerializer(kotlinx.serialization.json.Json {
+    install(ContentNegotiation) {
+        json(kotlinx.serialization.json.Json {
             ignoreUnknownKeys = true
         })
     }
@@ -26,7 +24,7 @@ suspend inline fun HttpClient.downloadFile(
     path: Path,
     noinline downloadProgress: (suspend (Double) -> Unit)? = null,
     builder: HttpRequestBuilder.() -> Unit = {},
-) = get<HttpStatement>(url) {
+) = prepareRequest(url) {
     builder(this)
 
     if (downloadProgress != null) {
@@ -38,7 +36,7 @@ suspend inline fun HttpClient.downloadFile(
         }
     }
 }.execute { response ->
-    val channel = response.receive<ByteReadChannel>()
+    val channel = response.bodyAsChannel()
 
     val partPath = path.parent!!.resolve(path.name + ".part")
 
