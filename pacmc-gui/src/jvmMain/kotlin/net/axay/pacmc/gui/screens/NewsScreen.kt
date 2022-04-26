@@ -2,9 +2,9 @@ package net.axay.pacmc.gui.screens
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.GridCells
-import androidx.compose.foundation.lazy.LazyVerticalGrid
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.ExperimentalUnitApi
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
+import io.ktor.client.call.*
 import io.ktor.client.request.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -27,11 +28,10 @@ import net.axay.pacmc.gui.util.JsonMarkup
 import net.axay.pacmc.server.model.JsonMarkup
 import net.axay.pacmc.server.model.MinecraftArticle
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalUnitApi::class)
 @Composable
 fun NewsScreen() {
     val news by produceState<List<MinecraftArticle.SearchResult>?>(null) {
-        value = ktorClient.get("http://localhost:8080/news/minecraft")
+        value = ktorClient.get("http://localhost:8080/news/minecraft").body()
     }
 
     var currentArticle by remember { mutableStateOf<String?>(null) }
@@ -40,7 +40,7 @@ fun NewsScreen() {
         val currentNews = news
         if (currentNews != null) {
             LazyVerticalGrid(
-                cells = GridCells.Adaptive(500.dp),
+                columns = GridCells.Adaptive(500.dp),
             ) {
                 items(currentNews) { searchResult ->
                     Box(
@@ -117,7 +117,7 @@ private fun ArticleResult(result: MinecraftArticle.SearchResult) {
 @Composable
 private fun ArticleView(articleId: String) {
     val articleState by produceState<MinecraftArticle?>(null, key1 = articleId) {
-        value = ktorClient.get("http://localhost:8080/news/minecraft/$articleId")
+        value = ktorClient.get("http://localhost:8080/news/minecraft/$articleId").body()
     }
     val article = articleState
 

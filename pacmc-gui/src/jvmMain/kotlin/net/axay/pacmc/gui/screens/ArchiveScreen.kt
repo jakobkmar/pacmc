@@ -40,6 +40,7 @@ import net.axay.pacmc.app.database.model.DbArchive
 import net.axay.pacmc.app.database.realm
 import net.axay.pacmc.app.features.Archive
 import net.axay.pacmc.app.repoapi.RepositoryApi
+import net.axay.pacmc.app.repoapi.repoApiContext
 import net.axay.pacmc.gui.screens.state.IdentifierState
 import net.axay.pacmc.gui.util.FileChooser
 import okio.Path.Companion.toPath
@@ -172,7 +173,7 @@ fun ArchiveScreen() = Box(Modifier.fillMaxSize()) {
             }
 
             val minecraftVersions by produceState<List<MinecraftVersion>?>(null) {
-                value = RepositoryApi.getMinecraftReleases()
+                value = repoApiContext { it.getMinecraftReleases() }
             }
 
             var minecraftVersion by remember(minecraftVersions != null) { mutableStateOf(minecraftVersions?.firstOrNull()) }

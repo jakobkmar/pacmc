@@ -1,12 +1,12 @@
 package net.axay.pacmc.gui.screens
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.GridCells
-import androidx.compose.foundation.lazy.LazyVerticalGrid
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.Button
@@ -33,9 +33,10 @@ import compose.icons.tablericons.MoodCry
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.axay.pacmc.app.data.Repository
-import net.axay.pacmc.app.repoapi.RepositoryApi
 import net.axay.pacmc.app.repoapi.model.CommonProjectResult
+import net.axay.pacmc.app.repoapi.repoApiContext
 import net.axay.pacmc.gui.cache.producePainterCached
+import net.axay.pacmc.repoapi.CachePolicy
 
 private sealed interface SearchResponse
 
@@ -48,7 +49,7 @@ private class SearchResponseFailure(
     val fetchedTerm: String,
 ) : SearchResponse
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalUnitApi::class)
+@OptIn(ExperimentalUnitApi::class)
 @Composable
 fun SearchScreen() {
     val searchScope = rememberCoroutineScope()
@@ -67,7 +68,7 @@ fun SearchScreen() {
             }
 
             val result = kotlin.runCatching {
-                RepositoryApi.search(fetchTerm, Repository.MODRINTH)
+                repoApiContext(CachePolicy.ONLY_FRESH) { it.search(fetchTerm, Repository.MODRINTH) }
             }
             if (searchTerm == fetchTerm) {
                 loading = false
@@ -110,13 +111,13 @@ fun SearchScreen() {
             }
         }
 
-        val listState = rememberLazyListState()
+        val gridState = rememberLazyGridState()
 
         when (val currentResponse = searchResponse) {
             is SearchResponseSuccess -> {
                 LazyVerticalGrid(
-                    state = listState,
-                    cells = GridCells.Adaptive(500.dp),
+                    state = gridState,
+                    columns = GridCells.Adaptive(500.dp),
                     contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 20.dp),
                     horizontalArrangement = Arrangement.spacedBy(15.dp),
                     verticalArrangement = Arrangement.spacedBy(15.dp),
