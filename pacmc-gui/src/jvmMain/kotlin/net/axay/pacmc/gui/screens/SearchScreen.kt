@@ -6,7 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyVerticalGrid
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -35,13 +34,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.axay.pacmc.app.data.Repository
 import net.axay.pacmc.app.repoapi.RepositoryApi
-import net.axay.pacmc.app.repoapi.model.CommonProjectInfo
+import net.axay.pacmc.app.repoapi.model.CommonProjectResult
 import net.axay.pacmc.gui.cache.producePainterCached
 
 private sealed interface SearchResponse
 
 private class SearchResponseSuccess(
-    val results: List<CommonProjectInfo>,
+    val results: List<CommonProjectResult>,
 ) : SearchResponse
 
 private class SearchResponseFailure(
@@ -153,7 +152,7 @@ fun SearchScreen() {
 }
 
 @Composable
-fun ProjectItem(project: CommonProjectInfo, modifier: Modifier = Modifier) {
+fun ProjectItem(project: CommonProjectResult, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .height(125.dp)
@@ -192,7 +191,7 @@ fun ProjectItem(project: CommonProjectInfo, modifier: Modifier = Modifier) {
 
 @Composable
 fun ProjectIconImage(
-    project: CommonProjectInfo,
+    project: CommonProjectResult,
     modifier: Modifier = Modifier,
     contentScale: ContentScale = ContentScale.Fit,
 ) {

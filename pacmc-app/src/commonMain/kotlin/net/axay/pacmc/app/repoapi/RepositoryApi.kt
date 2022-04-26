@@ -10,7 +10,8 @@ import net.axay.pacmc.app.data.ModLoader
 import net.axay.pacmc.app.data.Repository
 import net.axay.pacmc.app.ktorClient
 import net.axay.pacmc.app.repoapi.model.CommonBasicProjectInfo
-import net.axay.pacmc.app.repoapi.model.CommonProjectInfo
+import net.axay.pacmc.app.repoapi.model.CommonProject
+import net.axay.pacmc.app.repoapi.model.CommonProjectResult
 import net.axay.pacmc.app.repoapi.model.CommonProjectVersion
 import net.axay.pacmc.repoapi.CachePolicy
 import net.axay.pacmc.repoapi.RequestContext
@@ -48,12 +49,12 @@ object RepositoryApi {
     private val modrinthApi = ModrinthApi(ktorClient, cache)
     private val launcherMetaApi = LauncherMetaApi(ktorClient, cache)
 
-    suspend fun RequestContext.search(searchTerm: String, repository: Repository?): List<CommonProjectInfo> {
-        val results = mutableListOf<CommonProjectInfo>()
+    suspend fun RequestContext.search(searchTerm: String, repository: Repository?): List<CommonProjectResult> {
+        val results = mutableListOf<CommonProjectResult>()
 
         if (repository == null || repository == Repository.MODRINTH) {
             results += with(modrinthApi) { searchProjects(searchTerm, limit = 20) }?.hits.orEmpty().map {
-                CommonProjectInfo.fromModrinthProjectResult(it)
+                CommonProjectResult.fromModrinthProjectResult(it)
             }
         }
 

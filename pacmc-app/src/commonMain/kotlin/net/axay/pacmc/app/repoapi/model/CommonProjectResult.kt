@@ -5,7 +5,7 @@ import net.axay.pacmc.app.data.ModId
 import net.axay.pacmc.app.data.ModSlug
 import net.axay.pacmc.app.data.Repository
 
-data class CommonProjectInfo(
+data class CommonProjectResult(
     val id: ModId,
     val slug: ModSlug,
     val name: String,
@@ -15,7 +15,7 @@ data class CommonProjectInfo(
     val latestVersion: MinecraftVersion?,
 ) {
     companion object {
-        fun fromModrinthProjectResult(projectResult: net.axay.pacmc.repoapi.modrinth.model.ProjectResult) = CommonProjectInfo(
+        fun fromModrinthProjectResult(projectResult: net.axay.pacmc.repoapi.modrinth.model.ProjectResult) = CommonProjectResult(
             id = ModId(Repository.MODRINTH, projectResult.projectId),
             slug = ModSlug(Repository.MODRINTH, projectResult.slug.toString()), // TODO slugs actually shouldn't be but there are old mods
             name = projectResult.title!!,
