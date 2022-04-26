@@ -65,8 +65,8 @@ object RepositoryApi {
         return results
     }
 
-    suspend fun RequestContext.getProject(idOrSlug: IdOrSlug): CommonProjectInfo? = when (idOrSlug.repository) {
-        Repository.MODRINTH -> TODO()
+    suspend fun RequestContext.getProject(idOrSlug: IdOrSlug): CommonProject? = when (idOrSlug.repository) {
+        Repository.MODRINTH -> with(modrinthApi) { getProject(idOrSlug.idOrSlug) }?.let(CommonProject::fromModrinthProject)
         Repository.CURSEFORGE -> TODO()
     }
 
