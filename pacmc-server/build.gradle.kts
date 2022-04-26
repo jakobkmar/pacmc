@@ -17,8 +17,10 @@ kotlin {
             dependencies {
                 implementation(libs.ktor.server.core)
                 implementation(libs.ktor.server.netty)
-                implementation(libs.ktor.server.serialization)
+                implementation(libs.ktor.server.contentnegotiation)
+                implementation(libs.ktor.json)
 
+                implementation(libs.kotlinx.serialization.json)
                 implementation(libs.kotlinx.datetime)
 
                 implementation(libs.slfj4.simple)
