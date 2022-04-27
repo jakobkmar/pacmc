@@ -10,6 +10,8 @@ data class CommonProjectVersion(
     val id: String,
     val modId: ModId,
     val datePublished: Instant,
+    val number: String,
+    val name: String,
     val files: List<File>,
     val gameVersions: List<MinecraftVersion>,
     val dependencies: List<Dependency>,
@@ -39,6 +41,8 @@ data class CommonProjectVersion(
             id = version.id,
             modId = ModId(Repository.MODRINTH, version.projectId),
             datePublished = version.datePublished,
+            number = version.versionNumber,
+            name = version.name,
             files = version.files.map { File(it.filename, it.url, it.primary) },
             gameVersions = version.gameVersions!!.mapNotNull { MinecraftVersion.fromString(it) },
             dependencies = version.dependencies.orEmpty().mapNotNull {
