@@ -9,7 +9,7 @@ import net.axay.pacmc.app.data.MinecraftVersion
 import net.axay.pacmc.app.data.ModLoader
 import net.axay.pacmc.app.data.Repository
 import net.axay.pacmc.app.ktorClient
-import net.axay.pacmc.app.repoapi.model.CommonBasicProjectInfo
+import net.axay.pacmc.app.repoapi.model.CommonBasicProject
 import net.axay.pacmc.app.repoapi.model.CommonProject
 import net.axay.pacmc.app.repoapi.model.CommonProjectResult
 import net.axay.pacmc.app.repoapi.model.CommonProjectVersion
@@ -70,8 +70,8 @@ object RepositoryApi {
         Repository.CURSEFORGE -> TODO()
     }
 
-    suspend fun RequestContext.getBasicProjectInfo(idOrSlug: IdOrSlug): CommonBasicProjectInfo? = when (idOrSlug.repository) {
-        Repository.MODRINTH -> with(modrinthApi) { getProject(idOrSlug.idOrSlug) }?.let(CommonBasicProjectInfo::fromModrinthProject)
+    suspend fun RequestContext.getBasicProjectInfo(idOrSlug: IdOrSlug): CommonBasicProject? = when (idOrSlug.repository) {
+        Repository.MODRINTH -> with(modrinthApi) { getProject(idOrSlug.idOrSlug) }?.let(CommonBasicProject::fromModrinthProject)
         Repository.CURSEFORGE -> TODO()
     }
 
