@@ -31,6 +31,7 @@ abstract class AbstractRepositoryApi {
         val responseString = when (cachePolicy) {
             CachePolicy.ONLY_CACHED -> curCache?.get(cacheKey)
             CachePolicy.ONLY_FRESH -> {
+                // TODO already lock resolving of the url for this cache
                 val response = statement.executeOrNull()?.bodyAsText()
                 if (response != null) {
                     cache?.put(cacheKey, response)
