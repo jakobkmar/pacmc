@@ -45,7 +45,7 @@ class Archive(private val name: String) {
 
     @JvmName("resolveWithModSlug")
     suspend fun resolve(modSlugs: Set<ModSlug>): ResolveResult {
-        val modIds = modSlugs.pmap { repoApiContext { c -> c.getBasicProjectInfo(it) }?.id }.filterNotNull().toSet()
+        val modIds = modSlugs.pmap { repoApiContext(CachePolicy.ONLY_FRESH) { c -> c.getBasicProjectInfo(it) }?.id }.filterNotNull().toSet()
         return resolve(modIds)
     }
 
@@ -68,11 +68,6 @@ class Archive(private val name: String) {
 
                 if (!checkedModIdsMutex.withLock { checkedModIds.add(modId) }) return
 
-                // ensure that the project info is cached
-                launch {
-                    repoApiContext(CachePolicy.ONLY_FRESH) { it.getProject(modId) }
-                }
-
                 val version = repoApiContext(CachePolicy.ONLY_FRESH) {
                     it.getProjectVersions(modId, listOf(loader), listOf(minecraftVersion))
                 }?.findBest(minecraftVersion) ?: return
@@ -91,6 +86,9 @@ class Archive(private val name: String) {
                         }
 
                         if (dependencyModId != null) {
+                            launch {
+                                repoApiContext(CachePolicy.ONLY_FRESH) { it.getBasicProjectInfo(dependencyModId) }
+                            }
                             resolveTransitively(dependencyModId)
                         }
                     }
