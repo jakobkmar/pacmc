@@ -12,10 +12,13 @@ import net.axay.pacmc.app.data.ModSlug
 import net.axay.pacmc.app.data.Repository
 import net.axay.pacmc.app.features.Archive
 import net.axay.pacmc.app.repoapi.model.CommonProjectVersion
+import net.axay.pacmc.app.repoapi.repoApiContext
 import net.axay.pacmc.cli.launchJob
 import net.axay.pacmc.cli.terminal
 import net.axay.pacmc.cli.terminal.DownloadAnimation
 import net.axay.pacmc.cli.terminal.askYesOrNo
+import net.axay.pacmc.cli.terminal.terminalString
+import net.axay.pacmc.repoapi.CachePolicy
 
 class InstallCommand : CliktCommand(
     name = "install",
@@ -41,13 +44,13 @@ class InstallCommand : CliktCommand(
 
         terminal.println("Installing the following:")
         resolveResult.versions.forEach { version ->
-            terminal.println(TextColors.brightGreen("  " + version.files.primaryName()))
+            terminal.println(TextColors.brightGreen("  " + version.displayString()))
         }
 
         terminal.println()
         terminal.println("Installing the following dependencies:")
         resolveResult.dependencyVersions.forEach { version ->
-            terminal.println(TextColors.brightYellow("  " + version.files.primaryName()))
+            terminal.println(TextColors.brightYellow("  " + version.displayString()))
         }
 
         terminal.println()
@@ -61,7 +64,7 @@ class InstallCommand : CliktCommand(
 
         resolveResult.versions.map { version ->
             launch {
-                val fileName = version.files.first().name.removeSuffix(".jar")
+                val fileName = version.displayString()
                 val installResult = archive.install(version, false) {
                     downloadAnimation.update(fileName, DownloadAnimation.AnimationState(it))
                 }
@@ -81,6 +84,12 @@ class InstallCommand : CliktCommand(
             }
         }.joinAll()
     }
+}
+
+private suspend fun CommonProjectVersion.displayString(): String {
+    val projectString = repoApiContext(CachePolicy.ONLY_CACHED) { it.getBasicProjectInfo(modId) }
+        ?.slug?.terminalString ?: terminalString
+    return projectString + " " + TextColors.gray("($number)")
 }
 
 fun List<CommonProjectVersion.File>.primaryName() =
