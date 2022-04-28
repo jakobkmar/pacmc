@@ -4,6 +4,7 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.mordant.rendering.TextColors
 import net.axay.pacmc.app.features.Archive
+import net.axay.pacmc.app.utils.OperatingSystem
 import net.axay.pacmc.cli.launchJob
 import net.axay.pacmc.cli.terminal
 import net.axay.pacmc.cli.terminal.optimalTerminalString
@@ -24,12 +25,14 @@ class UpdateCommand : CliktCommand(
         val updateResult = archive.resolveUpdate()
         terminal.println()
 
+        val upSymbol = if (OperatingSystem.notWindows) "↑" else "u"
+
         terminal.println("Updating the archive will result in the following transaction:")
         updateResult.updateVersions.forEach {
-            terminal.println(TextColors.brightGreen("↑") + " update " + it.optimalTerminalString())
+            terminal.println(TextColors.brightGreen(upSymbol) + " update " + it.optimalTerminalString())
         }
         updateResult.updateDependencyVersions.forEach {
-            terminal.println("${TextColors.brightGreen("↑")} update ${it.optimalTerminalString()} ${TextColors.brightCyan("(dependency)")}")
+            terminal.println("${TextColors.brightGreen(upSymbol)} update ${it.optimalTerminalString()} ${TextColors.brightCyan("(dependency)")}")
         }
         updateResult.addedDependencyVersions.forEach {
             terminal.println("${TextColors.brightGreen("+")} add ${it.optimalTerminalString()} ${TextColors.brightCyan("(dependency)")}")
