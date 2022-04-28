@@ -5,6 +5,7 @@ import com.github.ajalt.mordant.rendering.TextStyles
 import com.github.ajalt.mordant.terminal.Terminal
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import net.axay.pacmc.app.data.ModId
 import net.axay.pacmc.app.data.ModSlug
 import net.axay.pacmc.app.data.Repository
 import net.axay.pacmc.app.database.model.DbInstalledProject
@@ -31,20 +32,23 @@ private val CommonProjectVersion.terminalString get() = repoEntry(
     (files.find { it.primary } ?: files.singleOrNull())?.name?.removeSuffix(".jar") ?: name
 )
 
+suspend fun ModId.terminalStringOrNull(): String? {
+    return repoApiContext(CachePolicy.ONLY_CACHED) { it.getBasicProjectInfo(this@terminalStringOrNull) }
+        ?.slug?.terminalString
+}
+
+suspend fun ModId.optimalTerminalString() = terminalStringOrNull() ?: repoEntry(repository, id)
+
 suspend fun CommonProjectVersion.optimalTerminalString(): String {
     // TODO sometimes, only the request using slugs has been pre-cached
-    val projectString = repoApiContext(CachePolicy.ONLY_CACHED) { it.getBasicProjectInfo(modId) }
-        ?.slug?.terminalString ?: terminalString
+    val projectString = modId.terminalStringOrNull() ?: terminalString
     return projectString + " " + TextColors.gray("($number)")
 }
 
 suspend fun DbInstalledProject.optimalTerminalString(): String = coroutineScope {
     val modId = readModId()
 
-    val projectString = async {
-        repoApiContext(CachePolicy.ONLY_CACHED) { it.getBasicProjectInfo(modId) }
-            ?.slug?.terminalString ?: repoEntry(modId.repository, modId.id)
-    }
+    val projectString = async { modId.optimalTerminalString() }
 
     val versionString = async {
         repoApiContext(CachePolicy.ONLY_CACHED) { it.getProjectVersion(version, modId.repository) }

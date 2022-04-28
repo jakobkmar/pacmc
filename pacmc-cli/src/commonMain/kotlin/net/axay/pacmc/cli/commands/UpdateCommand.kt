@@ -38,7 +38,7 @@ class UpdateCommand : CliktCommand(
             terminal.println("${TextColors.brightGreen("+")} add ${it.optimalTerminalString()} ${TextColors.brightCyan("(dependency)")}")
         }
         updateResult.removedDependencies.forEach {
-            terminal.println("${TextColors.brightRed("-")} remove $it ${TextColors.brightCyan("(unused dependency)")}")
+            terminal.println("${TextColors.brightRed("-")} remove ${it.optimalTerminalString()} ${TextColors.brightCyan("(unused dependency)")}")
         }
     }
 }
