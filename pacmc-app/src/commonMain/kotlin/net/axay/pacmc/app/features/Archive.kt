@@ -20,7 +20,6 @@ import net.axay.pacmc.app.repoapi.model.CommonProjectVersion
 import net.axay.pacmc.app.repoapi.repoApiContext
 import net.axay.pacmc.app.utils.pmap
 import net.axay.pacmc.repoapi.CachePolicy
-import kotlin.jvm.JvmName
 import kotlin.math.absoluteValue
 
 class Archive(private val name: String) {
@@ -208,5 +207,10 @@ class Archive(private val name: String) {
                 .filter { it.modId !in installedDependencyVersions },
             removedDependencies = installedDependencyVersions.keys - resolveResult.dependencyVersions.mapTo(mutableSetOf()) { it.modId },
         )
+    }
+
+    suspend fun getInstalled(): List<DbInstalledProject> {
+        val dbArchive = realm.findArchive()
+        return dbArchive.installed.toList()
     }
 }

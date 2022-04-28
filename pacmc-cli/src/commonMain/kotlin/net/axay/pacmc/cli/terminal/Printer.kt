@@ -3,10 +3,15 @@ package net.axay.pacmc.cli.terminal
 import com.github.ajalt.mordant.rendering.TextColors
 import com.github.ajalt.mordant.rendering.TextStyles
 import com.github.ajalt.mordant.terminal.Terminal
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import net.axay.pacmc.app.data.ModSlug
 import net.axay.pacmc.app.data.Repository
+import net.axay.pacmc.app.database.model.DbInstalledProject
 import net.axay.pacmc.app.repoapi.model.CommonProjectResult
 import net.axay.pacmc.app.repoapi.model.CommonProjectVersion
+import net.axay.pacmc.app.repoapi.repoApiContext
+import net.axay.pacmc.repoapi.CachePolicy
 
 private val Repository.textColor
     get() = when (this) {
@@ -14,15 +19,39 @@ private val Repository.textColor
         Repository.CURSEFORGE -> TextColors.yellow
     }
 
-val ModSlug.terminalString get() = buildString {
-    append(repository.run { textColor(displayName.lowercase() + "/") })
-    append(TextColors.white(TextStyles.bold(TextStyles.underline(slug))))
+private fun repoEntry(repository: Repository, entry: String): String {
+    return repository.run { textColor(displayName.lowercase() + "/") } +
+        TextColors.white(TextStyles.bold(TextStyles.underline(entry)))
 }
 
-val CommonProjectVersion.terminalString get() = buildString {
-    append(modId.repository.run { textColor(displayName.lowercase() + "/") })
-    val printName = (files.find { it.primary } ?: files.singleOrNull())?.name?.removeSuffix(".jar") ?: name
-    append(TextColors.white(TextStyles.bold(TextStyles.underline(printName))))
+val ModSlug.terminalString get() = repoEntry(repository, slug)
+
+private val CommonProjectVersion.terminalString get() = repoEntry(
+    modId.repository,
+    (files.find { it.primary } ?: files.singleOrNull())?.name?.removeSuffix(".jar") ?: name
+)
+
+suspend fun CommonProjectVersion.optimalTerminalString(): String {
+    // TODO sometimes, only the request using slugs has been pre-cached
+    val projectString = repoApiContext(CachePolicy.ONLY_CACHED) { it.getBasicProjectInfo(modId) }
+        ?.slug?.terminalString ?: terminalString
+    return projectString + " " + TextColors.gray("($number)")
+}
+
+suspend fun DbInstalledProject.optimalTerminalString(): String = coroutineScope {
+    val modId = readModId()
+
+    val projectString = async {
+        repoApiContext(CachePolicy.ONLY_CACHED) { it.getBasicProjectInfo(modId) }
+            ?.slug?.terminalString ?: repoEntry(modId.repository, modId.id)
+    }
+
+    val versionString = async {
+        repoApiContext(CachePolicy.ONLY_CACHED) { it.getProjectVersion(version, modId.repository) }
+            ?.number ?: "version id: $version"
+    }
+
+    projectString.await() + " " + TextColors.gray("(${versionString.await()})")
 }
 
 fun Terminal.printProject(project: CommonProjectResult) = println(buildString {
