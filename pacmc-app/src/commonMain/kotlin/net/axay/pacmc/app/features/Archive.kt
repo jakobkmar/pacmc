@@ -63,16 +63,22 @@ class Archive(private val name: String) {
         val finalListMutex = Mutex()
 
         coroutineScope {
-            suspend fun resolveTransitively(modId: ModId) {
+            suspend fun resolveTransitively(modId: ModId, isDependency: Boolean) {
 
                 if (!checkedModIdsMutex.withLock { checkedModIds.add(modId) }) return
+
+                if (isDependency) {
+                    launch {
+                        repoApiContext(CachePolicy.ONLY_FRESH) { it.getBasicProjectInfo(modId) }
+                    }
+                }
 
                 val version = repoApiContext(CachePolicy.ONLY_FRESH) {
                     it.getProjectVersions(modId, listOf(loader), listOf(minecraftVersion))
                 }?.findBest(minecraftVersion) ?: return
 
                 finalListMutex.withLock {
-                    (if (modId in modIds) versions else dependencyVersions) += version
+                    (if (!isDependency) versions else dependencyVersions) += version
                 }
 
                 version.dependencies.forEach {
@@ -85,16 +91,13 @@ class Archive(private val name: String) {
                         }
 
                         if (dependencyModId != null) {
-                            launch {
-                                repoApiContext(CachePolicy.ONLY_FRESH) { it.getBasicProjectInfo(dependencyModId) }
-                            }
-                            resolveTransitively(dependencyModId)
+                            resolveTransitively(dependencyModId, true)
                         }
                     }
                 }
             }
 
-            modIds.forEach { launch { resolveTransitively(it) } }
+            modIds.forEach { launch { resolveTransitively(it, false) } }
         }
 
         return ResolveResult(versions, dependencyVersions)
