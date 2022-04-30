@@ -44,7 +44,7 @@ dependencyResolutionManagement {
             library("kermit", "co.touchlab:kermit:1.0.0")
             library("okio", "com.squareup.okio:okio:3.0.0")
 
-            version("realm", "0.10.2")
+            version("realm", "0.11.0")
             library("realm-base", "io.realm.kotlin", "library-base").versionRef("realm")
             plugin("realm", "io.realm.kotlin").versionRef("realm")
 
