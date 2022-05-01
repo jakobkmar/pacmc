@@ -5,7 +5,9 @@ import io.realm.query
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.sync.withPermit
 import net.axay.pacmc.app.Environment
 import net.axay.pacmc.app.data.MinecraftVersion
 import net.axay.pacmc.app.data.ModFile
@@ -137,6 +139,7 @@ class Archive(private val name: String) {
     suspend fun install(
         version: CommonProjectVersion,
         isDependency: Boolean,
+        semaphore: Semaphore?,
         downloadProgress: suspend (Double) -> Unit,
     ): InstallResult {
 
@@ -171,11 +174,13 @@ class Archive(private val name: String) {
 
             val fileName = fileNameDeferred.await() ?: return InstallResult.NO_PROJECT_INFO
 
-            ktorClient.downloadFile(
-                downloadFile.url,
-                dbArchive.readPath().resolve(fileName),
-                downloadProgress
-            )
+            semaphore?.withPermit {
+                ktorClient.downloadFile(
+                    downloadFile.url,
+                    dbArchive.readPath().resolve(fileName),
+                    downloadProgress
+                )
+            }
 
             return InstallResult.SUCCESS
         } else {

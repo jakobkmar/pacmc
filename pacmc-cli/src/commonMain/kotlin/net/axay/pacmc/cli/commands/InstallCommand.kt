@@ -7,6 +7,7 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.mordant.rendering.TextColors
 import com.github.ajalt.mordant.rendering.TextStyles
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Semaphore
 import net.axay.pacmc.app.data.ModSlug
 import net.axay.pacmc.app.data.Repository
 import net.axay.pacmc.app.features.Archive
@@ -59,9 +60,11 @@ class InstallCommand : CliktCommand(
 
         val downloadAnimation = DownloadAnimation()
 
+        val semaphore = Semaphore(10)
+
         suspend fun launchInstall(version: CommonProjectVersion) = launch {
             val fileName = version.optimalTerminalString()
-            val installResult = archive.install(version, false) {
+            val installResult = archive.install(version, false, semaphore) {
                 downloadAnimation.update(fileName, DownloadAnimation.AnimationState(it))
             }
 
