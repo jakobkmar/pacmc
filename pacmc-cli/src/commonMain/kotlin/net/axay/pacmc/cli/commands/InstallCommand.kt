@@ -6,11 +6,11 @@ import com.github.ajalt.clikt.parameters.arguments.multiple
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.mordant.rendering.TextColors
 import com.github.ajalt.mordant.rendering.TextStyles
-import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import net.axay.pacmc.app.data.ModSlug
 import net.axay.pacmc.app.data.Repository
 import net.axay.pacmc.app.features.Archive
+import net.axay.pacmc.app.repoapi.model.CommonProjectVersion
 import net.axay.pacmc.cli.launchJob
 import net.axay.pacmc.cli.terminal
 import net.axay.pacmc.cli.terminal.DownloadAnimation
@@ -59,26 +59,27 @@ class InstallCommand : CliktCommand(
 
         val downloadAnimation = DownloadAnimation()
 
-        resolveResult.versions.map { version ->
-            launch {
-                val fileName = version.optimalTerminalString()
-                val installResult = archive.install(version, false) {
-                    downloadAnimation.update(fileName, DownloadAnimation.AnimationState(it))
-                }
-
-                if (installResult == Archive.InstallResult.SUCCESS) return@launch
-
-                val message = when (installResult) {
-                    Archive.InstallResult.ALREADY_INSTALLED -> TextColors.brightGreen("already installed")
-                    Archive.InstallResult.NO_PROJECT_INFO -> TextColors.brightRed("no project info")
-                    Archive.InstallResult.NO_FILE -> TextColors.brightRed("no downloadable file")
-                    else -> null
-                }?.let { TextStyles.bold(it) }
-
-                val color = if (!installResult.success) TextColors.brightRed else null
-
-                downloadAnimation.update(fileName, DownloadAnimation.AnimationState(1.0, message, color))
+        suspend fun launchInstall(version: CommonProjectVersion) = launch {
+            val fileName = version.optimalTerminalString()
+            val installResult = archive.install(version, false) {
+                downloadAnimation.update(fileName, DownloadAnimation.AnimationState(it))
             }
-        }.joinAll()
+
+            if (installResult == Archive.InstallResult.SUCCESS) return@launch
+
+            val message = when (installResult) {
+                Archive.InstallResult.ALREADY_INSTALLED -> TextColors.brightGreen("already installed")
+                Archive.InstallResult.NO_PROJECT_INFO -> TextColors.brightRed("no project info")
+                Archive.InstallResult.NO_FILE -> TextColors.brightRed("no downloadable file")
+                else -> null
+            }?.let { TextStyles.bold(it) }
+
+            val color = if (!installResult.success) TextColors.brightRed else null
+
+            downloadAnimation.update(fileName, DownloadAnimation.AnimationState(1.0, message, color))
+        }
+
+        resolveResult.versions.forEach { version -> launchInstall(version) }
+        resolveResult.dependencyVersions.forEach { version -> launchInstall(version) }
     }
 }
