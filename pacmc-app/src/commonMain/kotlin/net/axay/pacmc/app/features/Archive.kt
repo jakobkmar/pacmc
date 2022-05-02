@@ -188,14 +188,16 @@ class Archive(private val name: String) {
         }
     }
 
-    class UpdateResult(
-        val updateVersions: List<CommonProjectVersion>,
-        val updateDependencyVersions: List<CommonProjectVersion>,
-        val addedDependencyVersions: List<CommonProjectVersion>,
-        val removedDependencies: Set<ModId>,
+    class Transaction(
+        val add: List<CommonProjectVersion> = emptyList(),
+        val addDependencies: List<CommonProjectVersion> = emptyList(),
+        val update: List<CommonProjectVersion> = emptyList(),
+        val updateDependencies: List<CommonProjectVersion> = emptyList(),
+        val remove: Set<ModId> = emptySet(),
+        val removeDependencies: Set<ModId> = emptySet(),
     )
 
-    suspend fun resolveUpdate(): UpdateResult {
+    suspend fun resolveUpdate(): Transaction {
         val dbArchive = realm.findArchive()
 
         val installedVersions = mutableMapOf<ModId, String>()
@@ -206,14 +208,14 @@ class Archive(private val name: String) {
 
         val resolveResult = resolve(installedVersions.keys)
 
-        return UpdateResult(
-            updateVersions = resolveResult.versions
+        return Transaction(
+            update = resolveResult.versions
                 .filter { it.modId in installedVersions && installedVersions[it.modId] != it.id },
-            updateDependencyVersions = resolveResult.dependencyVersions
+            updateDependencies = resolveResult.dependencyVersions
                 .filter { it.modId in installedDependencyVersions && installedDependencyVersions[it.modId] != it.id },
-            addedDependencyVersions = resolveResult.dependencyVersions
+            addDependencies = resolveResult.dependencyVersions
                 .filter { it.modId !in installedDependencyVersions },
-            removedDependencies = installedDependencyVersions.keys - resolveResult.dependencyVersions.mapTo(mutableSetOf()) { it.modId },
+            removeDependencies = installedDependencyVersions.keys - resolveResult.dependencyVersions.mapTo(mutableSetOf()) { it.modId },
         )
     }
 
