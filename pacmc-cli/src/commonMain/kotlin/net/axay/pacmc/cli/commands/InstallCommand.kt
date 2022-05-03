@@ -4,19 +4,12 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.arguments.multiple
 import com.github.ajalt.clikt.parameters.options.option
-import com.github.ajalt.mordant.rendering.TextColors
-import com.github.ajalt.mordant.rendering.TextStyles
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Semaphore
 import net.axay.pacmc.app.data.ModSlug
 import net.axay.pacmc.app.data.Repository
 import net.axay.pacmc.app.features.Archive
-import net.axay.pacmc.app.repoapi.model.CommonProjectVersion
 import net.axay.pacmc.cli.launchJob
 import net.axay.pacmc.cli.terminal
-import net.axay.pacmc.cli.terminal.DownloadAnimation
-import net.axay.pacmc.cli.terminal.askYesOrNo
-import net.axay.pacmc.cli.terminal.optimalTerminalString
+import net.axay.pacmc.cli.terminal.handleTransaction
 
 class InstallCommand : CliktCommand(
     name = "install",
@@ -37,52 +30,13 @@ class InstallCommand : CliktCommand(
 
         val archive = Archive(archiveName!!)
 
-        val resolveResult = archive.resolve(modSlugNames.mapTo(mutableSetOf()) { ModSlug(Repository.MODRINTH, it) })
+        val transaction = archive.resolve(modSlugNames.mapTo(mutableSetOf()) { ModSlug(Repository.MODRINTH, it) })
         terminal.println()
 
-        terminal.println("Installing the following:")
-        resolveResult.add.forEach { version ->
-            terminal.println(TextColors.brightGreen("  " + version.optimalTerminalString()))
-        }
-
-        terminal.println()
-        terminal.println("Installing the following dependencies:")
-        resolveResult.addDependencies.forEach { version ->
-            terminal.println(TextColors.brightYellow("  " + version.optimalTerminalString()))
-        }
-
-        terminal.println()
-        if (!terminal.askYesOrNo("Is this okay?", default = true)) {
-            terminal.println("Abort.")
-            return@launchJob
-        }
-        terminal.println()
-
-        val downloadAnimation = DownloadAnimation()
-
-        val semaphore = Semaphore(10)
-
-        suspend fun launchInstall(version: CommonProjectVersion) = launch {
-            val fileName = version.optimalTerminalString()
-            val installResult = archive.install(version, false, semaphore) {
-                downloadAnimation.update(fileName, DownloadAnimation.AnimationState(it))
-            }
-
-            if (installResult == Archive.InstallResult.SUCCESS) return@launch
-
-            val message = when (installResult) {
-                Archive.InstallResult.ALREADY_INSTALLED -> TextColors.brightGreen("already installed")
-                Archive.InstallResult.NO_PROJECT_INFO -> TextColors.brightRed("no project info")
-                Archive.InstallResult.NO_FILE -> TextColors.brightRed("no downloadable file")
-                else -> null
-            }?.let { TextStyles.bold(it) }
-
-            val color = if (!installResult.success) TextColors.brightRed else null
-
-            downloadAnimation.update(fileName, DownloadAnimation.AnimationState(1.0, message, color))
-        }
-
-        resolveResult.add.forEach { version -> launchInstall(version) }
-        resolveResult.addDependencies.forEach { version -> launchInstall(version) }
+        terminal.handleTransaction(
+            "Installing the given mods will result in the following transaction:",
+            archive,
+            transaction
+        )
     }
 }
