@@ -21,6 +21,7 @@ class UpdateCommand : CliktCommand(
         val archive = Archive(archiveName!!)
 
         val transaction = archive.resolveUpdate()
+        terminal.println()
 
         terminal.handleTransaction(
             "Updating the archive will result in the following transaction:",
