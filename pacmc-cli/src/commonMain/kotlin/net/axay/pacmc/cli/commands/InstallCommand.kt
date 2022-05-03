@@ -41,13 +41,13 @@ class InstallCommand : CliktCommand(
         terminal.println()
 
         terminal.println("Installing the following:")
-        resolveResult.versions.forEach { version ->
+        resolveResult.add.forEach { version ->
             terminal.println(TextColors.brightGreen("  " + version.optimalTerminalString()))
         }
 
         terminal.println()
         terminal.println("Installing the following dependencies:")
-        resolveResult.dependencyVersions.forEach { version ->
+        resolveResult.addDependencies.forEach { version ->
             terminal.println(TextColors.brightYellow("  " + version.optimalTerminalString()))
         }
 
@@ -82,7 +82,7 @@ class InstallCommand : CliktCommand(
             downloadAnimation.update(fileName, DownloadAnimation.AnimationState(1.0, message, color))
         }
 
-        resolveResult.versions.forEach { version -> launchInstall(version) }
-        resolveResult.dependencyVersions.forEach { version -> launchInstall(version) }
+        resolveResult.add.forEach { version -> launchInstall(version) }
+        resolveResult.addDependencies.forEach { version -> launchInstall(version) }
     }
 }

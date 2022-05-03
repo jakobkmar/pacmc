@@ -39,96 +39,6 @@ class Archive(private val name: String) {
     private suspend fun TypedRealm.findArchive() = query<DbArchive>("name == $0", name)
         .first().asFlow().first().obj ?: error("The archive '$name' is not present in the database")
 
-    class ResolveResult(
-        val versions: List<CommonProjectVersion>,
-        val dependencyVersions: List<CommonProjectVersion>,
-    )
-
-    @JvmName("resolveWithModSlug")
-    suspend fun resolve(modSlugs: Set<ModSlug>): ResolveResult {
-        val modIds = modSlugs.pmap { repoApiContext(CachePolicy.ONLY_FRESH) { c -> c.getBasicProjectInfo(it) }?.id }.filterNotNull().toSet()
-        return resolve(modIds)
-    }
-
-    private suspend fun resolve(modIds: Set<ModId>): ResolveResult {
-        val dbArchive = realm.findArchive()
-
-        val loader = dbArchive.readLoader()
-        val minecraftVersion = dbArchive.readMinecraftVersion()
-
-        val checkedModIds = HashSet<ModId>()
-        val checkedModIdsMutex = Mutex()
-
-        val versions = mutableListOf<CommonProjectVersion>()
-        val dependencyVersions = mutableListOf<CommonProjectVersion>()
-
-        val finalListMutex = Mutex()
-
-        coroutineScope {
-            suspend fun resolveTransitively(modId: ModId, isDependency: Boolean) {
-
-                if (!checkedModIdsMutex.withLock { checkedModIds.add(modId) }) return
-
-                if (isDependency) {
-                    launch {
-                        repoApiContext(CachePolicy.ONLY_FRESH) { it.getBasicProjectInfo(modId) }
-                    }
-                }
-
-                val version = repoApiContext(CachePolicy.ONLY_FRESH) {
-                    it.getProjectVersions(modId, listOf(loader), listOf(minecraftVersion))
-                }?.findBest(minecraftVersion) ?: return
-
-                finalListMutex.withLock {
-                    (if (!isDependency) versions else dependencyVersions) += version
-                }
-
-                version.dependencies.forEach {
-                    launch {
-                        val dependencyModId = when (it) {
-                            is CommonProjectVersion.Dependency.ProjectDependency -> it.id
-                            is CommonProjectVersion.Dependency.VersionDependency -> repoApiContext(CachePolicy.ONLY_FRESH) { c ->
-                                c.getProjectVersion(it.id, version.modId.repository)?.modId
-                            }
-                        }
-
-                        if (dependencyModId != null) {
-                            resolveTransitively(dependencyModId, true)
-                        }
-                    }
-                }
-            }
-
-            modIds.forEach { launch { resolveTransitively(it, false) } }
-        }
-
-        return ResolveResult(versions, dependencyVersions)
-    }
-
-    private fun List<CommonProjectVersion>.findBest(desiredVersion: MinecraftVersion): CommonProjectVersion? =
-        fold<CommonProjectVersion, Pair<CommonProjectVersion, Int>?>(null) { acc, projectVersion ->
-            val distance = projectVersion.gameVersions
-                .mapNotNull { it.minorDistance(desiredVersion) }
-                .minOrNull()
-
-            when {
-                // the major version does not fit
-                distance == null -> acc
-                // the previous version does not fit but this one does
-                acc == null -> projectVersion to distance
-                // prefer the file closer to the desired version
-                distance.absoluteValue < acc.second.absoluteValue -> projectVersion to distance
-                distance.absoluteValue > acc.second.absoluteValue -> acc
-                // now both files are equally close to the desired version
-                // prefer the one which supports the more recent game version
-                distance > 0 && acc.second < 0 -> projectVersion to distance
-                distance < 0 && acc.second > 0 -> acc
-                // just prefer the newer file
-                projectVersion.datePublished > acc.first.datePublished -> projectVersion to distance
-                else -> acc
-            }
-        }?.first
-
     enum class InstallResult(val success: Boolean) {
         SUCCESS(true),
         ALREADY_INSTALLED(true),
@@ -188,6 +98,30 @@ class Archive(private val name: String) {
         }
     }
 
+    private fun List<CommonProjectVersion>.findBest(desiredVersion: MinecraftVersion): CommonProjectVersion? =
+        fold<CommonProjectVersion, Pair<CommonProjectVersion, Int>?>(null) { acc, projectVersion ->
+            val distance = projectVersion.gameVersions
+                .mapNotNull { it.minorDistance(desiredVersion) }
+                .minOrNull()
+
+            when {
+                // the major version does not fit
+                distance == null -> acc
+                // the previous version does not fit but this one does
+                acc == null -> projectVersion to distance
+                // prefer the file closer to the desired version
+                distance.absoluteValue < acc.second.absoluteValue -> projectVersion to distance
+                distance.absoluteValue > acc.second.absoluteValue -> acc
+                // now both files are equally close to the desired version
+                // prefer the one which supports the more recent game version
+                distance > 0 && acc.second < 0 -> projectVersion to distance
+                distance < 0 && acc.second > 0 -> acc
+                // just prefer the newer file
+                projectVersion.datePublished > acc.first.datePublished -> projectVersion to distance
+                else -> acc
+            }
+        }?.first
+
     class Transaction(
         val add: List<CommonProjectVersion> = emptyList(),
         val addDependencies: List<CommonProjectVersion> = emptyList(),
@@ -196,6 +130,70 @@ class Archive(private val name: String) {
         val remove: Set<ModId> = emptySet(),
         val removeDependencies: Set<ModId> = emptySet(),
     )
+
+    @JvmName("resolveWithModSlug")
+    suspend fun resolve(modSlugs: Set<ModSlug>): Transaction {
+        val modIds = modSlugs.pmap { repoApiContext(CachePolicy.ONLY_FRESH) { c -> c.getBasicProjectInfo(it) }?.id }.filterNotNull().toSet()
+        return resolve(modIds)
+    }
+
+    private suspend fun resolve(modIds: Set<ModId>): Transaction {
+        val dbArchive = realm.findArchive()
+
+        val loader = dbArchive.readLoader()
+        val minecraftVersion = dbArchive.readMinecraftVersion()
+
+        val checkedModIds = HashSet<ModId>()
+        val checkedModIdsMutex = Mutex()
+
+        val versions = mutableListOf<CommonProjectVersion>()
+        val dependencyVersions = mutableListOf<CommonProjectVersion>()
+
+        val finalListMutex = Mutex()
+
+        coroutineScope {
+            suspend fun resolveTransitively(modId: ModId, isDependency: Boolean) {
+
+                if (!checkedModIdsMutex.withLock { checkedModIds.add(modId) }) return
+
+                if (isDependency) {
+                    launch {
+                        repoApiContext(CachePolicy.ONLY_FRESH) { it.getBasicProjectInfo(modId) }
+                    }
+                }
+
+                val version = repoApiContext(CachePolicy.ONLY_FRESH) {
+                    it.getProjectVersions(modId, listOf(loader), listOf(minecraftVersion))
+                }?.findBest(minecraftVersion) ?: return
+
+                finalListMutex.withLock {
+                    (if (!isDependency) versions else dependencyVersions) += version
+                }
+
+                version.dependencies.forEach {
+                    launch {
+                        val dependencyModId = when (it) {
+                            is CommonProjectVersion.Dependency.ProjectDependency -> it.id
+                            is CommonProjectVersion.Dependency.VersionDependency -> repoApiContext(CachePolicy.ONLY_FRESH) { c ->
+                                c.getProjectVersion(it.id, version.modId.repository)?.modId
+                            }
+                        }
+
+                        if (dependencyModId != null) {
+                            resolveTransitively(dependencyModId, true)
+                        }
+                    }
+                }
+            }
+
+            modIds.forEach { launch { resolveTransitively(it, false) } }
+        }
+
+        return Transaction(
+            add = versions,
+            addDependencies = dependencyVersions,
+        )
+    }
 
     suspend fun resolveUpdate(): Transaction {
         val dbArchive = realm.findArchive()
@@ -209,13 +207,13 @@ class Archive(private val name: String) {
         val resolveResult = resolve(installedVersions.keys)
 
         return Transaction(
-            update = resolveResult.versions
+            update = resolveResult.add
                 .filter { it.modId in installedVersions && installedVersions[it.modId] != it.id },
-            updateDependencies = resolveResult.dependencyVersions
+            updateDependencies = resolveResult.addDependencies
                 .filter { it.modId in installedDependencyVersions && installedDependencyVersions[it.modId] != it.id },
-            addDependencies = resolveResult.dependencyVersions
+            addDependencies = resolveResult.addDependencies
                 .filter { it.modId !in installedDependencyVersions },
-            removeDependencies = installedDependencyVersions.keys - resolveResult.dependencyVersions.mapTo(mutableSetOf()) { it.modId },
+            removeDependencies = installedDependencyVersions.keys - resolveResult.addDependencies.mapTo(mutableSetOf()) { it.modId },
         )
     }
 
