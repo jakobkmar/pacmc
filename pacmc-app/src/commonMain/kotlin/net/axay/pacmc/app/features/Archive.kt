@@ -39,9 +39,17 @@ class Archive(private val name: String) {
     private suspend fun TypedRealm.findArchive() = query<DbArchive>("name == $0", name)
         .first().asFlow().first().obj ?: error("The archive '$name' is not present in the database")
 
-    enum class InstallResult(val success: Boolean) {
+    sealed class TransactionProgress<U> {
+        abstract val key: U
+
+        class Update<U>(override val key: U, val progress: Double) : TransactionProgress<U>()
+        class Finished<U>(override val key: U, val result: TransactionPartResult) : TransactionProgress<U>()
+    }
+
+    enum class TransactionPartResult(val success: Boolean) {
         SUCCESS(true),
         ALREADY_INSTALLED(true),
+        REMOVED(true),
         NO_PROJECT_INFO(false),
         NO_FILE(false),
     }
@@ -50,16 +58,17 @@ class Archive(private val name: String) {
         transaction: Transaction,
         semaphore: Semaphore,
         progressKeyMap: Map<ModId, U>,
-        progressCallback: suspend (key: U, progress: Double) -> Unit,
+        progressCallback: suspend (TransactionProgress<U>) -> Unit,
     ) {
         coroutineScope {
             fun Collection<CommonProjectVersion>.installAll() {
                 forEach { version ->
                     launch {
                         val key = progressKeyMap[version.modId]!!
-                        install(version, false, semaphore) {
-                            progressCallback(key, it)
+                        val result = install(version, false, semaphore) {
+                            progressCallback(TransactionProgress.Update(key, it))
                         }
+                        progressCallback(TransactionProgress.Finished(key, result))
                     }
                 }
             }
@@ -68,8 +77,8 @@ class Archive(private val name: String) {
                 forEach {
                     launch {
                         val key = progressKeyMap[it]!!
-                        uninstall(it)
-                        progressCallback(key, 1.0)
+                        val result = uninstall(it)
+                        progressCallback(TransactionProgress.Finished(key, result))
                     }
                 }
             }
@@ -89,7 +98,7 @@ class Archive(private val name: String) {
         isDependency: Boolean,
         semaphore: Semaphore?,
         downloadProgress: suspend (Double) -> Unit,
-    ): InstallResult {
+    ): TransactionPartResult {
 
         val modId = version.modId
         val fileNameDeferred = CoroutineScope(Dispatchers.Default).async {
@@ -100,7 +109,7 @@ class Archive(private val name: String) {
         val dbArchive = realm.findArchive()
 
         val shouldDownload = if (dbArchive.installed.any { it.readModId() == modId }) {
-            val fileName = fileNameDeferred.await() ?: return InstallResult.NO_PROJECT_INFO
+            val fileName = fileNameDeferred.await() ?: return TransactionPartResult.NO_PROJECT_INFO
             !Environment.fileSystem.exists(dbArchive.readPath().resolve(fileName))
         } else true
 
@@ -118,9 +127,9 @@ class Archive(private val name: String) {
 
         if (shouldDownload) {
             val downloadFile = (version.files.firstOrNull { it.primary } ?: version.files.singleOrNull())
-                ?: return InstallResult.NO_FILE
+                ?: return TransactionPartResult.NO_FILE
 
-            val fileName = fileNameDeferred.await() ?: return InstallResult.NO_PROJECT_INFO
+            val fileName = fileNameDeferred.await() ?: return TransactionPartResult.NO_PROJECT_INFO
 
             semaphore?.withPermit {
                 ktorClient.downloadFile(
@@ -130,14 +139,14 @@ class Archive(private val name: String) {
                 )
             }
 
-            return InstallResult.SUCCESS
+            return TransactionPartResult.SUCCESS
         } else {
-            return InstallResult.ALREADY_INSTALLED
+            return TransactionPartResult.ALREADY_INSTALLED
         }
     }
 
-    suspend fun uninstall(modId: ModId) {
-
+    suspend fun uninstall(modId: ModId): TransactionPartResult {
+        return TransactionPartResult.REMOVED
     }
 
     private fun List<CommonProjectVersion>.findBest(desiredVersion: MinecraftVersion): CommonProjectVersion? =
