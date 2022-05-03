@@ -53,7 +53,7 @@ class Archive(private val name: String) {
         progressCallback: suspend (key: U, progress: Double) -> Unit,
     ) {
         coroutineScope {
-            suspend fun Collection<CommonProjectVersion>.installAll() {
+            fun Collection<CommonProjectVersion>.installAll() {
                 forEach { version ->
                     launch {
                         val key = progressKeyMap[version.modId]!!
@@ -64,7 +64,7 @@ class Archive(private val name: String) {
                 }
             }
 
-            suspend fun Collection<ModId>.uninstallAll() {
+            fun Collection<ModId>.uninstallAll() {
                 forEach {
                     launch {
                         val key = progressKeyMap[it]!!
