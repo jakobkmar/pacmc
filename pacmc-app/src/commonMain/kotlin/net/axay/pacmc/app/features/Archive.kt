@@ -46,6 +46,44 @@ class Archive(private val name: String) {
         NO_FILE(false),
     }
 
+    suspend fun <U> applyTransaction(
+        transaction: Transaction,
+        semaphore: Semaphore,
+        progressKeyMap: Map<ModId, U>,
+        progressCallback: suspend (key: U, progress: Double) -> Unit,
+    ) {
+        coroutineScope {
+            suspend fun Collection<CommonProjectVersion>.installAll() {
+                forEach { version ->
+                    launch {
+                        val key = progressKeyMap[version.modId]!!
+                        install(version, false, semaphore) {
+                            progressCallback(key, it)
+                        }
+                    }
+                }
+            }
+
+            suspend fun Collection<ModId>.uninstallAll() {
+                forEach {
+                    launch {
+                        val key = progressKeyMap[it]!!
+                        uninstall(it)
+                        progressCallback(key, 1.0)
+                    }
+                }
+            }
+
+            transaction.add.installAll()
+            transaction.addDependencies.installAll()
+            transaction.update.installAll()
+            transaction.updateDependencies.installAll()
+
+            transaction.remove.uninstallAll()
+            transaction.removeDependencies.uninstallAll()
+        }
+    }
+
     suspend fun install(
         version: CommonProjectVersion,
         isDependency: Boolean,
@@ -96,6 +134,10 @@ class Archive(private val name: String) {
         } else {
             return InstallResult.ALREADY_INSTALLED
         }
+    }
+
+    suspend fun uninstall(modId: ModId) {
+
     }
 
     private fun List<CommonProjectVersion>.findBest(desiredVersion: MinecraftVersion): CommonProjectVersion? =
