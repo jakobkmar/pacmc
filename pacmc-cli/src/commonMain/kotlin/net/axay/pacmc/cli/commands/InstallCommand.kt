@@ -9,6 +9,7 @@ import net.axay.pacmc.app.data.Repository
 import net.axay.pacmc.app.features.Archive
 import net.axay.pacmc.cli.launchJob
 import net.axay.pacmc.cli.terminal
+import net.axay.pacmc.cli.terminal.SpinnerAnimation
 import net.axay.pacmc.cli.terminal.handleTransaction
 
 class InstallCommand : CliktCommand(
@@ -30,7 +31,10 @@ class InstallCommand : CliktCommand(
 
         val archive = Archive(archiveName!!)
 
-        val transaction = archive.resolve(modSlugNames.mapTo(mutableSetOf()) { ModSlug(Repository.MODRINTH, it) })
+        val spinner = SpinnerAnimation()
+        spinner.start()
+        val transaction = archive.resolve(modSlugNames.mapTo(mutableSetOf()) { ModSlug(Repository.MODRINTH, it) }, spinner::update)
+        spinner.stop()
         terminal.println()
 
         terminal.handleTransaction(

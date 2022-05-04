@@ -6,6 +6,7 @@ import com.github.ajalt.mordant.rendering.TextColors
 import net.axay.pacmc.app.features.Archive
 import net.axay.pacmc.cli.launchJob
 import net.axay.pacmc.cli.terminal
+import net.axay.pacmc.cli.terminal.SpinnerAnimation
 import net.axay.pacmc.cli.terminal.handleTransaction
 
 class UpdateCommand : CliktCommand(
@@ -21,7 +22,10 @@ class UpdateCommand : CliktCommand(
         terminal.println("Resolving updates for the given archive '$archiveName'...")
         val archive = Archive(archiveName!!)
 
-        val transaction = archive.resolveUpdate()
+        val spinner = SpinnerAnimation()
+        spinner.start()
+        val transaction = archive.resolveUpdate(spinner::update)
+        spinner.stop()
         terminal.println()
 
         if (transaction.isEmpty()) {

@@ -224,12 +224,20 @@ class Archive(private val name: String) {
     }
 
     @JvmName("resolveWithModSlug")
-    suspend fun resolve(modSlugs: Set<ModSlug>): Transaction {
+    suspend fun resolve(
+        modSlugs: Set<ModSlug>,
+        debugMessageCallback: (String) -> Unit,
+    ): Transaction {
+        debugMessageCallback("resolving slugs to mod ids")
         val modIds = modSlugs.pmap { repoApiContext(CachePolicy.ONLY_FRESH) { c -> c.getBasicProjectInfo(it) }?.id }.filterNotNull().toSet()
-        return resolve(modIds)
+        return resolve(modIds, debugMessageCallback)
     }
 
-    private suspend fun resolve(modIds: Set<ModId>): Transaction {
+    private suspend fun resolve(
+        modIds: Set<ModId>,
+        debugMessageCallback: (String) -> Unit,
+    ): Transaction {
+        debugMessageCallback("opening database")
         val dbArchive = realm.findArchive()
 
         val loader = dbArchive.readLoader()
@@ -246,6 +254,7 @@ class Archive(private val name: String) {
         coroutineScope {
             suspend fun resolveTransitively(modId: ModId, isDependency: Boolean) {
 
+                debugMessageCallback("resolving $modId")
                 if (!checkedModIdsMutex.withLock { checkedModIds.add(modId) }) return
 
                 if (isDependency) {
@@ -287,7 +296,10 @@ class Archive(private val name: String) {
         )
     }
 
-    suspend fun resolveUpdate(): Transaction {
+    suspend fun resolveUpdate(
+        debugMessageCallback: (String) -> Unit
+    ): Transaction {
+        debugMessageCallback("opening database")
         val dbArchive = realm.findArchive()
 
         val installedVersions = mutableMapOf<ModId, String>()
@@ -296,7 +308,7 @@ class Archive(private val name: String) {
             (if (it.dependency) installedDependencyVersions else installedVersions)[it.readModId()] = it.version
         }
 
-        val resolveResult = resolve(installedVersions.keys)
+        val resolveResult = resolve(installedVersions.keys, debugMessageCallback)
 
         return Transaction(
             update = resolveResult.add
