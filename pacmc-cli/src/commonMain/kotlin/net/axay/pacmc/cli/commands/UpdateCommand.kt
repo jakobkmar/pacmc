@@ -25,7 +25,7 @@ class UpdateCommand : CliktCommand(
         terminal.println()
 
         if (transaction.isEmpty()) {
-            terminal.println("Everything is ${TextColors.brightGreen("up-to-date")}.")
+            terminal.println("Everything is ${TextColors.brightGreen("up-to-date")}")
             return@launchJob
         }
 
