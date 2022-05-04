@@ -52,6 +52,10 @@ dependencyResolutionManagement {
             library("memoire-core", "net.axay", "memoire-core").versionRef("memoire")
             library("memoire-both", "net.axay", "memoire-both").versionRef("memoire")
 
+            version("atomicfu", "0.17.2")
+            library("kotlinx-atomicfu", "org.jetbrains.kotlinx", "atomicfu").versionRef("atomicfu")
+            library("kotlinx-atomicfu-plugin", "org.jetbrains.kotlinx", "atomicfu-gradle-plugin").versionRef("atomicfu")
+
             library("devsrsouza.icons.tablericons", "br.com.devsrsouza.compose.icons.jetbrains:tabler-icons:1.0.0")
 
             version("jackson", "2.13.1")

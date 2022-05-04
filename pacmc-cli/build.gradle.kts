@@ -3,6 +3,12 @@ plugins {
     application
 }
 
+buildscript {
+    dependencies {
+        classpath(libs.kotlinx.atomicfu.plugin)
+    }
+}
+
 kotlin {
     jvm {
         withJava()
@@ -14,6 +20,7 @@ kotlin {
                 implementation(project(":pacmc-app"))
                 implementation(libs.clikt)
                 implementation(libs.mordant)
+                compileOnly(libs.kotlinx.atomicfu)
             }
         }
     }
