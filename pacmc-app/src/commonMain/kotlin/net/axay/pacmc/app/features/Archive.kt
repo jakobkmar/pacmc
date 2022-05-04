@@ -217,7 +217,11 @@ class Archive(private val name: String) {
         val updateDependencies: List<CommonProjectVersion> = emptyList(),
         val remove: Set<ModId> = emptySet(),
         val removeDependencies: Set<ModId> = emptySet(),
-    )
+    ) {
+        fun isEmpty() = add.isEmpty() && addDependencies.isEmpty()
+            && update.isEmpty() && updateDependencies.isEmpty()
+            && remove.isEmpty() && removeDependencies.isEmpty()
+    }
 
     @JvmName("resolveWithModSlug")
     suspend fun resolve(modSlugs: Set<ModSlug>): Transaction {

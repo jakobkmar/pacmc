@@ -2,6 +2,7 @@ package net.axay.pacmc.cli.commands
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.mordant.rendering.TextColors
 import net.axay.pacmc.app.features.Archive
 import net.axay.pacmc.cli.launchJob
 import net.axay.pacmc.cli.terminal
@@ -22,6 +23,11 @@ class UpdateCommand : CliktCommand(
 
         val transaction = archive.resolveUpdate()
         terminal.println()
+
+        if (transaction.isEmpty()) {
+            terminal.println("Everything is ${TextColors.brightGreen("up-to-date")}.")
+            return@launchJob
+        }
 
         terminal.handleTransaction(
             "Updating the archive will result in the following transaction:",
