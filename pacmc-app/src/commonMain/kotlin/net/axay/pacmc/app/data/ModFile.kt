@@ -4,6 +4,7 @@ class ModFile(
     val repositoryPart: String,
     val slugPart: String?,
     val idPart: String,
+    val extension: String = "jar",
 ) {
-    val fileName get() = "${repositoryPart}_${slugPart ?: "unknown"}_${idPart}.jar"
+    val fileName get() = "${slugPart?.plus("_").orEmpty()}${repositoryPart}_${idPart}.pacmc.${extension}"
 }
