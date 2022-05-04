@@ -22,6 +22,7 @@ import net.axay.pacmc.app.repoapi.model.CommonProjectVersion
 import net.axay.pacmc.app.repoapi.repoApiContext
 import net.axay.pacmc.app.utils.pmap
 import net.axay.pacmc.repoapi.CachePolicy
+import okio.Path
 import kotlin.math.absoluteValue
 
 class Archive(private val name: String) {
@@ -36,8 +37,10 @@ class Archive(private val name: String) {
         }
     }
 
-    private suspend fun TypedRealm.findArchive() = query<DbArchive>("name == $0", name)
-        .first().asFlow().first().obj ?: error("The archive '$name' is not present in the database")
+    private fun TypedRealm.queryArchive() = query<DbArchive>("name == $0", name).first()
+
+    private suspend fun TypedRealm.findArchive() = queryArchive().asFlow().first().obj
+        ?: error("The archive '$name' is not present in the database")
 
     sealed class TransactionProgress<U> {
         abstract val key: U
@@ -50,6 +53,7 @@ class Archive(private val name: String) {
         SUCCESS(true),
         ALREADY_INSTALLED(true),
         REMOVED(true),
+        ALREADY_REMOVED(true),
         NO_PROJECT_INFO(false),
         NO_FILE(false),
     }
@@ -93,7 +97,7 @@ class Archive(private val name: String) {
         }
     }
 
-    suspend fun install(
+    private suspend fun install(
         version: CommonProjectVersion,
         isDependency: Boolean,
         semaphore: Semaphore?,
@@ -145,8 +149,27 @@ class Archive(private val name: String) {
         }
     }
 
-    suspend fun uninstall(modId: ModId): TransactionPartResult {
-        return TransactionPartResult.REMOVED
+    private suspend fun uninstall(modId: ModId): TransactionPartResult {
+        lateinit var archive: DbArchive
+
+        val wasPresent = realm.write {
+            archive = queryArchive().find()!!
+            archive.installed.removeAll { it.readModId() == modId }
+        }
+
+        var removedAny = false
+        Environment.fileSystem.list(archive.readPath()).forEach {
+            if (it.isArchiveFile() && ModFile.modIdFromPath(it) == modId) {
+                removedAny = true
+                Environment.fileSystem.delete(path = it, mustExist = true)
+            }
+        }
+
+        return if (wasPresent || removedAny) {
+            TransactionPartResult.REMOVED
+        } else {
+            TransactionPartResult.ALREADY_REMOVED
+        }
     }
 
     private fun List<CommonProjectVersion>.findBest(desiredVersion: MinecraftVersion): CommonProjectVersion? =
@@ -172,6 +195,11 @@ class Archive(private val name: String) {
                 else -> acc
             }
         }?.first
+
+    private fun Path.isArchiveFile(): Boolean {
+        return Environment.fileSystem.metadata(this).isRegularFile &&
+            name.removeSuffix(".jar").endsWith(".pacmc")
+    }
 
     class Transaction(
         val add: List<CommonProjectVersion> = emptyList(),
