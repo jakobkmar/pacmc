@@ -4,7 +4,7 @@ sealed class IdOrSlug {
     abstract val repository: Repository
     abstract val idOrSlug: String
 
-    override fun toString() = "${repository.displayName}/$idOrSlug"
+    override fun toString() = "${repository.displayName.lowercase()}/$idOrSlug"
 }
 
 data class ModId(
@@ -12,6 +12,8 @@ data class ModId(
     val id: String,
 ) : IdOrSlug() {
     override val idOrSlug get() = id
+
+    override fun toString() = super.toString()
 }
 
 data class ModSlug(
@@ -19,4 +21,6 @@ data class ModSlug(
     val slug: String,
 ) : IdOrSlug() {
     override val idOrSlug get() = slug
+
+    override fun toString() = super.toString()
 }
