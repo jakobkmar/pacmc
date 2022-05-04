@@ -50,8 +50,9 @@ class Archive(private val name: String) {
     }
 
     enum class TransactionPartResult(val success: Boolean) {
-        SUCCESS(true),
+        INSTALLED(true),
         ALREADY_INSTALLED(true),
+        UPDATED(true),
         REMOVED(true),
         ALREADY_REMOVED(true),
         NO_PROJECT_INFO(false),
@@ -112,16 +113,24 @@ class Archive(private val name: String) {
 
         val dbArchive = realm.findArchive()
 
-        val shouldDownload = if (dbArchive.installed.any { it.readModId() == modId }) {
-            val fileName = fileNameDeferred.await() ?: return TransactionPartResult.NO_PROJECT_INFO
-            !Environment.fileSystem.exists(dbArchive.readPath().resolve(fileName))
-        } else true
+        val alreadyInstalled = dbArchive.installed.find { it.readModId() == modId }
+
+        var isUpdate = false
+        val shouldDownload = if (alreadyInstalled == null) true else {
+            if (alreadyInstalled.version != version.id) {
+                isUpdate = true
+                true
+            } else {
+                val fileName = fileNameDeferred.await() ?: return TransactionPartResult.NO_PROJECT_INFO
+                !Environment.fileSystem.exists(dbArchive.readPath().resolve(fileName))
+            }
+        }
 
         realm.write {
             findLatest(dbArchive)!!.apply {
                 val presentProject = installed.find { it.readModId() == modId }
                 if (presentProject != null) {
-                    if (presentProject.dependency && !isDependency) {
+                    if (isUpdate || (presentProject.dependency && !isDependency)) {
                         installed.removeAll { it.readModId() == modId }
                     } else return@write
                 }
@@ -143,7 +152,7 @@ class Archive(private val name: String) {
                 )
             }
 
-            return TransactionPartResult.SUCCESS
+            return if (isUpdate) TransactionPartResult.UPDATED else TransactionPartResult.INSTALLED
         } else {
             return TransactionPartResult.ALREADY_INSTALLED
         }

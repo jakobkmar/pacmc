@@ -60,9 +60,11 @@ suspend fun Terminal.handleTransaction(
             is Archive.TransactionProgress.Update -> DownloadAnimation.AnimationState(progress.progress)
             is Archive.TransactionProgress.Finished -> {
                 val message = when (progress.result) {
-                    Archive.TransactionPartResult.SUCCESS -> TextColors.brightGreen("done")
+                    Archive.TransactionPartResult.INSTALLED -> TextColors.brightGreen("done")
                     Archive.TransactionPartResult.ALREADY_INSTALLED -> TextColors.brightGreen("already installed")
+                    Archive.TransactionPartResult.UPDATED -> TextColors.brightGreen("updated")
                     Archive.TransactionPartResult.REMOVED -> TextColors.brightYellow("removed")
+                    Archive.TransactionPartResult.ALREADY_REMOVED -> TextColors.brightYellow("already removed")
                     Archive.TransactionPartResult.NO_PROJECT_INFO -> TextColors.brightRed("no project info")
                     Archive.TransactionPartResult.NO_FILE -> TextColors.brightRed("no downloadable file")
                 }.let { TextStyles.bold(it) }
