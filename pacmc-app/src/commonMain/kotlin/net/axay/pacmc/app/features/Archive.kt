@@ -323,6 +323,7 @@ class Archive(private val name: String) {
     class RemovalResolveResult(
         val transaction: Transaction,
         val stillNeeded: Set<ModId>,
+        val notInstalled: Set<ModId>,
     )
 
     @JvmName("resolveRemovalWithModSlug")
@@ -397,6 +398,7 @@ class Archive(private val name: String) {
                 removeDependencies = removeDependencies,
             ),
             stillNeeded,
+            removeModIds subtract dbArchive.installed.mapTo(HashSet()) { it.readModId() },
         )
     }
 
