@@ -159,11 +159,10 @@ class Archive(private val name: String) {
     }
 
     private suspend fun uninstall(modId: ModId): TransactionPartResult {
-        lateinit var archive: DbArchive
+        val archive = realm.findArchive()
 
         val wasPresent = realm.write {
-            archive = queryArchive().find()!!
-            archive.installed.removeAll { it.readModId() == modId }
+            findLatest(archive)!!.installed.removeAll { it.readModId() == modId }
         }
 
         var removedAny = false
