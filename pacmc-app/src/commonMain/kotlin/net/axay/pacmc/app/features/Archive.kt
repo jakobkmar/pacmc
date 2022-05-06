@@ -415,7 +415,7 @@ class Archive(private val name: String) {
             Transaction(
                 remove = remove,
                 removeDependencies = removeDependencies,
-                makeDependency = stillNeeded,
+                makeDependency = stillNeeded intersect dbArchive.installed.filterNot { it.dependency }.mapTo(HashSet()) { it.readModId() },
             ),
             stillNeeded = stillNeeded,
             notInstalled = removeModIds subtract dbArchive.installed.mapTo(HashSet()) { it.readModId() },
