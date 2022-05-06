@@ -66,11 +66,11 @@ class Archive(private val name: String) {
         progressCallback: suspend (TransactionProgress<U>) -> Unit,
     ) {
         coroutineScope {
-            fun Collection<CommonProjectVersion>.installAll() {
+            fun Collection<CommonProjectVersion>.installAll(isDependency: Boolean = false) {
                 forEach { version ->
                     launch {
                         val key = progressKeyMap[version.modId]!!
-                        val result = install(version, false, semaphore) {
+                        val result = install(version, isDependency, semaphore) {
                             progressCallback(TransactionProgress.Update(key, it))
                         }
                         progressCallback(TransactionProgress.Finished(key, result))
@@ -89,9 +89,9 @@ class Archive(private val name: String) {
             }
 
             transaction.add.installAll()
-            transaction.addDependencies.installAll()
+            transaction.addDependencies.installAll(true)
             transaction.update.installAll()
-            transaction.updateDependencies.installAll()
+            transaction.updateDependencies.installAll(true)
 
             transaction.remove.uninstallAll()
             transaction.removeDependencies.uninstallAll()
