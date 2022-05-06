@@ -386,7 +386,7 @@ class Archive(private val name: String) {
 
         dbArchive.installed.forEach {
             val modId = it.readModId()
-            if (modId in removeModIds && modId !in stillNeeded) {
+            if ((modId in removeModIds || it.dependency) && modId !in stillNeeded) {
                 (if (it.dependency) removeDependencies else remove) += modId
             }
         }
