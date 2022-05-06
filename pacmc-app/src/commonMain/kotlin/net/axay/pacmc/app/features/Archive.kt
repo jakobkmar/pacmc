@@ -261,7 +261,7 @@ class Archive(private val name: String) {
         val loader = dbArchive.readLoader()
         val minecraftVersion = dbArchive.readMinecraftVersion()
 
-        val checkedModIds = HashSet<ModId>()
+        val checkedModIds = modIds.toHashSet()
         val checkedModIdsMutex = Mutex()
 
         val versions = mutableListOf<CommonProjectVersion>()
@@ -271,9 +271,9 @@ class Archive(private val name: String) {
 
         coroutineScope {
             suspend fun resolveTransitively(modId: ModId, isDependency: Boolean) {
+                if (isDependency && !checkedModIdsMutex.withLock { checkedModIds.add(modId) }) return
 
                 debugMessageCallback("resolving $modId")
-                if (!checkedModIdsMutex.withLock { checkedModIds.add(modId) }) return
 
                 if (isDependency) {
                     launch {
