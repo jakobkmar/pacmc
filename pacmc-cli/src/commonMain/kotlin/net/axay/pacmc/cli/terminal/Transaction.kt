@@ -43,6 +43,9 @@ suspend fun Terminal.handleTransaction(
     transaction.removeDependencies.forEach {
         println("${TextColors.brightRed("-")} remove ${modStrings[it]} ${TextColors.brightCyan("(unused dependency)")}")
     }
+    transaction.makeDependency.forEach {
+        println("${TextColors.brightYellow("!")} downgrade status to dependency ${modStrings[it]} $dep")
+    }
 
     println()
     if (!askYesOrNo("Is this okay?", default = true)) {
@@ -65,8 +68,10 @@ suspend fun Terminal.handleTransaction(
                     Archive.TransactionPartResult.UPDATED -> TextColors.brightGreen("updated")
                     Archive.TransactionPartResult.REMOVED -> TextColors.brightYellow("removed")
                     Archive.TransactionPartResult.ALREADY_REMOVED -> TextColors.brightYellow("already removed")
+                    Archive.TransactionPartResult.MADE_DEPENDENCY -> TextColors.brightYellow("made dependency")
                     Archive.TransactionPartResult.NO_PROJECT_INFO -> TextColors.brightRed("no project info")
                     Archive.TransactionPartResult.NO_FILE -> TextColors.brightRed("no downloadable file")
+                    Archive.TransactionPartResult.NOT_INSTALLED -> TextColors.brightRed("not installed")
                 }.let { TextStyles.bold(it) }
 
                 val lineColor = if (!progress.result.success) TextColors.brightRed else null
@@ -101,6 +106,7 @@ private suspend fun Archive.Transaction.resolveModStrings(): Map<ModId, String> 
     updateDependencies.handleVersions()
     remove.handleIds()
     removeDependencies.handleIds()
+    makeDependency.handleIds()
 
     returnMap
 }

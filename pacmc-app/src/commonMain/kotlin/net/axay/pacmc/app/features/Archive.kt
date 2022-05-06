@@ -55,8 +55,10 @@ class Archive(private val name: String) {
         UPDATED(true),
         REMOVED(true),
         ALREADY_REMOVED(true),
+        MADE_DEPENDENCY(true),
         NO_PROJECT_INFO(false),
         NO_FILE(false),
+        NOT_INSTALLED(false),
     }
 
     suspend fun <U> applyTransaction(
@@ -78,11 +80,11 @@ class Archive(private val name: String) {
                 }
             }
 
-            fun Collection<ModId>.uninstallAll() {
+            fun Collection<ModId>.invokeOnIds(action: suspend (ModId) -> TransactionPartResult) {
                 forEach {
                     launch {
                         val key = progressKeyMap[it]!!
-                        val result = uninstall(it)
+                        val result = action(it)
                         progressCallback(TransactionProgress.Finished(key, result))
                     }
                 }
@@ -93,8 +95,10 @@ class Archive(private val name: String) {
             transaction.update.installAll()
             transaction.updateDependencies.installAll(true)
 
-            transaction.remove.uninstallAll()
-            transaction.removeDependencies.uninstallAll()
+            transaction.remove.invokeOnIds(::uninstall)
+            transaction.removeDependencies.invokeOnIds(::uninstall)
+
+            transaction.makeDependency.invokeOnIds(::makeDependency)
         }
     }
 
@@ -180,6 +184,20 @@ class Archive(private val name: String) {
         }
     }
 
+    private suspend fun makeDependency(modId: ModId): TransactionPartResult {
+        return realm.write {
+            val installedProject = queryArchive().find()!!.installed
+                .find { it.readModId() == modId }
+            when (installedProject) {
+                null -> TransactionPartResult.NOT_INSTALLED
+                else -> {
+                    installedProject.dependency = true
+                    TransactionPartResult.MADE_DEPENDENCY
+                }
+            }
+        }
+    }
+
     private fun List<CommonProjectVersion>.findBest(desiredVersion: MinecraftVersion): CommonProjectVersion? =
         fold<CommonProjectVersion, Pair<CommonProjectVersion, Int>?>(null) { acc, projectVersion ->
             val distance = projectVersion.gameVersions
@@ -216,10 +234,12 @@ class Archive(private val name: String) {
         val updateDependencies: List<CommonProjectVersion> = emptyList(),
         val remove: Set<ModId> = emptySet(),
         val removeDependencies: Set<ModId> = emptySet(),
+        val makeDependency: Set<ModId> = emptySet(),
     ) {
         fun isEmpty() = add.isEmpty() && addDependencies.isEmpty()
             && update.isEmpty() && updateDependencies.isEmpty()
             && remove.isEmpty() && removeDependencies.isEmpty()
+            && makeDependency.isEmpty()
     }
 
     @JvmName("resolveWithModSlug")
@@ -344,7 +364,7 @@ class Archive(private val name: String) {
         val stillInstalledProjects = dbArchive.installed
             .filter { it.readModId() !in removeModIds }
 
-        val stillNeeded = HashSet<ModId>()
+        val stillNeededDependencies = HashSet<ModId>()
         val stillNeededMutex = Mutex()
 
         coroutineScope {
@@ -363,7 +383,7 @@ class Archive(private val name: String) {
                         }
 
                         stillNeededMutex.withLock {
-                            stillNeeded += dependencyModId
+                            stillNeededDependencies += dependencyModId
                         }
 
                         val dependencyInstalledProject = stillInstalledProjects.find { it.readModId() == dependencyModId }
@@ -384,18 +404,21 @@ class Archive(private val name: String) {
 
         dbArchive.installed.forEach {
             val modId = it.readModId()
-            if ((modId in removeModIds || it.dependency) && modId !in stillNeeded) {
+            if ((modId in removeModIds || it.dependency) && modId !in stillNeededDependencies) {
                 (if (it.dependency) removeDependencies else remove) += modId
             }
         }
+
+        val stillNeeded = stillNeededDependencies intersect removeModIds
 
         return RemovalResolveResult(
             Transaction(
                 remove = remove,
                 removeDependencies = removeDependencies,
+                makeDependency = stillNeeded,
             ),
-            stillNeeded intersect removeModIds,
-            removeModIds subtract dbArchive.installed.mapTo(HashSet()) { it.readModId() },
+            stillNeeded = stillNeeded,
+            notInstalled = removeModIds subtract dbArchive.installed.mapTo(HashSet()) { it.readModId() },
         )
     }
 
