@@ -362,10 +362,8 @@ class Archive(private val name: String) {
                             } ?: error("Couldn't resolve a dependency version, try refreshing the archive before removing content from it")
                         }
 
-                        if (dependencyModId in removeModIds) {
-                            stillNeededMutex.withLock {
-                                stillNeeded += dependencyModId
-                            }
+                        stillNeededMutex.withLock {
+                            stillNeeded += dependencyModId
                         }
 
                         val dependencyInstalledProject = stillInstalledProjects.find { it.readModId() == dependencyModId }
@@ -396,7 +394,7 @@ class Archive(private val name: String) {
                 remove = remove,
                 removeDependencies = removeDependencies,
             ),
-            stillNeeded,
+            stillNeeded intersect removeModIds,
             removeModIds subtract dbArchive.installed.mapTo(HashSet()) { it.readModId() },
         )
     }
