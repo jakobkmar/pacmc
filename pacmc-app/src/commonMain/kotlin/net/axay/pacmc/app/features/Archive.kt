@@ -229,8 +229,7 @@ class Archive(private val name: String) {
         debugMessageCallback: (String) -> Unit,
     ): Transaction {
         debugMessageCallback("resolving slugs to mod ids")
-        val modIds = modSlugs.pmap { repoApiContext(CachePolicy.ONLY_FRESH) { c -> c.getBasicProjectInfo(it) }?.id }.filterNotNull().toSet()
-        return resolve(modIds, debugMessageCallback)
+        return resolve(modSlugs.resolveIds(), debugMessageCallback)
     }
 
     private suspend fun resolve(
@@ -297,7 +296,7 @@ class Archive(private val name: String) {
     }
 
     suspend fun resolveUpdate(
-        debugMessageCallback: (String) -> Unit
+        debugMessageCallback: (String) -> Unit,
     ): Transaction {
         debugMessageCallback("opening database")
         val dbArchive = realm.findArchive()
@@ -319,6 +318,90 @@ class Archive(private val name: String) {
                 .filter { it.modId !in installedDependencyVersions },
             removeDependencies = installedDependencyVersions.keys - resolveResult.addDependencies.mapTo(mutableSetOf()) { it.modId },
         )
+    }
+
+    class RemovalResolveResult(
+        val transaction: Transaction,
+        val stillNeeded: Set<ModId>,
+    )
+
+    @JvmName("resolveRemovalWithModSlug")
+    suspend fun resolveRemoval(
+        modSlugs: Set<ModSlug>,
+        debugMessageCallback: (String) -> Unit,
+    ): RemovalResolveResult {
+        debugMessageCallback("resolving slugs to mod ids")
+        return resolveRemoval(modSlugs.resolveIds(), debugMessageCallback)
+    }
+
+    private suspend fun resolveRemoval(
+        removeModIds: Set<ModId>,
+        debugMessageCallback: (String) -> Unit,
+    ): RemovalResolveResult {
+        debugMessageCallback("opening database")
+        val dbArchive = realm.findArchive()
+
+        val stillInstalledProjects = dbArchive.installed
+            .filter { it.readModId() !in removeModIds }
+
+        val stillNeeded = HashSet<ModId>()
+        val stillNeededMutex = Mutex()
+
+        coroutineScope {
+            suspend fun checkInstalledProject(installedProject: DbInstalledProject) {
+                val version = repoApiContext {
+                    it.getProjectVersion(installedProject.version, installedProject.readModId().repository)
+                } ?: error("Couldn't resolve an installed project version, try refreshing the archive before removing content from it")
+
+                version.dependencies.forEach { dependency ->
+                    launch {
+                        val dependencyModId = when (dependency) {
+                            is CommonProjectVersion.Dependency.ProjectDependency -> dependency.id
+                            is CommonProjectVersion.Dependency.VersionDependency -> repoApiContext { c ->
+                                c.getProjectVersion(dependency.id, version.modId.repository)?.modId
+                            } ?: error("Couldn't resolve a dependency version, try refreshing the archive before removing content from it")
+                        }
+
+                        if (dependencyModId in removeModIds) {
+                            stillNeededMutex.withLock {
+                                stillNeeded += dependencyModId
+                            }
+                        }
+
+                        val dependencyInstalledProject = stillInstalledProjects.find { it.readModId() == dependencyModId }
+                            ?: return@launch
+
+                        checkInstalledProject(dependencyInstalledProject)
+                    }
+                }
+            }
+
+            stillInstalledProjects
+                .filterNot { it.dependency }
+                .forEach { launch { checkInstalledProject(it) } }
+        }
+
+        val remove = HashSet<ModId>()
+        val removeDependencies = HashSet<ModId>()
+
+        dbArchive.installed.forEach {
+            val modId = it.readModId()
+            if (modId in removeModIds && modId !in stillNeeded) {
+                (if (it.dependency) removeDependencies else remove) += modId
+            }
+        }
+
+        return RemovalResolveResult(
+            Transaction(
+                remove = remove,
+                removeDependencies = removeDependencies,
+            ),
+            stillNeeded,
+        )
+    }
+
+    private suspend fun Collection<ModSlug>.resolveIds(): Set<ModId> {
+        return pmap { repoApiContext(CachePolicy.ONLY_FRESH) { c -> c.getBasicProjectInfo(it) }?.id }.filterNotNull().toSet()
     }
 
     suspend fun getInstalled(): List<DbInstalledProject> {
