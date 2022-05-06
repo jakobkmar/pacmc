@@ -29,6 +29,7 @@ class RemoveCommand : CliktCommand(
     )
 
     override fun run() = launchJob {
+        terminal.println("Resolving effects of removal...")
         val archive = Archive(archiveName!!)
 
         val spinner = SpinnerAnimation()
