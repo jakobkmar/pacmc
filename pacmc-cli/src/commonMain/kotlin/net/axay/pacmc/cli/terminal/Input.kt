@@ -3,7 +3,7 @@ package net.axay.pacmc.cli.terminal
 import com.github.ajalt.mordant.terminal.Terminal
 
 fun Terminal.askYesOrNo(question: String, default: Boolean? = null): Boolean {
-    val keyString = if (default == null) "(y/n)" else (if (default) "(Y/n)" else "(n/Y)")
+    val keyString = if (default == null) "(y/n)" else (if (default) "(Y/n)" else "(y/N)")
     while (true) {
         print("$question $keyString ")
         return when (readlnOrNull()?.trim()?.lowercase()) {
