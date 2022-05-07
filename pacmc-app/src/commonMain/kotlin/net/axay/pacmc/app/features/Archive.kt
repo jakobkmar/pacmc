@@ -25,7 +25,7 @@ import net.axay.pacmc.repoapi.CachePolicy
 import okio.Path
 import kotlin.math.absoluteValue
 
-class Archive(private val name: String) {
+class Archive(val name: String) {
     companion object {
         fun getArchives() = realm.query<DbArchive>().find()
         fun getArchivesList() = getArchives().toList()
@@ -441,5 +441,21 @@ class Archive(private val name: String) {
     suspend fun getInstalled(): List<DbInstalledProject> {
         val dbArchive = realm.findArchive()
         return dbArchive.installed.toList()
+    }
+
+    suspend fun getPath(): Path = realm.findArchive().readPath()
+
+    suspend fun delete(keepFiles: Boolean) {
+        val dbArchive = realm.findArchive()
+        if (!keepFiles) {
+            Environment.fileSystem.list(dbArchive.readPath()).forEach {
+                if (it.isArchiveFile()) {
+                    Environment.fileSystem.delete(it, mustExist = false)
+                }
+            }
+        }
+        realm.write {
+            delete(queryArchive())
+        }
     }
 }

@@ -3,6 +3,7 @@ package net.axay.pacmc.cli.commands
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.subcommands
 import com.github.ajalt.clikt.parameters.arguments.argument
+import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.colormath.model.RGBInt
 import com.github.ajalt.mordant.rendering.TextColors
@@ -20,6 +21,8 @@ import net.axay.pacmc.app.utils.ColorUtils
 import net.axay.pacmc.app.utils.OperatingSystem
 import net.axay.pacmc.cli.launchJob
 import net.axay.pacmc.cli.terminal
+import net.axay.pacmc.cli.terminal.askYesOrNo
+import net.axay.pacmc.cli.terminal.terminalString
 import net.axay.pacmc.repoapi.CachePolicy
 import okio.Path.Companion.toPath
 
@@ -28,7 +31,7 @@ class ArchiveCommand : CliktCommand(
     help = "Manage archives",
 ) {
     init {
-        subcommands(Create(), List())
+        subcommands(Create(), List(), Remove())
     }
 
     override fun run() = Unit
@@ -115,6 +118,46 @@ class ArchiveCommand : CliktCommand(
                 terminal.println()
                 terminal.println("${if (isLast) ' ' else '│'}     ${TextColors.gray(archive.path)}")
             }
+        }
+    }
+
+    class Remove : CliktCommand(
+        name = "remove",
+        help = "Remove an archive",
+    ) {
+        private val archiveName by argument(
+            name = "archiveIdentifier",
+            help = "The archive which should be deleted"
+        )
+
+        private val keepFiles by option(
+            "-k", "--keep-files",
+            help = "Whether the files installed to the archive should be kept"
+        ).flag()
+
+        override fun run() = launchJob {
+            terminal.println("Finding archive '$archiveName'...")
+            val archive = Archive(archiveName)
+
+            terminal.println()
+            terminal.println("The following archive will be removed:")
+            terminal.println(archive.terminalString())
+            if (!keepFiles) {
+                terminal.println()
+                terminal.println("Additionally, all content installed by pacmc to this archive will be")
+                terminal.println("deleted, run this command with --keep-files to change this behaviour.")
+            }
+
+            terminal.println()
+            if (!terminal.askYesOrNo("Do you want to continue?")) {
+                terminal.println("Abort.")
+                return@launchJob
+            }
+            terminal.println()
+
+            archive.delete(keepFiles)
+
+            terminal.println("${TextColors.brightRed("Removed")} archive '$archiveName'")
         }
     }
 }
