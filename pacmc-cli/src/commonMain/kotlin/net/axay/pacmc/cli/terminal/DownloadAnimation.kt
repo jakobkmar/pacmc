@@ -2,16 +2,16 @@ package net.axay.pacmc.cli.terminal
 
 import com.github.ajalt.mordant.rendering.TextColors
 import com.github.ajalt.mordant.rendering.TextStyles
+import com.github.ajalt.mordant.terminal.Terminal
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import net.axay.pacmc.cli.terminal
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
 
 private const val PROGRESS_BAR_WIDTH = 30
 
-class DownloadAnimation {
+class DownloadAnimation(val terminal: Terminal) {
     private var maxWidth = 0
 
     private val finished = LinkedHashMap<String, AnimationState>()

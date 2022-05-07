@@ -13,13 +13,11 @@ import net.axay.pacmc.app.features.Archive
 import net.axay.pacmc.app.repoapi.model.CommonProjectVersion
 import net.axay.pacmc.app.utils.OperatingSystem
 
-suspend fun Terminal.handleTransaction(
+fun Terminal.printAndConfirmTransaction(
     headline: String,
-    archive: Archive,
     transaction: Archive.Transaction,
-) {
-    val modStrings = transaction.resolveModStrings()
-
+    modStrings: Map<ModId, String>,
+): Boolean {
     val upSymbol = if (OperatingSystem.notWindows) "↑" else "u"
     val dep = TextColors.brightCyan("(dependency)")
 
@@ -50,11 +48,19 @@ suspend fun Terminal.handleTransaction(
     println()
     if (!askYesOrNo("Is this okay?", default = true)) {
         println("Abort.")
-        return
+        return false
     }
     println()
 
-    val downloadAnimation = DownloadAnimation()
+    return true
+}
+
+suspend fun Terminal.handleTransaction(
+    archive: Archive,
+    transaction: Archive.Transaction,
+    modStrings: Map<ModId, String>,
+) {
+    val downloadAnimation = DownloadAnimation(this)
 
     val semaphore = Semaphore(10)
 
@@ -83,7 +89,7 @@ suspend fun Terminal.handleTransaction(
     }
 }
 
-private suspend fun Archive.Transaction.resolveModStrings(): Map<ModId, String> = coroutineScope {
+suspend fun Archive.Transaction.resolveModStrings(): Map<ModId, String> = coroutineScope {
     val returnMap = HashMap<ModId, String>()
     val addMutex = Mutex()
 

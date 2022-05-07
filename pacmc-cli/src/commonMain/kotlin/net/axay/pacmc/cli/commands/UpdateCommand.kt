@@ -8,6 +8,8 @@ import net.axay.pacmc.cli.launchJob
 import net.axay.pacmc.cli.terminal
 import net.axay.pacmc.cli.terminal.SpinnerAnimation
 import net.axay.pacmc.cli.terminal.handleTransaction
+import net.axay.pacmc.cli.terminal.printAndConfirmTransaction
+import net.axay.pacmc.cli.terminal.resolveModStrings
 
 class UpdateCommand : CliktCommand(
     name = "update",
@@ -33,10 +35,16 @@ class UpdateCommand : CliktCommand(
             return@launchJob
         }
 
-        terminal.handleTransaction(
-            "Updating the archive will result in the following transaction:",
-            archive,
-            transaction
-        )
+        val modStrings = transaction.resolveModStrings()
+
+        if (
+            !terminal.printAndConfirmTransaction(
+                "Updating the archive will result in the following transaction:",
+                transaction,
+                modStrings
+            )
+        ) return@launchJob
+
+        terminal.handleTransaction(archive, transaction, modStrings)
     }
 }

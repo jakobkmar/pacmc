@@ -14,7 +14,8 @@ class PacmcCommand : CliktCommand(
             InstallCommand(),
             RemoveCommand(),
             UpdateCommand(),
-            ListCommand()
+            ListCommand(),
+            RefreshCommand(),
         )
     }
 

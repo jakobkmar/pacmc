@@ -10,9 +10,7 @@ import net.axay.pacmc.app.data.Repository
 import net.axay.pacmc.app.features.Archive
 import net.axay.pacmc.cli.launchJob
 import net.axay.pacmc.cli.terminal
-import net.axay.pacmc.cli.terminal.SpinnerAnimation
-import net.axay.pacmc.cli.terminal.handleTransaction
-import net.axay.pacmc.cli.terminal.optimalTerminalString
+import net.axay.pacmc.cli.terminal.*
 
 class RemoveCommand : CliktCommand(
     name = "remove",
@@ -53,10 +51,17 @@ class RemoveCommand : CliktCommand(
             terminal.println("All of the given mods ${TextColors.brightRed("cannot be removed")}")
             return@launchJob
         }
-        terminal.handleTransaction(
-            "Removing the given mods will result in the following transaction:",
-            archive,
-            removalResolveResult.transaction
-        )
+
+        val modStrings = removalResolveResult.transaction.resolveModStrings()
+
+        if (
+            !terminal.printAndConfirmTransaction(
+                "Removing the given mods will result in the following transaction:",
+                removalResolveResult.transaction,
+                modStrings
+            )
+        ) return@launchJob
+
+        terminal.handleTransaction(archive, removalResolveResult.transaction, modStrings)
     }
 }

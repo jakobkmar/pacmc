@@ -173,7 +173,7 @@ class Archive(private val name: String) {
         Environment.fileSystem.list(archive.readPath()).forEach {
             if (it.isArchiveFile() && ModFile.modIdFromPath(it) == modId) {
                 removedAny = true
-                Environment.fileSystem.delete(path = it, mustExist = true)
+                Environment.fileSystem.delete(path = it, mustExist = false)
             }
         }
 
@@ -263,7 +263,7 @@ class Archive(private val name: String) {
         return resolve(modSlugs.resolveIds(), debugMessageCallback)
     }
 
-    private suspend fun resolve(
+    suspend fun resolve(
         modIds: Set<ModId>,
         debugMessageCallback: (String) -> Unit,
     ): Transaction {
