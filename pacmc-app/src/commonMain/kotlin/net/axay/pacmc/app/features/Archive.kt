@@ -198,6 +198,18 @@ class Archive(private val name: String) {
         }
     }
 
+    suspend fun prepareRefresh() {
+        val archive = realm.findArchive()
+        realm.write {
+            findLatest(archive)!!.installed.removeAll { it.dependency }
+        }
+        Environment.fileSystem.list(archive.readPath()).forEach {
+            if (it.isArchiveFile()) {
+                Environment.fileSystem.delete(it, mustExist = false)
+            }
+        }
+    }
+
     private fun List<CommonProjectVersion>.findBest(desiredVersion: MinecraftVersion): CommonProjectVersion? =
         fold<CommonProjectVersion, Pair<CommonProjectVersion, Int>?>(null) { acc, projectVersion ->
             val distance = projectVersion.gameVersions
