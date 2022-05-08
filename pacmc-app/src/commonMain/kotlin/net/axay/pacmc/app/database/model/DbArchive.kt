@@ -16,7 +16,7 @@ class DbArchive() : RealmObject {
     var displayName: String = ""
     var path: String = ""
     var minecraftVersion: String = ""
-    var contentType: ContentType = ContentType.MOD
+    var contentType: String = ""
     var loaders: RealmList<String> = realmListOf()
     var installed: RealmList<DbInstalledProject> = realmListOf()
     var color: Int = 0
@@ -43,7 +43,7 @@ class DbArchive() : RealmObject {
         this.displayName = displayName
         this.path = path.toString()
         this.minecraftVersion = minecraftVersion.toString()
-        this.contentType = contentType
+        this.contentType = contentType.name
         this.loaders = loaders.map { it.name }.toRealmList()
         this.installed = installed.toRealmList()
         this.color = color
