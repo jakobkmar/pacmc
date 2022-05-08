@@ -18,9 +18,13 @@ expect suspend fun main(args: Array<String>)
 internal suspend fun runCli(args: Array<String>) {
     CommonApplication.init()
 
-    coroutineScope {
-        mainScope = this
-        PacmcCommand().main(args)
+    try {
+        coroutineScope {
+            mainScope = this
+            PacmcCommand().main(args)
+        }
+    } catch (throwable: Throwable) {
+        throwable.printStackTrace()
     }
 
     CommonApplication.close()
