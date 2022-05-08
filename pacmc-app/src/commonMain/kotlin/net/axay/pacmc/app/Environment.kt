@@ -10,4 +10,6 @@ expect object Environment {
     val configDir: Path
     val osName: String
     val userHome: Path
+
+    fun getEnv(name: String): String?
 }

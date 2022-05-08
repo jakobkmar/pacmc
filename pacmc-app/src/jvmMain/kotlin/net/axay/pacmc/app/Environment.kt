@@ -15,18 +15,24 @@ actual object Environment {
     actual val dataLocalDir = if (OperatingSystem.notWindows)
         projectDirectories.dataLocalDir.toPath()
     else
-        System.getenv("LOCALAPPDATA").toPath().resolve("pacmc/data")
+        getEnv("LOCALAPPDATA")!!.toPath().resolve("pacmc/data")
 
     actual val cacheDir = if (OperatingSystem.notWindows)
         projectDirectories.cacheDir.toPath()
     else
-        System.getenv("LOCALAPPDATA").toPath().resolve("pacmc/cache")
+        getEnv("LOCALAPPDATA")!!.toPath().resolve("pacmc/cache")
 
     actual val configDir = if (OperatingSystem.notWindows)
         projectDirectories.configDir.toPath()
     else
-        System.getenv("APPDATA").toPath().resolve("pacmc/config")
+        getEnv("APPDATA")!!.toPath().resolve("pacmc/config")
 
     actual val osName get() = getProperty("os.name")
     actual val userHome get() = getProperty("user.home").toPath()
+
+    actual fun getEnv(name: String) = try {
+        System.getenv(name)
+    } catch (exc: Exception) {
+        null
+    }
 }

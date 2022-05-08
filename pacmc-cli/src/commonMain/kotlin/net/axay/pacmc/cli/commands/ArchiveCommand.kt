@@ -25,6 +25,7 @@ import net.axay.pacmc.cli.launchJob
 import net.axay.pacmc.cli.terminal
 import net.axay.pacmc.cli.terminal.*
 import net.axay.pacmc.repoapi.CachePolicy
+import okio.Path
 import okio.Path.Companion.toPath
 
 class ArchiveCommand : CliktCommand(
@@ -41,20 +42,57 @@ class ArchiveCommand : CliktCommand(
         name = "create",
         help = "Create an archive",
     ) {
-        private val archiveIdentifier by argument("identifier", help = "The archive identifier")
+        private val archiveName by argument("identifier", help = "The archive identifier")
         private val archivePathString by argument("path", help = "The path to the archive directory")
 
         private val gameVersionString by option("-g", "--game-version", help = "The game version content installed to this archive must be made for")
         private val archiveDisplayName by option("-d", "--display-name", help = "Display name for the archive allowing more characters than the identifier")
         private val loaderNameString by option("-l", "--load", help = "The loader mods installed to this archive must support")
 
-        override fun run() = launchJob {
-            val optionalMinecraftVersion = gameVersionString?.let {
-                MinecraftVersion.terminalFromString(it) ?: return@launchJob
-            }
+        companion object {
+            suspend fun create(
+                name: String,
+                displayName: String?,
+                path: Path,
+                gameVersion: MinecraftVersion?,
+                loader: ModLoader?,
+            ) {
+                val actualGameVersionDeferred = CoroutineScope(Dispatchers.Default).async {
+                    gameVersion ?: repoApiContext(CachePolicy.ONLY_FRESH) { it.getMinecraftReleases() }?.maxOrNull()
+                }
 
-            val minecraftVersionDeferred = CoroutineScope(Dispatchers.Default).async {
-                optionalMinecraftVersion ?: repoApiContext(CachePolicy.ONLY_FRESH) { it.getMinecraftReleases() }?.maxOrNull()
+                val archive = Archive(name)
+                if (archive.exists()) {
+                    terminal.warning("The archive '$name' already exists")
+                    return
+                }
+
+                val actualGameVersion = actualGameVersionDeferred.await()
+                if (actualGameVersion == null) {
+                    terminal.danger("Failed to load most recent game version, specify one explicitly or try again later")
+                    return
+                }
+
+                Archive.create(DbArchive(
+                    name,
+                    displayName ?: name,
+                    path,
+                    actualGameVersion,
+                    ContentType.MOD,
+                    listOf(loader ?: ModLoader.FABRIC),
+                    emptyList(),
+                    ColorUtils.randomLightColor().toRGBInt().argb.toInt()
+                ))
+
+                terminal.println()
+                terminal.println("${TextColors.brightGreen("Successfully")} created the following archive:")
+                terminal.println(archive)
+            }
+        }
+
+        override fun run() = launchJob {
+            val optionalGameVersion = gameVersionString?.let {
+                MinecraftVersion.terminalFromString(it) ?: return@launchJob
             }
 
             val archivePath = try {
@@ -76,23 +114,15 @@ class ArchiveCommand : CliktCommand(
                     terminal.warning("The given loader '$loaderNameString' is not supported!")
                     return@launchJob
                 }.getOrThrow()
-            } ?: ModLoader.FABRIC
-
-            val minecraftVersion = minecraftVersionDeferred.await() ?: kotlin.run {
-                terminal.warning("Could not resolve the latest game version!")
-                return@launchJob
             }
 
-            Archive.create(DbArchive(
-                archiveIdentifier,
-                archiveDisplayName ?: archiveIdentifier,
+            create(
+                archiveName,
+                archiveDisplayName,
                 archivePath,
-                minecraftVersion,
-                ContentType.MOD,
-                listOf(loader),
-                emptyList(),
-                ColorUtils.randomLightColor().toRGBInt().argb.toInt()
-            ))
+                optionalGameVersion,
+                loader
+            )
         }
     }
 
@@ -189,6 +219,7 @@ class ArchiveCommand : CliktCommand(
         ).required()
 
         override fun run() = launchJob {
+            terminal.println("Resolving changes required for version change...")
             val archive = Archive.terminalFromString(archiveName) ?: return@launchJob
             val gameVersion = MinecraftVersion.terminalFromString(gameVersionString) ?: return@launchJob
 
@@ -227,6 +258,47 @@ class ArchiveCommand : CliktCommand(
             terminal.println("${TextColors.brightGreen("Successfully")} changed the game version of '$archiveName' to $gameVersion")
         }
     }
+
+    class Init : CliktCommand(
+        name = "init",
+        help = "Create default archives"
+    ) {
+        override fun run() = launchJob {
+            terminal.println("Resolving possible archive locations...")
+            val dotMinecraftArchive = Archive(".minecraft")
+            if (dotMinecraftArchive.exists()) {
+                terminal.warning("The archive '.minecraft' already exists:")
+                terminal.println(dotMinecraftArchive)
+                return@launchJob
+            }
+
+            val minecraftFolder = when (OperatingSystem.current) {
+                OperatingSystem.LINUX -> Environment.userHome
+                OperatingSystem.MACOS -> Environment.getEnv("APPDATA")!!.toPath()
+                OperatingSystem.WINDOWS -> Environment.userHome.resolve("Library/Application Support/minecraft/")
+                null -> {
+                    terminal.warning("Unknown operating system, cannot proceed")
+                    return@launchJob
+                }
+            }.resolve(".minecraft/")
+
+            if (!Environment.fileSystem.exists(minecraftFolder)) {
+                terminal.warning("There exists no .minecraft folder at the default location:")
+                terminal.println("  ${TextColors.gray(minecraftFolder.toString())}")
+                return@launchJob
+            }
+
+            val modsFolder = minecraftFolder.resolve("mods/")
+            if (!Environment.fileSystem.exists(modsFolder)) {
+                Environment.fileSystem.createDirectories(modsFolder)
+                terminal.println("Created the 'mods' folder")
+            }
+
+            Create.create(
+                ".minecraft", ".minecraft",
+                modsFolder,
+                null, null
+            )
         }
     }
 }
