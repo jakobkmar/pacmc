@@ -20,8 +20,8 @@ fun CliktCommand.archiveIdArgument(
 ) = argument("archiveIdentifier", help = help)
     .defaultLazy { Archive.getDefault() }
 
-suspend fun Archive.Companion.fromString(name: String?): Archive? {
-    val archive = Archive(name ?: getDefault())
+suspend fun Archive.Companion.fromString(name: String): Archive? {
+    val archive = Archive(name)
     return if (archive.exists()) archive else {
         terminal.warning("The given archive '${archive.name}' does not exist")
         if (archive.name == ".minecraft") {

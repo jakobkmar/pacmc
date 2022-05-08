@@ -34,7 +34,7 @@ class ArchiveCommand : CliktCommand(
     help = "Manage archives",
 ) {
     init {
-        subcommands(Create(), List(), Remove())
+        subcommands(Create(), List(), Remove(), SetDefault())
     }
 
     override fun run() = Unit
@@ -159,6 +159,26 @@ class ArchiveCommand : CliktCommand(
             archive.delete(keepFiles)
 
             terminal.println("${TextColors.brightRed("Removed")} archive '$archiveName'")
+        }
+    }
+
+    class SetDefault : CliktCommand(
+        name = "set-default",
+        help = "Set the default archive"
+    ) {
+        private val archiveName by argument(
+            name = "archiveIdentifier",
+            help = "The archive which should be used by default for all commands"
+        )
+
+        override fun run() = launchJob {
+            terminal.println("Setting default archive to '$archiveName'...")
+
+            Archive.fromString(archiveName) ?: return@launchJob
+            Archive.setDefault(archiveName)
+
+            terminal.println()
+            terminal.println("${TextColors.brightGreen("Successfully")} set default archive to '$archiveName'")
         }
     }
 }
