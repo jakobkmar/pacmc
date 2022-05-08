@@ -5,7 +5,7 @@ import okio.FileSystem
 import okio.Path.Companion.toPath
 
 actual object Environment {
-    private val projectDirectories = ProjectDirectories.from("net", "axay", "pacmc")
+    private val projectDirectories = ProjectDirectories.from("org", null, "pacmc")
 
     private fun getProperty(name: String) = System.getProperty(name) ?: error("Could not get property '${name}'")
 
