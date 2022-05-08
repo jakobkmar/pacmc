@@ -320,7 +320,7 @@ class Archive(val name: String) {
                 }
 
                 val version = repoApiContext(CachePolicy.ONLY_FRESH) {
-                    it.getProjectVersions(modId, loaders, listOf(minecraftVersion))
+                    it.getProjectVersions(modId, loaders)
                 }?.findBest(minecraftVersion) ?: return
 
                 finalListMutex.withLock {
