@@ -339,7 +339,7 @@ fun ArchiveItem(archive: DbArchive) {
                 Text(archive.displayName, fontWeight = FontWeight.Bold)
                 Text(archive.name)
                 Text(archive.path)
-                Text(archive.readLoader().displayName)
+                Text(archive.readLoaders().joinToString())
             }
         }
     }
