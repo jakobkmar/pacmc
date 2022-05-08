@@ -251,6 +251,9 @@ class Archive(val name: String) {
                 distance.absoluteValue < acc.second.absoluteValue -> projectVersion to distance
                 distance.absoluteValue > acc.second.absoluteValue -> acc
                 // now both files are equally close to the desired version
+                // prefer the one which is not in alpha
+                projectVersion.type != CommonProjectVersion.Type.ALPHA && acc.first.type == CommonProjectVersion.Type.ALPHA -> projectVersion to distance
+                projectVersion.type == CommonProjectVersion.Type.ALPHA && acc.first.type != CommonProjectVersion.Type.ALPHA -> acc
                 // prefer the one which supports the more recent game version
                 distance > 0 && acc.second < 0 -> projectVersion to distance
                 distance < 0 && acc.second > 0 -> acc

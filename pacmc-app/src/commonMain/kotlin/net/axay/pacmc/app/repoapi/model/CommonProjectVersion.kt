@@ -15,6 +15,7 @@ data class CommonProjectVersion(
     val files: List<File>,
     val gameVersions: List<MinecraftVersion>,
     val dependencies: List<Dependency>,
+    val type: Type,
 ) {
     data class File(
         val name: String,
@@ -36,6 +37,10 @@ data class CommonProjectVersion(
         ) : Dependency()
     }
 
+    enum class Type {
+        RELEASE, BETA, ALPHA
+    }
+
     companion object {
         fun fromModrinthProjectVersion(version: net.axay.pacmc.repoapi.modrinth.model.Version) = CommonProjectVersion(
             id = version.id,
@@ -53,6 +58,11 @@ data class CommonProjectVersion(
                     it.versionId != null -> Dependency.VersionDependency(it.versionId!!, optional)
                     else -> null
                 }
+            },
+            type = when (version.versionType) {
+                BaseVersion.VersionType.Release -> Type.RELEASE
+                BaseVersion.VersionType.Beta -> Type.BETA
+                BaseVersion.VersionType.Alpha -> Type.ALPHA
             },
         )
     }
