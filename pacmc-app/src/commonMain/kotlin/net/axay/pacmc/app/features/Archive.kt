@@ -35,6 +35,22 @@ class Archive(val name: String) {
                 copyToRealm(dbArchive)
             }
         }
+
+        fun getDefault(): String {
+            with (Environment) {
+                val file = configDir.resolve("default_archive.txt")
+                if (!fileSystem.exists(file)) return ".minecraft"
+                return fileSystem.read(file) { readUtf8() }
+            }
+        }
+
+        fun setDefault(name: String) {
+            with (Environment) {
+                val file = configDir.resolve("default_archive.txt")
+                file.parent?.let(fileSystem::createDirectories)
+                fileSystem.write(file) { writeUtf8(name) }
+            }
+        }
     }
 
     private fun TypedRealm.queryArchive() = query<DbArchive>("name == $0", name).first()

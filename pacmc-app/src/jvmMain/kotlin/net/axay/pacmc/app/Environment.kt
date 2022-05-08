@@ -12,6 +12,7 @@ actual object Environment {
     actual val fileSystem = FileSystem.SYSTEM
     actual val dataLocalDir = projectDirectories.dataLocalDir.toPath()
     actual val cacheDir = projectDirectories.cacheDir.toPath()
+    actual val configDir = projectDirectories.configDir.toPath()
     actual val osName get() = getProperty("os.name")
     actual val userHome get() = getProperty("user.home").toPath()
 }
