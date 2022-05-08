@@ -131,6 +131,7 @@ class ArchiveCommand : CliktCommand(
         help = "List all archives",
     ) {
         override fun run() {
+            val defaultArchive = Archive.getDefault()
             val archives = Archive.getArchivesList()
             archives.forEachIndexed { index, archive ->
                 val isLast = index == archives.lastIndex
@@ -143,6 +144,9 @@ class ArchiveCommand : CliktCommand(
                 terminal.print(" " + TextColors.brightCyan(TextStyles.bold(archive.minecraftVersion)))
                 if (archive.name != archive.displayName) {
                     terminal.print(" (${archive.displayName})")
+                }
+                if (archive.name == defaultArchive) {
+                    terminal.print(" ${TextColors.brightMagenta("(default)")}")
                 }
                 terminal.println()
                 terminal.println("${if (isLast) ' ' else '│'}     ${TextColors.gray(archive.path)}")
