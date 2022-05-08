@@ -33,7 +33,7 @@ class ArchiveCommand : CliktCommand(
     help = "Manage archives",
 ) {
     init {
-        subcommands(Create(), List(), Remove(), SetDefault(), Version())
+        subcommands(Create(), List(), Remove(), SetDefault(), Version(), Init())
     }
 
     override fun run() = Unit
@@ -274,8 +274,8 @@ class ArchiveCommand : CliktCommand(
 
             val minecraftFolder = when (OperatingSystem.current) {
                 OperatingSystem.LINUX -> Environment.userHome
-                OperatingSystem.MACOS -> Environment.getEnv("APPDATA")!!.toPath()
-                OperatingSystem.WINDOWS -> Environment.userHome.resolve("Library/Application Support/minecraft/")
+                OperatingSystem.WINDOWS -> Environment.getEnv("APPDATA")!!.toPath()
+                OperatingSystem.MACOS -> Environment.userHome.resolve("Library/Application Support/minecraft/")
                 null -> {
                     terminal.warning("Unknown operating system, cannot proceed")
                     return@launchJob
