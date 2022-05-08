@@ -22,7 +22,9 @@ import net.axay.pacmc.app.utils.ColorUtils
 import net.axay.pacmc.app.utils.OperatingSystem
 import net.axay.pacmc.cli.launchJob
 import net.axay.pacmc.cli.terminal
+import net.axay.pacmc.cli.terminal.archiveIdArgument
 import net.axay.pacmc.cli.terminal.askYesOrNo
+import net.axay.pacmc.cli.terminal.fromString
 import net.axay.pacmc.cli.terminal.terminalString
 import net.axay.pacmc.repoapi.CachePolicy
 import okio.Path.Companion.toPath
@@ -127,10 +129,7 @@ class ArchiveCommand : CliktCommand(
         name = "remove",
         help = "Remove an archive",
     ) {
-        private val archiveName by argument(
-            name = "archiveIdentifier",
-            help = "The archive which should be deleted"
-        )
+        private val archiveName by archiveIdArgument("The archive which should be deleted")
 
         private val keepFiles by option(
             "-k", "--keep-files",
@@ -139,7 +138,7 @@ class ArchiveCommand : CliktCommand(
 
         override fun run() = launchJob {
             terminal.println("Finding archive '$archiveName'...")
-            val archive = Archive(archiveName)
+            val archive = Archive.fromString(archiveName) ?: return@launchJob
 
             terminal.println()
             terminal.println("The following archive will be removed:")

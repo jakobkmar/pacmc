@@ -1,27 +1,20 @@
 package net.axay.pacmc.cli.commands
 
 import com.github.ajalt.clikt.core.CliktCommand
-import com.github.ajalt.clikt.parameters.options.option
 import net.axay.pacmc.app.features.Archive
 import net.axay.pacmc.cli.launchJob
 import net.axay.pacmc.cli.terminal
-import net.axay.pacmc.cli.terminal.SpinnerAnimation
-import net.axay.pacmc.cli.terminal.askYesOrNo
-import net.axay.pacmc.cli.terminal.handleTransaction
-import net.axay.pacmc.cli.terminal.resolveModStrings
+import net.axay.pacmc.cli.terminal.*
 
 class RefreshCommand : CliktCommand(
     name = "refresh",
     help = "Refresh an archive and all content installed to it",
 ) {
-    private val archiveName by option(
-        "-a", "--archive",
-        help = "The archive where the mods should be installed"
-    )
+    private val archiveName by archiveIdOption("The archive which should be refreshed")
 
     override fun run() = launchJob {
         terminal.println("Gather fresh data for all content inside '$archiveName'...")
-        val archive = Archive(archiveName!!)
+        val archive = Archive.fromString(archiveName) ?: return@launchJob
 
         val spinner = SpinnerAnimation()
         spinner.start()

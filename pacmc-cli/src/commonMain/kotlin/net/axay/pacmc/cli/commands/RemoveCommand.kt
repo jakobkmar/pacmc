@@ -3,7 +3,6 @@ package net.axay.pacmc.cli.commands
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.arguments.multiple
-import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.mordant.rendering.TextColors
 import net.axay.pacmc.app.data.ModSlug
 import net.axay.pacmc.app.data.Repository
@@ -21,14 +20,11 @@ class RemoveCommand : CliktCommand(
         help = "The slugs of mods which should be installed, optionally prefixed with the repository"
     ).multiple()
 
-    private val archiveName by option(
-        "-a", "--archive",
-        help = "The archive where the mods should be installed"
-    )
+    private val archiveName by archiveIdOption("The archive where the content should be removed")
 
     override fun run() = launchJob {
         terminal.println("Resolving effects of removal...")
-        val archive = Archive(archiveName!!)
+        val archive = Archive.fromString(archiveName) ?: return@launchJob
 
         val spinner = SpinnerAnimation()
         spinner.start()
