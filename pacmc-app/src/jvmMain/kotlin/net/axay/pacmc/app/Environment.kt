@@ -1,6 +1,7 @@
 package net.axay.pacmc.app
 
 import dev.dirs.ProjectDirectories
+import net.axay.pacmc.app.utils.OperatingSystem
 import okio.FileSystem
 import okio.Path.Companion.toPath
 
@@ -10,9 +11,22 @@ actual object Environment {
     private fun getProperty(name: String) = System.getProperty(name) ?: error("Could not get property '${name}'")
 
     actual val fileSystem = FileSystem.SYSTEM
-    actual val dataLocalDir = projectDirectories.dataLocalDir.toPath()
-    actual val cacheDir = projectDirectories.cacheDir.toPath()
-    actual val configDir = projectDirectories.configDir.toPath()
+
+    actual val dataLocalDir = if (OperatingSystem.notWindows)
+        projectDirectories.dataLocalDir.toPath()
+    else
+        System.getenv("LOCALAPPDATA").toPath().resolve("pacmc/data")
+
+    actual val cacheDir = if (OperatingSystem.notWindows)
+        projectDirectories.cacheDir.toPath()
+    else
+        System.getenv("LOCALAPPDATA").toPath().resolve("pacmc/cache")
+
+    actual val configDir = if (OperatingSystem.notWindows)
+        projectDirectories.configDir.toPath()
+    else
+        System.getenv("APPDATA").toPath().resolve("pacmc/config")
+
     actual val osName get() = getProperty("os.name")
     actual val userHome get() = getProperty("user.home").toPath()
 }
