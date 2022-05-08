@@ -10,7 +10,7 @@ pkgrel=1
 pkgdesc='${description}'
 arch=('any')
 url='https://github.com/jakobkmar/pacmc'
-license=('GPL3')
+license=('AGPL3 or any later version')
 depends=('java-runtime=${javaVersion}')
 optdepends=('minecraft-launcher: The game launcher, managing the .minecraft folder')
 source=("https://github.com/jakobkmar/pacmc/releases/download/${pkgver}/pacmc-${pkgver}.tar")
