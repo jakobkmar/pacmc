@@ -55,6 +55,8 @@ class Archive(val name: String) {
 
     private fun TypedRealm.queryArchive() = query<DbArchive>("name == $0", name).first()
 
+    private suspend fun TypedRealm.findArchiveOrNull() = queryArchive().asFlow().first().obj
+
     private suspend fun TypedRealm.findArchive() = queryArchive().asFlow().first().obj
         ?: error("The archive '$name' is not present in the database")
 
@@ -473,5 +475,9 @@ class Archive(val name: String) {
         realm.write {
             delete(queryArchive())
         }
+    }
+
+    suspend fun exists(): Boolean {
+        return realm.findArchiveOrNull() != null
     }
 }
