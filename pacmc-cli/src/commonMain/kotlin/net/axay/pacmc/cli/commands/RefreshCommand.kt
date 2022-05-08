@@ -14,7 +14,7 @@ class RefreshCommand : CliktCommand(
 
     override fun run() = launchJob {
         terminal.println("Gather fresh data for all content inside '$archiveName'...")
-        val archive = Archive.fromString(archiveName) ?: return@launchJob
+        val archive = Archive.terminalFromString(archiveName) ?: return@launchJob
 
         val spinner = SpinnerAnimation()
         spinner.start()

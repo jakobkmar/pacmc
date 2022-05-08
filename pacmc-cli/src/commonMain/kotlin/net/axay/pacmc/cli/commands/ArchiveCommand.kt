@@ -5,6 +5,7 @@ import com.github.ajalt.clikt.core.subcommands
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.colormath.model.RGBInt
 import com.github.ajalt.mordant.rendering.TextColors
 import com.github.ajalt.mordant.rendering.TextStyles
@@ -22,10 +23,7 @@ import net.axay.pacmc.app.utils.ColorUtils
 import net.axay.pacmc.app.utils.OperatingSystem
 import net.axay.pacmc.cli.launchJob
 import net.axay.pacmc.cli.terminal
-import net.axay.pacmc.cli.terminal.archiveIdArgument
-import net.axay.pacmc.cli.terminal.askYesOrNo
-import net.axay.pacmc.cli.terminal.fromString
-import net.axay.pacmc.cli.terminal.terminalString
+import net.axay.pacmc.cli.terminal.*
 import net.axay.pacmc.repoapi.CachePolicy
 import okio.Path.Companion.toPath
 
@@ -138,7 +136,7 @@ class ArchiveCommand : CliktCommand(
 
         override fun run() = launchJob {
             terminal.println("Finding archive '$archiveName'...")
-            val archive = Archive.fromString(archiveName) ?: return@launchJob
+            val archive = Archive.terminalFromString(archiveName) ?: return@launchJob
 
             terminal.println()
             terminal.println("The following archive will be removed:")
@@ -164,7 +162,7 @@ class ArchiveCommand : CliktCommand(
 
     class SetDefault : CliktCommand(
         name = "set-default",
-        help = "Set the default archive"
+        help = "Set the default archive",
     ) {
         private val archiveName by argument(
             name = "archiveIdentifier",
@@ -174,11 +172,55 @@ class ArchiveCommand : CliktCommand(
         override fun run() = launchJob {
             terminal.println("Setting default archive to '$archiveName'...")
 
-            Archive.fromString(archiveName) ?: return@launchJob
+            Archive.terminalFromString(archiveName) ?: return@launchJob
             Archive.setDefault(archiveName)
 
             terminal.println()
             terminal.println("${TextColors.brightGreen("Successfully")} set default archive to '$archiveName'")
+        }
+    }
+
+    class Version : CliktCommand(
+        name = "Version",
+        help = "Set the game version of an archive",
+    ) {
+        private val archiveName by archiveIdArgument("The archive whose game version should be changed")
+
+        private val gameVersionString by option(
+            "-g", "--game-version",
+            help = "The game version content installed to this archive must be made for"
+        ).required()
+
+        override fun run() = launchJob {
+            val archive = Archive.terminalFromString(archiveName) ?: return@launchJob
+            val gameVersion = MinecraftVersion.terminalFromString(gameVersionString) ?: return@launchJob
+
+            val previousGameVersion = archive.getGameVersion()
+
+            val spinner = SpinnerAnimation()
+            spinner.start()
+            val transaction = archive.setGameVersionAndResolveUpdate(gameVersion)
+            spinner.stop()
+            terminal.println()
+
+            if (!transaction.isEmpty()) {
+                val modStrings = transaction.resolveModStrings()
+
+                if (
+                    !terminal.printAndConfirmTransaction(
+                        "Changing the game version to $gameVersion will result in the following transaction:",
+                        transaction,
+                        modStrings
+                    )
+                ) {
+                    archive.setGameVersion(previousGameVersion)
+                    return@launchJob
+                }
+
+                terminal.handleTransaction(archive, transaction, modStrings)
+            }
+
+            terminal.println("Changed game version of '$archiveName' to $gameVersion")
         }
     }
 }

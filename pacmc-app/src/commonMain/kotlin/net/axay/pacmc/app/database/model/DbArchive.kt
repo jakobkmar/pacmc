@@ -23,7 +23,7 @@ class DbArchive() : RealmObject {
 
     fun readPath() = path.toPath()
 
-    fun readMinecraftVersion() = MinecraftVersion.fromString(minecraftVersion)
+    fun readGameVersion() = MinecraftVersion.fromString(minecraftVersion)
         ?: error("Invalid minecraft version string in database for archive '$name'")
 
     fun readLoaders() = loaders.map { ModLoader.valueOf(it) }

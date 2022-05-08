@@ -7,6 +7,7 @@ import com.github.ajalt.clikt.parameters.arguments.defaultLazy
 import com.github.ajalt.clikt.parameters.options.defaultLazy
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.mordant.rendering.TextColors
+import net.axay.pacmc.app.data.MinecraftVersion
 import net.axay.pacmc.app.features.Archive
 import net.axay.pacmc.cli.terminal
 
@@ -20,7 +21,7 @@ fun CliktCommand.archiveIdArgument(
 ) = argument("archiveIdentifier", help = help)
     .defaultLazy { Archive.getDefault() }
 
-suspend fun Archive.Companion.fromString(name: String): Archive? {
+suspend fun Archive.Companion.terminalFromString(name: String): Archive? {
     val archive = Archive(name)
     return if (archive.exists()) archive else {
         terminal.warning("The given archive '${archive.name}' does not exist")
@@ -29,4 +30,13 @@ suspend fun Archive.Companion.fromString(name: String): Archive? {
         }
         null
     }
+}
+
+fun MinecraftVersion.Companion.terminalFromString(version: String): MinecraftVersion? {
+    val gameVersion = fromString(version)
+    if (gameVersion == null) {
+        terminal.warning("The given game version '$version' is invalid")
+        return null
+    }
+    return gameVersion
 }

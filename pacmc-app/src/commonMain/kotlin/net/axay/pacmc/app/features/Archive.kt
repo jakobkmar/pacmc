@@ -228,6 +228,14 @@ class Archive(val name: String) {
         }
     }
 
+    suspend fun setGameVersionAndResolveUpdate(
+        version: MinecraftVersion,
+        debugMessageCallback: (String) -> Unit,
+    ): Transaction {
+        setGameVersion(version)
+        return resolveUpdate(debugMessageCallback)
+    }
+
     private fun List<CommonProjectVersion>.findBest(desiredVersion: MinecraftVersion): CommonProjectVersion? =
         fold<CommonProjectVersion, Pair<CommonProjectVersion, Int>?>(null) { acc, projectVersion ->
             val distance = projectVersion.gameVersions
@@ -289,7 +297,7 @@ class Archive(val name: String) {
         val dbArchive = realm.findArchive()
 
         val loaders = dbArchive.readLoaders()
-        val minecraftVersion = dbArchive.readMinecraftVersion()
+        val minecraftVersion = dbArchive.readGameVersion()
 
         val checkedModIds = modIds.toHashSet()
         val checkedModIdsMutex = Mutex()
@@ -479,5 +487,15 @@ class Archive(val name: String) {
 
     suspend fun exists(): Boolean {
         return realm.findArchiveOrNull() != null
+    }
+
+    suspend fun setGameVersion(version: MinecraftVersion) {
+        realm.write {
+            queryArchive().find()?.minecraftVersion = version.toString()
+        }
+    }
+
+    suspend fun getGameVersion(): MinecraftVersion {
+        return realm.findArchive().readGameVersion()
     }
 }

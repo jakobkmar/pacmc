@@ -23,7 +23,7 @@ class InstallCommand : CliktCommand(
 
     override fun run() = launchJob {
         terminal.println("Resolving versions and dependencies...")
-        val archive = Archive.fromString(archiveName) ?: return@launchJob
+        val archive = Archive.terminalFromString(archiveName) ?: return@launchJob
 
         val spinner = SpinnerAnimation()
         spinner.start()

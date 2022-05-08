@@ -6,7 +6,7 @@ import net.axay.pacmc.app.features.Archive
 import net.axay.pacmc.cli.launchJob
 import net.axay.pacmc.cli.terminal
 import net.axay.pacmc.cli.terminal.archiveIdOption
-import net.axay.pacmc.cli.terminal.fromString
+import net.axay.pacmc.cli.terminal.terminalFromString
 import net.axay.pacmc.cli.terminal.optimalTerminalString
 
 class ListCommand : CliktCommand(
@@ -17,7 +17,7 @@ class ListCommand : CliktCommand(
 
     override fun run() = launchJob {
         terminal.println("The archive '$archiveName' contains the following content:")
-        val archive = Archive.fromString(archiveName) ?: return@launchJob
+        val archive = Archive.terminalFromString(archiveName) ?: return@launchJob
 
         terminal.println()
         archive.getInstalled().sortedBy { it.dependency }.forEach {

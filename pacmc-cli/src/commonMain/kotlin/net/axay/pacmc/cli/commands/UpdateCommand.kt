@@ -15,7 +15,7 @@ class UpdateCommand : CliktCommand(
 
     override fun run() = launchJob {
         terminal.println("Resolving updates for the given archive '$archiveName'...")
-        val archive = Archive.fromString(archiveName) ?: return@launchJob
+        val archive = Archive.terminalFromString(archiveName) ?: return@launchJob
 
         val spinner = SpinnerAnimation()
         spinner.start()
