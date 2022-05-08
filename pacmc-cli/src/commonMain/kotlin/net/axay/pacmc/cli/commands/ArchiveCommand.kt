@@ -50,10 +50,7 @@ class ArchiveCommand : CliktCommand(
 
         override fun run() = launchJob {
             val optionalMinecraftVersion = gameVersionString?.let {
-                MinecraftVersion.fromString(it) ?: kotlin.run {
-                    terminal.warning("The given game version '$gameVersionString' is invalid!")
-                    return@launchJob
-                }
+                MinecraftVersion.terminalFromString(it) ?: return@launchJob
             }
 
             val minecraftVersionDeferred = CoroutineScope(Dispatchers.Default).async {
