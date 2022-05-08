@@ -270,7 +270,7 @@ class Archive(val name: String) {
         debugMessageCallback("opening database")
         val dbArchive = realm.findArchive()
 
-        val loader = dbArchive.readLoader()
+        val loaders = dbArchive.readLoaders()
         val minecraftVersion = dbArchive.readMinecraftVersion()
 
         val checkedModIds = modIds.toHashSet()
@@ -294,7 +294,7 @@ class Archive(val name: String) {
                 }
 
                 val version = repoApiContext(CachePolicy.ONLY_FRESH) {
-                    it.getProjectVersions(modId, listOf(loader), listOf(minecraftVersion))
+                    it.getProjectVersions(modId, loaders, listOf(minecraftVersion))
                 }?.findBest(minecraftVersion) ?: return
 
                 finalListMutex.withLock {

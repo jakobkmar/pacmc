@@ -6,10 +6,7 @@ import io.realm.annotations.Index
 import io.realm.annotations.PrimaryKey
 import io.realm.realmListOf
 import io.realm.toRealmList
-import net.axay.pacmc.app.data.MinecraftVersion
-import net.axay.pacmc.app.data.ModId
-import net.axay.pacmc.app.data.ModLoader
-import net.axay.pacmc.app.data.Repository
+import net.axay.pacmc.app.data.*
 import net.axay.pacmc.app.repoapi.model.CommonProjectVersion
 import okio.Path
 import okio.Path.Companion.toPath
@@ -19,7 +16,8 @@ class DbArchive() : RealmObject {
     var displayName: String = ""
     var path: String = ""
     var minecraftVersion: String = ""
-    var loader: String = ""
+    var contentType: ContentType = ContentType.MOD
+    var loaders: RealmList<String> = realmListOf()
     var installed: RealmList<DbInstalledProject> = realmListOf()
     var color: Int = 0
 
@@ -28,7 +26,7 @@ class DbArchive() : RealmObject {
     fun readMinecraftVersion() = MinecraftVersion.fromString(minecraftVersion)
         ?: error("Invalid minecraft version string in database for archive '$name'")
 
-    fun readLoader() = ModLoader.valueOf(loader)
+    fun readLoaders() = loaders.map { ModLoader.valueOf(it) }
 
     // for the current realm compiler plugin
     constructor(
@@ -36,7 +34,8 @@ class DbArchive() : RealmObject {
         displayName: String,
         path: Path,
         minecraftVersion: MinecraftVersion,
-        loader: ModLoader,
+        contentType: ContentType,
+        loaders: List<ModLoader>,
         installed: List<DbInstalledProject>,
         color: Int,
     ) : this() {
@@ -44,7 +43,8 @@ class DbArchive() : RealmObject {
         this.displayName = displayName
         this.path = path.toString()
         this.minecraftVersion = minecraftVersion.toString()
-        this.loader = loader.name
+        this.contentType = contentType
+        this.loaders = loaders.map { it.name }.toRealmList()
         this.installed = installed.toRealmList()
         this.color = color
     }

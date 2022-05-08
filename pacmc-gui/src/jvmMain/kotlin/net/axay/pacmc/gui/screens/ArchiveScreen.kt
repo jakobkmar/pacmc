@@ -34,6 +34,7 @@ import io.realm.realmListOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import net.axay.pacmc.app.data.ContentType
 import net.axay.pacmc.app.data.MinecraftVersion
 import net.axay.pacmc.app.data.ModLoader
 import net.axay.pacmc.app.database.model.DbArchive
@@ -233,7 +234,8 @@ fun ArchiveScreen() = Box(Modifier.fillMaxSize()) {
                                 displayName,
                                 path.toPath(),
                                 minecraftVersion!!,
-                                ModLoader.FABRIC,
+                                ContentType.MOD,
+                                listOf(ModLoader.FABRIC),
                                 realmListOf(),
                                 color.toRGBInt().argb.toInt()
                             ))
@@ -279,7 +281,8 @@ fun ArchiveScreen() = Box(Modifier.fillMaxSize()) {
                                 uuid,
                                 "/test/path".toPath(),
                                 MinecraftVersion(1, 18, 1),
-                                ModLoader.FABRIC,
+                                ContentType.MOD,
+                                listOf(ModLoader.FABRIC),
                                 realmListOf(),
                                 (0x000000..0xFFFFFF).random()
                             ))

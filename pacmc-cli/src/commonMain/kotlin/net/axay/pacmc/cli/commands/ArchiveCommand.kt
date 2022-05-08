@@ -12,6 +12,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import net.axay.pacmc.app.Environment
+import net.axay.pacmc.app.data.ContentType
 import net.axay.pacmc.app.data.MinecraftVersion
 import net.axay.pacmc.app.data.ModLoader
 import net.axay.pacmc.app.database.model.DbArchive
@@ -90,7 +91,8 @@ class ArchiveCommand : CliktCommand(
                 archiveDisplayName ?: archiveIdentifier,
                 archivePath,
                 minecraftVersion,
-                loader,
+                ContentType.MOD,
+                listOf(loader),
                 emptyList(),
                 ColorUtils.randomLightColor().toRGBInt().argb.toInt()
             ))
