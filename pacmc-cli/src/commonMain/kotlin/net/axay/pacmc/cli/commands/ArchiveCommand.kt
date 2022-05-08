@@ -86,7 +86,7 @@ class ArchiveCommand : CliktCommand(
 
                 terminal.println()
                 terminal.println("${TextColors.brightGreen("Successfully")} created the following archive:")
-                terminal.println(archive)
+                terminal.println(archive.terminalString())
             }
         }
 
@@ -268,7 +268,7 @@ class ArchiveCommand : CliktCommand(
             val dotMinecraftArchive = Archive(".minecraft")
             if (dotMinecraftArchive.exists()) {
                 terminal.warning("The archive '.minecraft' already exists:")
-                terminal.println(dotMinecraftArchive)
+                terminal.println(dotMinecraftArchive.terminalString())
                 return@launchJob
             }
 
