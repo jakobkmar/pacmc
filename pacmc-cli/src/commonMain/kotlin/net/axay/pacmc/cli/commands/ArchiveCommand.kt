@@ -32,7 +32,7 @@ class ArchiveCommand : CliktCommand(
     help = "Manage archives",
 ) {
     init {
-        subcommands(Create(), List(), Remove(), SetDefault())
+        subcommands(Create(), List(), Remove(), SetDefault(), Version())
     }
 
     override fun run() = Unit
@@ -181,7 +181,7 @@ class ArchiveCommand : CliktCommand(
     }
 
     class Version : CliktCommand(
-        name = "Version",
+        name = "version",
         help = "Set the game version of an archive",
     ) {
         private val archiveName by archiveIdArgument("The archive whose game version should be changed")
@@ -197,13 +197,19 @@ class ArchiveCommand : CliktCommand(
 
             val previousGameVersion = archive.getGameVersion()
 
+            if (gameVersion == previousGameVersion) {
+                terminal.warning("The game version of '$archiveName' is already set to $previousGameVersion")
+                return@launchJob
+            }
+
             val spinner = SpinnerAnimation()
             spinner.start()
-            val transaction = archive.setGameVersionAndResolveUpdate(gameVersion)
+            val transaction = archive.setGameVersionAndResolveUpdate(gameVersion, spinner::update)
             spinner.stop()
-            terminal.println()
 
             if (!transaction.isEmpty()) {
+                terminal.println()
+
                 val modStrings = transaction.resolveModStrings()
 
                 if (
@@ -220,7 +226,10 @@ class ArchiveCommand : CliktCommand(
                 terminal.handleTransaction(archive, transaction, modStrings)
             }
 
-            terminal.println("Changed game version of '$archiveName' to $gameVersion")
+            terminal.println()
+            terminal.println("${TextColors.brightGreen("Successfully")} changed the game version of '$archiveName' to $gameVersion")
+        }
+    }
         }
     }
 }
