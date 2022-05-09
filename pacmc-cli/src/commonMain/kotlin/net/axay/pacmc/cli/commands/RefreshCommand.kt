@@ -12,6 +12,8 @@ class RefreshCommand : CliktCommand(
 ) {
     private val archiveName by archiveIdOption("The archive which should be refreshed")
 
+    private val yesFlag by yesFlag()
+
     override fun run() = launchJob {
         terminal.println("Gather fresh data for all content inside '$archiveName'...")
         val archive = Archive.terminalFromString(archiveName) ?: return@launchJob
@@ -27,7 +29,7 @@ class RefreshCommand : CliktCommand(
         terminal.danger("fresh copy will be downloaded over the network from the repository.")
 
         println()
-        if (!terminal.askYesOrNo("Is this okay?", default = false)) {
+        if (!terminal.askYesOrNo("Is this okay?", default = false, yesFlag = yesFlag)) {
             println("Abort.")
             return@launchJob
         }

@@ -165,6 +165,8 @@ class ArchiveCommand : CliktCommand(
             help = "Whether the files installed to the archive should be kept"
         ).flag()
 
+        private val yesFlag by yesFlag()
+
         override fun run() = launchJob {
             terminal.println("Finding archive '$archiveName'...")
             val archive = Archive.terminalFromString(archiveName) ?: return@launchJob
@@ -179,7 +181,7 @@ class ArchiveCommand : CliktCommand(
             }
 
             terminal.println()
-            if (!terminal.askYesOrNo("Do you want to continue?")) {
+            if (!terminal.askYesOrNo("Do you want to continue?", yesFlag = yesFlag)) {
                 terminal.println("Abort.")
                 return@launchJob
             }
@@ -222,6 +224,8 @@ class ArchiveCommand : CliktCommand(
             help = "The game version content installed to this archive must be made for"
         ).required()
 
+        private val yesFlag by yesFlag()
+
         override fun run() = launchJob {
             terminal.println("Resolving changes required for version change...")
             val archive = Archive.terminalFromString(archiveName) ?: return@launchJob
@@ -248,7 +252,8 @@ class ArchiveCommand : CliktCommand(
                     !terminal.printAndConfirmTransaction(
                         "Changing the game version to $gameVersion will result in the following transaction:",
                         transaction,
-                        modStrings
+                        modStrings,
+                        yesFlag
                     )
                 ) {
                     archive.setGameVersion(previousGameVersion)

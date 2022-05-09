@@ -17,6 +17,7 @@ fun Terminal.printAndConfirmTransaction(
     headline: String,
     transaction: Archive.Transaction,
     modStrings: Map<ModId, String>,
+    yesFlag: Boolean,
 ): Boolean {
     val upSymbol = if (OperatingSystem.notWindows) "↑" else "u"
     val dep = TextColors.brightCyan("(dependency)")
@@ -46,7 +47,7 @@ fun Terminal.printAndConfirmTransaction(
     }
 
     println()
-    if (!askYesOrNo("Is this okay?", default = true)) {
+    if (!askYesOrNo("Is this okay?", default = true, yesFlag = yesFlag)) {
         println("Abort.")
         return false
     }

@@ -22,6 +22,8 @@ class RemoveCommand : CliktCommand(
 
     private val archiveName by archiveIdOption("The archive where the content should be removed")
 
+    private val yesFlag by yesFlag()
+
     override fun run() = launchJob {
         terminal.println("Resolving effects of removal...")
         val archive = Archive.terminalFromString(archiveName) ?: return@launchJob
@@ -54,7 +56,8 @@ class RemoveCommand : CliktCommand(
             !terminal.printAndConfirmTransaction(
                 "Removing the given mods will result in the following transaction:",
                 removalResolveResult.transaction,
-                modStrings
+                modStrings,
+                yesFlag
             )
         ) return@launchJob
 

@@ -10,7 +10,7 @@ suspend fun Archive.Companion.terminalFromString(name: String): Archive? {
     return if (archive.exists()) archive else {
         terminal.warning("The given archive '${archive.name}' does not exist")
         if (archive.name == ".minecraft") {
-            terminal.warning("Try running ${TextColors.brightWhite("pacmc init")} to automatically detect the '.minecraft' folder.")
+            terminal.warning("Try running ${TextColors.brightWhite("pacmc archive init")} to automatically detect the '.minecraft' folder.")
         }
         null
     }

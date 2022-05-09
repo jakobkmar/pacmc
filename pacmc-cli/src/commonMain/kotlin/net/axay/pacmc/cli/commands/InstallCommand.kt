@@ -21,6 +21,8 @@ class InstallCommand : CliktCommand(
 
     private val archiveName by archiveIdOption("The archive where the mods should be installed")
 
+    private val yesFlag by yesFlag()
+
     override fun run() = launchJob {
         terminal.println("Resolving versions and dependencies...")
         val archive = Archive.terminalFromString(archiveName) ?: return@launchJob
@@ -37,7 +39,8 @@ class InstallCommand : CliktCommand(
             !terminal.printAndConfirmTransaction(
                 "Installing the given mods will result in the following transaction:",
                 transaction,
-                modStrings
+                modStrings,
+                yesFlag
             )
         ) return@launchJob
 

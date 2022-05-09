@@ -13,6 +13,8 @@ class UpdateCommand : CliktCommand(
 ) {
     private val archiveName by archiveIdOption("The archive which contains the content that should be updated")
 
+    private val yesFlag by yesFlag()
+
     override fun run() = launchJob {
         terminal.println("Resolving updates for the given archive '$archiveName'...")
         val archive = Archive.terminalFromString(archiveName) ?: return@launchJob
@@ -34,7 +36,8 @@ class UpdateCommand : CliktCommand(
             !terminal.printAndConfirmTransaction(
                 "Updating the archive will result in the following transaction:",
                 transaction,
-                modStrings
+                modStrings,
+                yesFlag
             )
         ) return@launchJob
 
