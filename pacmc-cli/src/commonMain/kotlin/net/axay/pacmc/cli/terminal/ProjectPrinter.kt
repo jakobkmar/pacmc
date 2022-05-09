@@ -12,7 +12,6 @@ import net.axay.pacmc.app.database.model.DbInstalledProject
 import net.axay.pacmc.app.repoapi.model.CommonProjectResult
 import net.axay.pacmc.app.repoapi.model.CommonProjectVersion
 import net.axay.pacmc.app.repoapi.repoApiContext
-import net.axay.pacmc.repoapi.CachePolicy
 
 private val Repository.textColor
     get() = when (this) {
@@ -33,7 +32,7 @@ private val CommonProjectVersion.terminalString get() = repoEntry(
 )
 
 suspend fun ModId.terminalStringOrNull(): String? {
-    return repoApiContext(CachePolicy.ONLY_CACHED) { it.getBasicProjectInfo(this@terminalStringOrNull) }
+    return repoApiContext { it.getBasicProjectInfo(this@terminalStringOrNull) }
         ?.slug?.terminalString
 }
 
@@ -51,7 +50,7 @@ suspend fun DbInstalledProject.optimalTerminalString(): String = coroutineScope 
     val projectString = async { modId.optimalTerminalString() }
 
     val versionString = async {
-        repoApiContext(CachePolicy.ONLY_CACHED) { it.getProjectVersion(version, modId.repository) }
+        repoApiContext { it.getProjectVersion(version, modId.repository) }
             ?.number ?: "version id: $version"
     }
 
