@@ -1,8 +1,3 @@
-import okio.HashingSink
-import okio.blackholeSink
-import okio.buffer
-import okio.source
-
 allprojects {
     group = "net.axay"
     version = "0.5.0"
@@ -17,7 +12,7 @@ buildscript {
     }
 
     dependencies {
-        classpath("com.squareup.okio:okio:3.1.0")
+        classpath("commons-codec:commons-codec:1.15")
     }
 }
 
@@ -26,15 +21,8 @@ val githubUrl = "https://github.com/jakobkmar/pacmc"
 fun requestHash(extension: String): String {
     val url = "${githubUrl}/releases/download/${version}/pacmc-${version}.${extension}"
     println("Requesting $extension sha256 hash of $url")
-    return HashingSink.sha256(blackholeSink()).use { sink ->
-        java.net.URL(url).openStream().source().buffer().use { source ->
-            source.readAll(sink)
-        }
-        sink.hash.sha256().hex()
-    }.let {
-        println("The hash is $it")
-        it
-    }
+    return org.apache.commons.codec.digest.DigestUtils.sha256Hex(java.net.URL(url).openStream())
+        .also { println("The hash is $it") }
 }
 
 val expandProps by lazy {
