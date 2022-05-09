@@ -1,8 +1,8 @@
 class Pacmc < Formula
     # TODO
 
-    desc "An easy-to-use package manager and launcher for Minecraft"
-    homepage ""
+    desc "${description}"
+    homepage "${githubUrl}"
 
     def install
 

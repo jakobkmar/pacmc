@@ -1,20 +1,18 @@
-# Maintainer: Jakob Kretzschmar <bluefireolymp@gmail.com>
+# Maintainer: Jakob Kretzschmar <dev@jakobk.de>
 
-# shellcheck disable=SC2016
-# shellcheck disable=SC2034
-# shellcheck disable=SC2154
+# shellcheck disable=SC2016,SC2034,SC2154,SC2148
 
-pkgname='pacmc'
-pkgver='${version}'
+pkgname="pacmc"
+pkgver="${version}"
 pkgrel=1
-pkgdesc='${description}'
-arch=('any')
-url='https://github.com/jakobkmar/pacmc'
-license=('AGPL3 or any later version')
-depends=('java-runtime=${javaVersion}')
-optdepends=('minecraft-launcher: The game launcher, managing the .minecraft folder')
-source=("https://github.com/jakobkmar/pacmc/releases/download/${pkgver}/pacmc-${pkgver}.tar")
-sha256sums=('${sha256Hash}')
+pkgdesc="${description}"
+arch=("any")
+url="${githubUrl}"
+license=("${licenseArchFormat}")
+depends=("java-runtime=${javaVersion}")
+optdepends=("minecraft-launcher: The game launcher, managing the .minecraft folder")
+source=("${githubUrl}/releases/download/${pkgver}/pacmc-${pkgver}.tar")
+sha256sums=("${tarHashSha256}")
 
 build() {
   cd "${srcdir}" || exit
@@ -25,9 +23,9 @@ build() {
 
 package() {
   cd "${srcdir}" || exit
-  install -D 'pacmc.sh' "$pkgdir/usr/bin/pacmc"
+  install -D "pacmc.sh" "$pkgdir/usr/bin/pacmc"
 
   cd "pacmc-${pkgver}" || exit
   mkdir -p "$pkgdir/usr/share/${pkgname}"
-  cp -r '.' "$pkgdir/usr/share/${pkgname}"
+  cp -r "." "$pkgdir/usr/share/${pkgname}"
 }
