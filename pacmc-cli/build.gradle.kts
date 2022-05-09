@@ -28,6 +28,7 @@ kotlin {
 
 application {
     mainClass.set("net.axay.pacmc.cli.ApplicationJvmKt")
+    applicationName = "pacmc"
 }
 
 distributions {
