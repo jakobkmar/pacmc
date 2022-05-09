@@ -331,6 +331,7 @@ class Archive(val name: String) {
                 }
 
                 version.dependencies.forEach {
+                    if (it.optional) return@forEach
                     launch {
                         val dependencyModId = when (it) {
                             is CommonProjectVersion.Dependency.ProjectDependency -> it.id
@@ -415,6 +416,7 @@ class Archive(val name: String) {
                 } ?: error("Couldn't resolve an installed project version, try refreshing the archive before removing content from it")
 
                 version.dependencies.forEach { dependency ->
+                    if (dependency.optional) return@forEach
                     launch {
                         val dependencyModId = when (dependency) {
                             is CommonProjectVersion.Dependency.ProjectDependency -> dependency.id
