@@ -55,7 +55,7 @@ class ListCommand : CliktCommand(
         terminal.println()
         (installed + installedDependencies).forEach { (projectLine, descriptionLine) ->
             terminal.println(projectLine)
-            terminal.println(descriptionLine)
+            terminal.println("  $descriptionLine")
         }
     }
 }
