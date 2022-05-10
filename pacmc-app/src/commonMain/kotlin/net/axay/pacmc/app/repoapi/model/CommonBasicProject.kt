@@ -17,5 +17,12 @@ data class CommonBasicProject(
             name = project.title,
             description = project.description,
         )
+
+        fun fromCurseforgeMod(mod: net.axay.pacmc.repoapi.curseforge.model.Mod) = CommonBasicProject(
+            id = ModId(Repository.CURSEFORGE, mod.id.toString()),
+            slug = ModSlug(Repository.CURSEFORGE, mod.slug),
+            name = mod.name,
+            description = mod.summary,
+        )
     }
 }

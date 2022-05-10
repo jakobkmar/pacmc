@@ -4,16 +4,16 @@ import net.axay.memoire.CacheValidationConfig
 import net.axay.memoire.DiskCacheConfig
 import net.axay.memoire.MemoryDiskCache
 import net.axay.pacmc.app.Environment
-import net.axay.pacmc.common.data.IdOrSlug
-import net.axay.pacmc.common.data.MinecraftVersion
-import net.axay.pacmc.common.data.ModLoader
-import net.axay.pacmc.common.data.Repository
 import net.axay.pacmc.app.ktorClient
 import net.axay.pacmc.app.ktorClientJson
 import net.axay.pacmc.app.repoapi.model.CommonBasicProject
 import net.axay.pacmc.app.repoapi.model.CommonProject
 import net.axay.pacmc.app.repoapi.model.CommonProjectResult
 import net.axay.pacmc.app.repoapi.model.CommonProjectVersion
+import net.axay.pacmc.common.data.IdOrSlug
+import net.axay.pacmc.common.data.MinecraftVersion
+import net.axay.pacmc.common.data.ModLoader
+import net.axay.pacmc.common.data.Repository
 import net.axay.pacmc.repoapi.CachePolicy
 import net.axay.pacmc.repoapi.RequestContext
 import net.axay.pacmc.repoapi.curseforge.CurseforgeApi
@@ -75,7 +75,7 @@ object RepositoryApi {
 
     suspend fun RequestContext.getBasicProjectInfo(idOrSlug: IdOrSlug): CommonBasicProject? = when (idOrSlug.repository) {
         Repository.MODRINTH -> with(modrinthApi) { getProject(idOrSlug.idOrSlug) }?.let(CommonBasicProject::fromModrinthProject)
-        Repository.CURSEFORGE -> TODO()
+        Repository.CURSEFORGE -> with(curseforgeApi) { getProject(idOrSlug) }?.let(CommonBasicProject::fromCurseforgeMod)
     }
 
     suspend fun RequestContext.getProjectVersion(id: String, repository: Repository): CommonProjectVersion? = when (repository) {
