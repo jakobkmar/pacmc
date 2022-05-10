@@ -16,7 +16,7 @@ import net.axay.pacmc.app.repoapi.repoApiContext
 private val Repository.textColor
     get() = when (this) {
         Repository.MODRINTH -> TextColors.brightGreen
-        Repository.CURSEFORGE -> TextColors.yellow
+        Repository.CURSEFORGE -> TextColors.brightYellow
     }
 
 private fun repoEntry(repository: Repository, entry: String): String {
