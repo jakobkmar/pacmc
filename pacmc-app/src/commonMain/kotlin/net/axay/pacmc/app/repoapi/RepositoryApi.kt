@@ -1,5 +1,7 @@
 package net.axay.pacmc.app.repoapi
 
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import net.axay.memoire.CacheValidationConfig
 import net.axay.memoire.DiskCacheConfig
 import net.axay.memoire.MemoryDiskCache
@@ -55,14 +57,23 @@ object RepositoryApi {
     suspend fun RequestContext.search(searchTerm: String, repository: Repository?): List<CommonProjectResult> {
         val results = mutableListOf<CommonProjectResult>()
 
-        if (repository == null || repository == Repository.MODRINTH) {
-            results += with(modrinthApi) { searchProjects(searchTerm, limit = 8) }?.hits.orEmpty()
-                .map(CommonProjectResult.Companion::fromModrinthProjectResult)
-        }
+        coroutineScope {
+            val modrinthRequest = async {
+                if (repository == null || repository == Repository.MODRINTH) {
+                    with(modrinthApi) { searchProjects(searchTerm, limit = 8) }?.hits.orEmpty()
+                        .map(CommonProjectResult.Companion::fromModrinthProjectResult)
+                } else emptyList()
+            }
 
-        if (repository == null || repository == Repository.CURSEFORGE) {
-            results += with(curseforgeApi) { searchProjects(searchTerm, pageSize = 8) }?.data.orEmpty()
-                .map(CommonProjectResult.Companion::fromCurseforgeMod)
+            val curseforgeRequest = async {
+                if (repository == null || repository == Repository.CURSEFORGE) {
+                    with(curseforgeApi) { searchProjects(searchTerm, pageSize = 8) }?.data.orEmpty()
+                        .map(CommonProjectResult.Companion::fromCurseforgeMod)
+                } else emptyList()
+            }
+
+            results += modrinthRequest.await()
+            results += curseforgeRequest.await()
         }
 
         return results
