@@ -5,13 +5,13 @@ import com.github.ajalt.mordant.rendering.TextStyles
 import com.github.ajalt.mordant.terminal.Terminal
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import net.axay.pacmc.common.data.ModId
-import net.axay.pacmc.common.data.ModSlug
-import net.axay.pacmc.common.data.Repository
 import net.axay.pacmc.app.database.model.DbInstalledProject
 import net.axay.pacmc.app.repoapi.model.CommonProjectResult
 import net.axay.pacmc.app.repoapi.model.CommonProjectVersion
 import net.axay.pacmc.app.repoapi.repoApiContext
+import net.axay.pacmc.common.data.ModId
+import net.axay.pacmc.common.data.ModSlug
+import net.axay.pacmc.common.data.Repository
 
 private val Repository.textColor
     get() = when (this) {
@@ -50,7 +50,7 @@ suspend fun DbInstalledProject.optimalTerminalString(): String = coroutineScope 
     val projectString = async { modId.optimalTerminalString() }
 
     val versionString = async {
-        repoApiContext { it.getProjectVersion(version, modId.repository) }
+        repoApiContext { it.getProjectVersion(modId, version) }
             ?.number ?: "version id: $version"
     }
 

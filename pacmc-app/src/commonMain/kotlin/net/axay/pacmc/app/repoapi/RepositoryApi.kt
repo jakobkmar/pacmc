@@ -10,10 +10,7 @@ import net.axay.pacmc.app.repoapi.model.CommonBasicProject
 import net.axay.pacmc.app.repoapi.model.CommonProject
 import net.axay.pacmc.app.repoapi.model.CommonProjectResult
 import net.axay.pacmc.app.repoapi.model.CommonProjectVersion
-import net.axay.pacmc.common.data.IdOrSlug
-import net.axay.pacmc.common.data.MinecraftVersion
-import net.axay.pacmc.common.data.ModLoader
-import net.axay.pacmc.common.data.Repository
+import net.axay.pacmc.common.data.*
 import net.axay.pacmc.repoapi.CachePolicy
 import net.axay.pacmc.repoapi.RequestContext
 import net.axay.pacmc.repoapi.curseforge.CurseforgeApi
@@ -78,9 +75,12 @@ object RepositoryApi {
         Repository.CURSEFORGE -> with(curseforgeApi) { getProject(idOrSlug) }?.let(CommonBasicProject::fromCurseforgeMod)
     }
 
-    suspend fun RequestContext.getProjectVersion(id: String, repository: Repository): CommonProjectVersion? = when (repository) {
-        Repository.MODRINTH -> with(modrinthApi) { getProjectVersion(id) }?.let(CommonProjectVersion::fromModrinthProjectVersion)
-        Repository.CURSEFORGE -> TODO()
+    suspend fun RequestContext.getProjectVersion(
+        projectIdOrSlug: IdOrSlug,
+        versionId: String,
+    ): CommonProjectVersion? = when (projectIdOrSlug.repository) {
+        Repository.MODRINTH -> with(modrinthApi) { getProjectVersion(versionId) }?.let(CommonProjectVersion::fromModrinthProjectVersion)
+        Repository.CURSEFORGE -> with (curseforgeApi) { getProjectVersion(projectIdOrSlug, versionId) }?.let(CommonProjectVersion::fromCurseforgeFile)
     }
 
     suspend fun RequestContext.getProjectVersions(

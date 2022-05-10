@@ -9,10 +9,6 @@ import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
 import net.axay.pacmc.app.Environment
-import net.axay.pacmc.common.data.MinecraftVersion
-import net.axay.pacmc.common.data.ModFile
-import net.axay.pacmc.common.data.ModId
-import net.axay.pacmc.common.data.ModSlug
 import net.axay.pacmc.app.database.model.DbArchive
 import net.axay.pacmc.app.database.model.DbInstalledProject
 import net.axay.pacmc.app.database.realm
@@ -21,6 +17,10 @@ import net.axay.pacmc.app.ktorClient
 import net.axay.pacmc.app.repoapi.model.CommonProjectVersion
 import net.axay.pacmc.app.repoapi.repoApiContext
 import net.axay.pacmc.app.utils.pmap
+import net.axay.pacmc.common.data.MinecraftVersion
+import net.axay.pacmc.common.data.ModFile
+import net.axay.pacmc.common.data.ModId
+import net.axay.pacmc.common.data.ModSlug
 import net.axay.pacmc.repoapi.CachePolicy
 import okio.Path
 import kotlin.math.absoluteValue
@@ -335,9 +335,7 @@ class Archive(val name: String) {
                     launch {
                         val dependencyModId = when (it) {
                             is CommonProjectVersion.Dependency.ProjectDependency -> it.id
-                            is CommonProjectVersion.Dependency.VersionDependency -> repoApiContext(CachePolicy.ONLY_FRESH) { c ->
-                                c.getProjectVersion(it.id, version.modId.repository)?.modId
-                            }
+                            is CommonProjectVersion.Dependency.VersionDependency -> it.resolveModId(version.modId.repository)
                         }
 
                         if (dependencyModId != null) {
@@ -412,7 +410,7 @@ class Archive(val name: String) {
         coroutineScope {
             suspend fun checkInstalledProject(installedProject: DbInstalledProject) {
                 val version = repoApiContext {
-                    it.getProjectVersion(installedProject.version, installedProject.readModId().repository)
+                    it.getProjectVersion(installedProject.readModId(), installedProject.version)
                 } ?: error("Couldn't resolve an installed project version, try refreshing the archive before removing content from it")
 
                 version.dependencies.forEach { dependency ->
@@ -420,9 +418,8 @@ class Archive(val name: String) {
                     launch {
                         val dependencyModId = when (dependency) {
                             is CommonProjectVersion.Dependency.ProjectDependency -> dependency.id
-                            is CommonProjectVersion.Dependency.VersionDependency -> repoApiContext { c ->
-                                c.getProjectVersion(dependency.id, version.modId.repository)?.modId
-                            } ?: error("Couldn't resolve a dependency version, try refreshing the archive before removing content from it")
+                            is CommonProjectVersion.Dependency.VersionDependency -> dependency.resolveModId(version.modId.repository)
+                                ?: error("Couldn't resolve a dependency version, try refreshing the archive before removing content from it")
                         }
 
                         stillNeededMutex.withLock {

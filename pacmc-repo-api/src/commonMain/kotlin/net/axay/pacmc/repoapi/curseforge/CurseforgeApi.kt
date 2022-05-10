@@ -10,9 +10,7 @@ import net.axay.pacmc.common.data.ModId
 import net.axay.pacmc.common.data.ModSlug
 import net.axay.pacmc.repoapi.AbstractRepositoryApi
 import net.axay.pacmc.repoapi.RequestContext
-import net.axay.pacmc.repoapi.curseforge.model.Mod
-import net.axay.pacmc.repoapi.curseforge.model.ModsSearchSortField
-import net.axay.pacmc.repoapi.curseforge.model.SearchModsResponse
+import net.axay.pacmc.repoapi.curseforge.model.*
 
 class CurseforgeApi(
     override val client: HttpClient,
@@ -23,6 +21,14 @@ class CurseforgeApi(
 
     override val headers = StringValues.build {
         append("x-api-key", "\$2a\$10\$NVywddNPLdJ93qG4QFp/fOjGIcM9323G3L0VDDKTEtGwS0MEnDhTO")
+    }
+
+    private suspend fun RequestContext.resolveId(idOrSlug: IdOrSlug): String? {
+        return when (idOrSlug) {
+            is ModId -> idOrSlug.id
+            is ModSlug -> searchProjects(idOrSlug.slug, sortOrder = ModsSearchSortField.NAME)
+                ?.data?.find { it.slug == idOrSlug.slug }?.id?.toString()
+        }
     }
 
     suspend fun RequestContext.searchProjects(
@@ -36,15 +42,11 @@ class CurseforgeApi(
         parameter("sortOrder", sortOrder?.ordinal?.plus(1))
     }
 
-    suspend fun RequestContext.getProject(
-        idOrSlug: IdOrSlug,
-    ): Mod? {
-        val id = when (idOrSlug) {
-            is ModId -> idOrSlug.id
-            is ModSlug -> searchProjects(idOrSlug.slug, sortOrder = ModsSearchSortField.NAME)
-                ?.data?.find { it.slug == idOrSlug.slug }?.id?.toString()
-        } ?: return null
+    suspend fun RequestContext.getProject(idOrSlug: IdOrSlug): Mod? {
+        return repoRequest<Mod>("/mods/${resolveId(idOrSlug) ?: return null}")
+    }
 
-        return repoRequest<Mod>("/mods/$id")
+    suspend fun RequestContext.getProjectVersion(projectIdOrSlug: IdOrSlug, versionId: String): File? {
+        return repoRequest<GetModFileResponse>("/mods/${resolveId(projectIdOrSlug) ?: return null}/files/${versionId}")?.data
     }
 }
