@@ -2,6 +2,7 @@ package net.axay.pacmc.repoapi.modrinth
 
 import io.ktor.client.*
 import io.ktor.client.request.*
+import kotlinx.serialization.json.Json
 import net.axay.memoire.Cache
 import net.axay.pacmc.repoapi.AbstractRepositoryApi
 import net.axay.pacmc.repoapi.RequestContext
@@ -9,6 +10,7 @@ import net.axay.pacmc.repoapi.modrinth.model.*
 
 class ModrinthApi(
     override val client: HttpClient,
+    override val clientJson: Json,
     override val cache: Cache<String, String, String>?,
     override val apiUrl: String = "https://api.modrinth.com/v2",
 ) : AbstractRepositoryApi() {

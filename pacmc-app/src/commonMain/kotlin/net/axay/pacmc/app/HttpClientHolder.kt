@@ -9,13 +9,16 @@ import io.ktor.client.statement.*
 import io.ktor.client.utils.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.utils.io.core.*
+import kotlinx.serialization.json.Json
 import okio.Path
+
+val ktorClientJson = Json {
+    ignoreUnknownKeys = true
+}
 
 val ktorClient = HttpClient(CIO) {
     install(ContentNegotiation) {
-        json(kotlinx.serialization.json.Json {
-            ignoreUnknownKeys = true
-        })
+        json(ktorClientJson)
     }
 }
 

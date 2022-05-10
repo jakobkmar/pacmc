@@ -24,5 +24,15 @@ data class CommonProjectResult(
             iconUrl = projectResult.iconUrl,
             latestVersion = projectResult.versions.mapNotNull { MinecraftVersion.fromString(it) }.maxOrNull(),
         )
+
+        fun fromCurseforgeMod(mod: net.axay.pacmc.repoapi.curseforge.model.Mod) = CommonProjectResult(
+            id = ModId(Repository.CURSEFORGE, mod.id.toString()),
+            slug = ModSlug(Repository.CURSEFORGE, mod.slug),
+            name = mod.name,
+            author = mod.authors.first().name,
+            description = mod.summary,
+            iconUrl = mod.logo.thumbnailUrl,
+            latestVersion = mod.latestFilesIndexes.mapNotNull { MinecraftVersion.fromString(it.gameVersion) }.maxOrNull(),
+        )
     }
 }

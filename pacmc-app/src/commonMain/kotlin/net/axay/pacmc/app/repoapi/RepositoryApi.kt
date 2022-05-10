@@ -9,12 +9,14 @@ import net.axay.pacmc.app.data.MinecraftVersion
 import net.axay.pacmc.app.data.ModLoader
 import net.axay.pacmc.app.data.Repository
 import net.axay.pacmc.app.ktorClient
+import net.axay.pacmc.app.ktorClientJson
 import net.axay.pacmc.app.repoapi.model.CommonBasicProject
 import net.axay.pacmc.app.repoapi.model.CommonProject
 import net.axay.pacmc.app.repoapi.model.CommonProjectResult
 import net.axay.pacmc.app.repoapi.model.CommonProjectVersion
 import net.axay.pacmc.repoapi.CachePolicy
 import net.axay.pacmc.repoapi.RequestContext
+import net.axay.pacmc.repoapi.curseforge.CurseforgeApi
 import net.axay.pacmc.repoapi.modrinth.ModrinthApi
 import net.axay.pacmc.repoapi.mojang.LauncherMetaApi
 import net.axay.pacmc.repoapi.mojang.model.VersionManifest
@@ -46,20 +48,21 @@ object RepositoryApi {
         )
     )
 
-    private val modrinthApi = ModrinthApi(ktorClient, cache)
-    private val launcherMetaApi = LauncherMetaApi(ktorClient, cache)
+    private val modrinthApi = ModrinthApi(ktorClient, ktorClientJson, cache)
+    private val curseforgeApi = CurseforgeApi(ktorClient, ktorClientJson, cache)
+    private val launcherMetaApi = LauncherMetaApi(ktorClient, ktorClientJson, cache)
 
     suspend fun RequestContext.search(searchTerm: String, repository: Repository?): List<CommonProjectResult> {
         val results = mutableListOf<CommonProjectResult>()
 
         if (repository == null || repository == Repository.MODRINTH) {
-            results += with(modrinthApi) { searchProjects(searchTerm, limit = 20) }?.hits.orEmpty().map {
-                CommonProjectResult.fromModrinthProjectResult(it)
-            }
+            results += with(modrinthApi) { searchProjects(searchTerm, limit = 8) }?.hits.orEmpty()
+                .map(CommonProjectResult.Companion::fromModrinthProjectResult)
         }
 
         if (repository == null || repository == Repository.CURSEFORGE) {
-            // TODO
+            results += with(curseforgeApi) { searchProjects(searchTerm, pageSize = 8) }?.data.orEmpty()
+                .map(CommonProjectResult.Companion::fromCurseforgeMod)
         }
 
         return results
