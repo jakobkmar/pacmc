@@ -19,6 +19,7 @@ kotlin {
     sourceSets {
         named("commonMain") {
             dependencies {
+                api(project(":pacmc-common"))
                 api(libs.ktor.client.core)
                 api(libs.ktor.client.contentnegotiation)
                 api(libs.ktor.json)

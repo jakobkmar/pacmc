@@ -5,8 +5,13 @@ import io.ktor.client.request.*
 import io.ktor.util.*
 import kotlinx.serialization.json.Json
 import net.axay.memoire.Cache
+import net.axay.pacmc.common.data.IdOrSlug
+import net.axay.pacmc.common.data.ModId
+import net.axay.pacmc.common.data.ModSlug
 import net.axay.pacmc.repoapi.AbstractRepositoryApi
 import net.axay.pacmc.repoapi.RequestContext
+import net.axay.pacmc.repoapi.curseforge.model.Mod
+import net.axay.pacmc.repoapi.curseforge.model.ModsSearchSortField
 import net.axay.pacmc.repoapi.curseforge.model.SearchModsResponse
 
 class CurseforgeApi(
@@ -23,9 +28,23 @@ class CurseforgeApi(
     suspend fun RequestContext.searchProjects(
         searchFilter: String,
         pageSize: Int? = null,
+        sortOrder: ModsSearchSortField? = null,
     ) = repoRequest<SearchModsResponse>("/mods/search") {
         parameter("gameId", 432) // TODO request this value
         parameter("searchFilter", searchFilter)
         parameter("pageSize", pageSize)
+        parameter("sortOrder", sortOrder?.ordinal?.plus(1))
+    }
+
+    suspend fun RequestContext.getProject(
+        idOrSlug: IdOrSlug,
+    ): Mod? {
+        val id = when (idOrSlug) {
+            is ModId -> idOrSlug.id
+            is ModSlug -> searchProjects(idOrSlug.slug, sortOrder = ModsSearchSortField.NAME)
+                ?.data?.find { it.slug == idOrSlug.slug }?.id?.toString()
+        } ?: return null
+
+        return repoRequest<Mod>("/mods/$id")
     }
 }
