@@ -32,7 +32,7 @@ import compose.icons.tablericons.Download
 import compose.icons.tablericons.MoodCry
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import net.axay.pacmc.app.data.Repository
+import net.axay.pacmc.common.data.Repository
 import net.axay.pacmc.app.repoapi.model.CommonProjectResult
 import net.axay.pacmc.app.repoapi.repoApiContext
 import net.axay.pacmc.gui.cache.producePainterCached

@@ -4,8 +4,8 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.arguments.multiple
 import com.github.ajalt.mordant.rendering.TextColors
-import net.axay.pacmc.app.data.ModSlug
-import net.axay.pacmc.app.data.Repository
+import net.axay.pacmc.common.data.ModSlug
+import net.axay.pacmc.common.data.Repository
 import net.axay.pacmc.app.features.Archive
 import net.axay.pacmc.cli.launchJob
 import net.axay.pacmc.cli.terminal

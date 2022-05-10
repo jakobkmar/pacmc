@@ -1,9 +1,9 @@
 package net.axay.pacmc.app.repoapi.model
 
 import kotlinx.datetime.Instant
-import net.axay.pacmc.app.data.MinecraftVersion
-import net.axay.pacmc.app.data.ModId
-import net.axay.pacmc.app.data.Repository
+import net.axay.pacmc.common.data.MinecraftVersion
+import net.axay.pacmc.common.data.ModId
+import net.axay.pacmc.common.data.Repository
 import net.axay.pacmc.repoapi.modrinth.model.BaseVersion
 
 data class CommonProjectVersion(

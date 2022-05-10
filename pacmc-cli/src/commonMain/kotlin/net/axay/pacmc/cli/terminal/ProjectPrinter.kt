@@ -5,9 +5,9 @@ import com.github.ajalt.mordant.rendering.TextStyles
 import com.github.ajalt.mordant.terminal.Terminal
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import net.axay.pacmc.app.data.ModId
-import net.axay.pacmc.app.data.ModSlug
-import net.axay.pacmc.app.data.Repository
+import net.axay.pacmc.common.data.ModId
+import net.axay.pacmc.common.data.ModSlug
+import net.axay.pacmc.common.data.Repository
 import net.axay.pacmc.app.database.model.DbInstalledProject
 import net.axay.pacmc.app.repoapi.model.CommonProjectResult
 import net.axay.pacmc.app.repoapi.model.CommonProjectVersion

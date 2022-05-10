@@ -4,10 +4,10 @@ import net.axay.memoire.CacheValidationConfig
 import net.axay.memoire.DiskCacheConfig
 import net.axay.memoire.MemoryDiskCache
 import net.axay.pacmc.app.Environment
-import net.axay.pacmc.app.data.IdOrSlug
-import net.axay.pacmc.app.data.MinecraftVersion
-import net.axay.pacmc.app.data.ModLoader
-import net.axay.pacmc.app.data.Repository
+import net.axay.pacmc.common.data.IdOrSlug
+import net.axay.pacmc.common.data.MinecraftVersion
+import net.axay.pacmc.common.data.ModLoader
+import net.axay.pacmc.common.data.Repository
 import net.axay.pacmc.app.ktorClient
 import net.axay.pacmc.app.ktorClientJson
 import net.axay.pacmc.app.repoapi.model.CommonBasicProject

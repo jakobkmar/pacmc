@@ -13,9 +13,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import net.axay.pacmc.app.Environment
-import net.axay.pacmc.app.data.ContentType
-import net.axay.pacmc.app.data.MinecraftVersion
-import net.axay.pacmc.app.data.ModLoader
+import net.axay.pacmc.common.data.ContentType
+import net.axay.pacmc.common.data.MinecraftVersion
+import net.axay.pacmc.common.data.ModLoader
 import net.axay.pacmc.app.database.model.DbArchive
 import net.axay.pacmc.app.features.Archive
 import net.axay.pacmc.app.repoapi.repoApiContext

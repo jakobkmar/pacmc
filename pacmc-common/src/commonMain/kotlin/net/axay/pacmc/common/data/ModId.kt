@@ -1,4 +1,4 @@
-package net.axay.pacmc.app.data
+package net.axay.pacmc.common.data
 
 sealed class IdOrSlug {
     abstract val repository: Repository

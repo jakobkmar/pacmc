@@ -6,8 +6,8 @@ import io.realm.annotations.Index
 import io.realm.annotations.PrimaryKey
 import io.realm.realmListOf
 import io.realm.toRealmList
-import net.axay.pacmc.app.data.*
 import net.axay.pacmc.app.repoapi.model.CommonProjectVersion
+import net.axay.pacmc.common.data.*
 import okio.Path
 import okio.Path.Companion.toPath
 

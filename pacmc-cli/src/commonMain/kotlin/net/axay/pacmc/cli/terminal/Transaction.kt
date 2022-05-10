@@ -8,7 +8,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
-import net.axay.pacmc.app.data.ModId
+import net.axay.pacmc.common.data.ModId
 import net.axay.pacmc.app.features.Archive
 import net.axay.pacmc.app.repoapi.model.CommonProjectVersion
 import net.axay.pacmc.app.utils.OperatingSystem

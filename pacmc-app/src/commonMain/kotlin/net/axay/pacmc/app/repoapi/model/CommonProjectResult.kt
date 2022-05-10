@@ -1,9 +1,9 @@
 package net.axay.pacmc.app.repoapi.model
 
-import net.axay.pacmc.app.data.MinecraftVersion
-import net.axay.pacmc.app.data.ModId
-import net.axay.pacmc.app.data.ModSlug
-import net.axay.pacmc.app.data.Repository
+import net.axay.pacmc.common.data.MinecraftVersion
+import net.axay.pacmc.common.data.ModId
+import net.axay.pacmc.common.data.ModSlug
+import net.axay.pacmc.common.data.Repository
 
 data class CommonProjectResult(
     val id: ModId,

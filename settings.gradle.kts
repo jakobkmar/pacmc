@@ -8,6 +8,7 @@ pluginManagement {
 }
 
 // apis
+include("pacmc-common")
 include("pacmc-repo-api")
 
 // server-side

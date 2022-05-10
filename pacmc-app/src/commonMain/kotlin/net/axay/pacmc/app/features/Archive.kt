@@ -9,10 +9,10 @@ import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
 import net.axay.pacmc.app.Environment
-import net.axay.pacmc.app.data.MinecraftVersion
-import net.axay.pacmc.app.data.ModFile
-import net.axay.pacmc.app.data.ModId
-import net.axay.pacmc.app.data.ModSlug
+import net.axay.pacmc.common.data.MinecraftVersion
+import net.axay.pacmc.common.data.ModFile
+import net.axay.pacmc.common.data.ModId
+import net.axay.pacmc.common.data.ModSlug
 import net.axay.pacmc.app.database.model.DbArchive
 import net.axay.pacmc.app.database.model.DbInstalledProject
 import net.axay.pacmc.app.database.realm

@@ -1,7 +1,7 @@
 package net.axay.pacmc.cli.terminal
 
 import com.github.ajalt.mordant.rendering.TextColors
-import net.axay.pacmc.app.data.MinecraftVersion
+import net.axay.pacmc.common.data.MinecraftVersion
 import net.axay.pacmc.app.features.Archive
 import net.axay.pacmc.cli.terminal
 

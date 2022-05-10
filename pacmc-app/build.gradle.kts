@@ -11,6 +11,7 @@ kotlin {
     sourceSets {
         named("commonMain") {
             dependencies {
+                api(project(":pacmc-common"))
                 api(project(":pacmc-repo-api"))
                 api(libs.okio)
                 api(libs.realm.base)

@@ -34,13 +34,12 @@ import io.realm.realmListOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import net.axay.pacmc.app.data.ContentType
-import net.axay.pacmc.app.data.MinecraftVersion
-import net.axay.pacmc.app.data.ModLoader
+import net.axay.pacmc.common.data.ContentType
+import net.axay.pacmc.common.data.MinecraftVersion
+import net.axay.pacmc.common.data.ModLoader
 import net.axay.pacmc.app.database.model.DbArchive
 import net.axay.pacmc.app.database.realm
 import net.axay.pacmc.app.features.Archive
-import net.axay.pacmc.app.repoapi.RepositoryApi
 import net.axay.pacmc.app.repoapi.repoApiContext
 import net.axay.pacmc.gui.screens.state.IdentifierState
 import net.axay.pacmc.gui.util.FileChooser
