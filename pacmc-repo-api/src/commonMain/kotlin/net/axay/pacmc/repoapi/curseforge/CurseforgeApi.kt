@@ -3,10 +3,14 @@ package net.axay.pacmc.repoapi.curseforge
 import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.util.*
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.serialization.json.Json
 import net.axay.memoire.Cache
 import net.axay.pacmc.common.data.IdOrSlug
 import net.axay.pacmc.common.data.ModId
+import net.axay.pacmc.common.data.ModLoader
 import net.axay.pacmc.common.data.ModSlug
 import net.axay.pacmc.repoapi.AbstractRepositoryApi
 import net.axay.pacmc.repoapi.RequestContext
@@ -48,5 +52,22 @@ class CurseforgeApi(
 
     suspend fun RequestContext.getProjectVersion(projectIdOrSlug: IdOrSlug, versionId: String): File? {
         return repoRequest<GetModFileResponse>("/mods/${resolveId(projectIdOrSlug) ?: return null}/files/${versionId}")?.data
+    }
+
+    suspend fun RequestContext.getProjectVersions(
+        idOrSlug: IdOrSlug,
+        loaders: List<ModLoader>? = null,
+    ): List<File>? {
+        return if (loaders == null || loaders.isEmpty())
+            repoRequest<GetModFilesResponse>("/mods/${resolveId(idOrSlug) ?: return null}/files")?.data
+        else coroutineScope {
+            loaders.map { loader ->
+                async {
+                    repoRequest<GetModFilesResponse>("/mods/${resolveId(idOrSlug) ?: return@async null}/files") {
+                        parameter("modLoaderType", loader.curseforgeId ?: error("The loader ${loader.displayName} is not supported by Curseforge"))
+                    }?.data
+                }
+            }.awaitAll().filterNotNull().flatten().distinctBy { it.id }
+        }
     }
 }
