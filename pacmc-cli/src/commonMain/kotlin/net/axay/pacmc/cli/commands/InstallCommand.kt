@@ -25,10 +25,12 @@ class InstallCommand : CliktCommand(
         terminal.println("Resolving versions and dependencies...")
         val archive = Archive.terminalFromString(archiveName) ?: return@launchJob
 
+        val modIds = CliParser.resolveSlugs(modSlugNames) ?: return@launchJob
+
         val spinner = SpinnerAnimation()
         spinner.start()
-        val transaction = archive.resolve(CliParser.resolveSlugs(modSlugNames) ?: return@launchJob, spinner::update)
-        spinner.stop()
+        val transaction = archive.resolve(modIds, spinner::update)
+        spinner.stop("resolved install transaction")
         terminal.println()
 
         val modStrings = transaction.resolveModStrings()

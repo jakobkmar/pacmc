@@ -26,10 +26,12 @@ class RemoveCommand : CliktCommand(
         terminal.println("Resolving effects of removal...")
         val archive = Archive.terminalFromString(archiveName) ?: return@launchJob
 
+        val modIds = CliParser.resolveSlugs(modSlugNames) ?: return@launchJob
+
         val spinner = SpinnerAnimation()
         spinner.start()
-        val removalResolveResult = archive.resolveRemoval(CliParser.resolveSlugs(modSlugNames) ?: return@launchJob, spinner::update)
-        spinner.stop()
+        val removalResolveResult = archive.resolveRemoval(modIds, spinner::update)
+        spinner.stop("resolved remove transaction")
         terminal.println()
 
         if (removalResolveResult.stillNeeded.isNotEmpty() || removalResolveResult.notInstalled.isNotEmpty()) {
