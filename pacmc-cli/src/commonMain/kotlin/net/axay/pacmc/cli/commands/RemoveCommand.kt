@@ -4,8 +4,6 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.arguments.multiple
 import com.github.ajalt.mordant.rendering.TextColors
-import net.axay.pacmc.common.data.ModSlug
-import net.axay.pacmc.common.data.Repository
 import net.axay.pacmc.app.features.Archive
 import net.axay.pacmc.cli.launchJob
 import net.axay.pacmc.cli.terminal
@@ -30,7 +28,7 @@ class RemoveCommand : CliktCommand(
 
         val spinner = SpinnerAnimation()
         spinner.start()
-        val removalResolveResult = archive.resolveRemoval(modSlugNames.mapTo(mutableSetOf()) { ModSlug(Repository.MODRINTH, it) }, spinner::update)
+        val removalResolveResult = archive.resolveRemoval(CliParser.resolveSlugs(modSlugNames) ?: return@launchJob, spinner::update)
         spinner.stop()
         terminal.println()
 

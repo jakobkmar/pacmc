@@ -16,11 +16,9 @@ import net.axay.pacmc.app.downloadFile
 import net.axay.pacmc.app.ktorClient
 import net.axay.pacmc.app.repoapi.model.CommonProjectVersion
 import net.axay.pacmc.app.repoapi.repoApiContext
-import net.axay.pacmc.app.utils.pmap
 import net.axay.pacmc.common.data.MinecraftVersion
 import net.axay.pacmc.common.data.ModFile
 import net.axay.pacmc.common.data.ModId
-import net.axay.pacmc.common.data.ModSlug
 import net.axay.pacmc.repoapi.CachePolicy
 import okio.Path
 import kotlin.math.absoluteValue
@@ -283,15 +281,6 @@ class Archive(val name: String) {
             && makeDependency.isEmpty()
     }
 
-    @JvmName("resolveWithModSlug")
-    suspend fun resolve(
-        modSlugs: Set<ModSlug>,
-        debugMessageCallback: (String) -> Unit,
-    ): Transaction {
-        debugMessageCallback("resolving slugs to mod ids")
-        return resolve(modSlugs.resolveIds(), debugMessageCallback)
-    }
-
     suspend fun resolve(
         modIds: Set<ModId>,
         debugMessageCallback: (String) -> Unit,
@@ -385,16 +374,7 @@ class Archive(val name: String) {
         val notInstalled: Set<ModId>,
     )
 
-    @JvmName("resolveRemovalWithModSlug")
     suspend fun resolveRemoval(
-        modSlugs: Set<ModSlug>,
-        debugMessageCallback: (String) -> Unit,
-    ): RemovalResolveResult {
-        debugMessageCallback("resolving slugs to mod ids")
-        return resolveRemoval(modSlugs.resolveIds(), debugMessageCallback)
-    }
-
-    private suspend fun resolveRemoval(
         removeModIds: Set<ModId>,
         debugMessageCallback: (String) -> Unit,
     ): RemovalResolveResult {
@@ -460,10 +440,6 @@ class Archive(val name: String) {
             stillNeeded = stillNeeded,
             notInstalled = removeModIds subtract dbArchive.installed.mapTo(HashSet()) { it.readModId() },
         )
-    }
-
-    private suspend fun Collection<ModSlug>.resolveIds(): Set<ModId> {
-        return pmap { repoApiContext(CachePolicy.ONLY_FRESH) { c -> c.getBasicProjectInfo(it) }?.id }.filterNotNull().toSet()
     }
 
     suspend fun getInstalled(): List<DbInstalledProject> {
