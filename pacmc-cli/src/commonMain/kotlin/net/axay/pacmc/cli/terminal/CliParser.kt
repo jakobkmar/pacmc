@@ -41,7 +41,7 @@ object CliParser {
         val spinner = SpinnerAnimation()
         spinner.start()
 
-        val slugResolveResults = rawSlugs.map resolve@{ rawSlug ->
+        val slugResolveResults = rawSlugs.pmap resolve@{ rawSlug ->
             spinner.update("resolving slug $rawSlug")
             val split = rawSlug.split('/')
             when (split.size) {
