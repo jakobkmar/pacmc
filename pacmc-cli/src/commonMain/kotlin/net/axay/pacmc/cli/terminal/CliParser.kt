@@ -38,7 +38,11 @@ object CliParser {
     }
 
     suspend fun resolveSlugs(rawSlugs: List<String>): Set<ModId>? {
+        val spinner = SpinnerAnimation()
+        spinner.start()
+
         val slugResolveResults = rawSlugs.map resolve@{ rawSlug ->
+            spinner.update("resolving slug $rawSlug")
             val split = rawSlug.split('/')
             when (split.size) {
                 1 -> {
@@ -58,7 +62,7 @@ object CliParser {
                 2 -> {
                     val (repoName, slug) = split
                     val repo = try {
-                        Repository.valueOf(repoName)
+                        Repository.valueOf(repoName.uppercase())
                     } catch (exc: IllegalArgumentException) {
                         null
                     }
@@ -66,7 +70,7 @@ object CliParser {
                     if (repo != null) {
                         val id = ModSlug(repo, slug).resolveId()
                         if (id != null) {
-                            SlugResolveResult.Resolved(id)
+                            return@resolve SlugResolveResult.Resolved(id)
                         }
                     }
 
@@ -76,6 +80,8 @@ object CliParser {
             }
         }
 
+        spinner.stop("resolved slugs")
+
         val invalidSlugs = slugResolveResults.filterIsInstance<SlugResolveResult.Invalid>()
         if (invalidSlugs.isNotEmpty()) {
             invalidSlugs.forEach {
@@ -84,15 +90,24 @@ object CliParser {
             return null
         }
 
+        var alreadyAsked = false
+
         return slugResolveResults.mapTo(HashSet()) { result ->
             when (result) {
                 is SlugResolveResult.Resolved -> result.id
                 is SlugResolveResult.Ambiguous -> {
+                    if (!alreadyAsked) {
+                        terminal.println()
+                        alreadyAsked = true
+                    }
                     val id = terminal.choose("Which one did you mean?", result.possibleSlugs.map { it.second to it.first.terminalString })
                     if (id == null) {
                         terminal.println("Abort.")
                         return null
-                    } else id
+                    } else {
+                        terminal.println()
+                        id
+                    }
                 }
                 is SlugResolveResult.Invalid -> error("Unhandled invalid slug ${result.slug}")
             }

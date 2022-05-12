@@ -28,12 +28,12 @@ class SpinnerAnimation : CoroutineScope {
         spinJob.start()
     }
 
-    suspend fun stop() {
+    suspend fun stop(message: String = "done") {
         spinJob.cancelAndJoin()
         terminal.cursor.move { startOfLine() }
         terminal.print("[${if (OperatingSystem.notWindows) '✓' else '+'}] ")
         terminal.cursor.move { clearLineAfterCursor() }
-        terminal.println("done")
+        terminal.println(message)
     }
 
     fun update(message: String) {
