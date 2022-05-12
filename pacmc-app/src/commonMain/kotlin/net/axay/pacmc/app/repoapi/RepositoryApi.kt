@@ -67,7 +67,7 @@ object RepositoryApi {
 
             val curseforgeRequest = async {
                 if (repository == null || repository == Repository.CURSEFORGE) {
-                    with(curseforgeApi) { searchProjects(searchTerm, pageSize = 8) }?.data.orEmpty()
+                    with(curseforgeApi) { searchProjects(searchTerm, pageSize = 8) }.orEmpty()
                         .map(CommonProjectResult.Companion::fromCurseforgeMod)
                 } else emptyList()
             }

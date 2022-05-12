@@ -31,7 +31,7 @@ class CurseforgeApi(
         return when (idOrSlug) {
             is ModId -> idOrSlug.id
             is ModSlug -> searchProjects(idOrSlug.slug, sortOrder = ModsSearchSortField.NAME)
-                ?.data?.find { it.slug == idOrSlug.slug }?.id?.toString()
+                ?.find { it.slug == idOrSlug.slug }?.id?.toString()
         }
     }
 
@@ -39,19 +39,19 @@ class CurseforgeApi(
         searchFilter: String,
         pageSize: Int? = null,
         sortOrder: ModsSearchSortField? = null,
-    ) = repoRequest<SearchModsResponse>("/mods/search") {
+    ): List<Mod>? = repoRequest<CurseforgeDataWrapper<List<Mod>>>("/mods/search") {
         parameter("gameId", 432) // TODO request this value
         parameter("searchFilter", searchFilter)
         parameter("pageSize", pageSize)
         parameter("sortOrder", sortOrder?.ordinal?.plus(1))
-    }
+    }?.data
 
     suspend fun RequestContext.getProject(idOrSlug: IdOrSlug): Mod? {
-        return repoRequest<Mod>("/mods/${resolveId(idOrSlug) ?: return null}")
+        return repoRequest<CurseforgeDataWrapper<Mod>>("/mods/${resolveId(idOrSlug) ?: return null}")?.data
     }
 
     suspend fun RequestContext.getProjectVersion(projectIdOrSlug: IdOrSlug, versionId: String): File? {
-        return repoRequest<GetModFileResponse>("/mods/${resolveId(projectIdOrSlug) ?: return null}/files/${versionId}")?.data
+        return repoRequest<CurseforgeDataWrapper<File>>("/mods/${resolveId(projectIdOrSlug) ?: return null}/files/${versionId}")?.data
     }
 
     suspend fun RequestContext.getProjectVersions(
@@ -59,11 +59,11 @@ class CurseforgeApi(
         loaders: List<ModLoader>? = null,
     ): List<File>? {
         return if (loaders == null || loaders.isEmpty())
-            repoRequest<GetModFilesResponse>("/mods/${resolveId(idOrSlug) ?: return null}/files")?.data
+            repoRequest<CurseforgeDataWrapper<List<File>>>("/mods/${resolveId(idOrSlug) ?: return null}/files")?.data
         else coroutineScope {
             loaders.map { loader ->
                 async {
-                    repoRequest<GetModFilesResponse>("/mods/${resolveId(idOrSlug) ?: return@async null}/files") {
+                    repoRequest<CurseforgeDataWrapper<List<File>>>("/mods/${resolveId(idOrSlug) ?: return@async null}/files") {
                         parameter("modLoaderType", loader.curseforgeId ?: error("The loader ${loader.displayName} is not supported by Curseforge"))
                     }?.data
                 }
