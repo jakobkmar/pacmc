@@ -23,4 +23,6 @@ data class ModSlug(
     override val idOrSlug get() = slug
 
     override fun toString() = super.toString()
+
+    companion object
 }
