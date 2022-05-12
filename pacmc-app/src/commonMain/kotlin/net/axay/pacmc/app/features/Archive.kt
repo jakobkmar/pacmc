@@ -179,14 +179,14 @@ class Archive(val name: String) {
     }
 
     private suspend fun uninstall(modId: ModId): TransactionPartResult {
-        val archive = realm.findArchive()
+        val dbArchive = realm.findArchive()
 
         val wasPresent = realm.write {
-            findLatest(archive)!!.installed.removeAll { it.readModId() == modId }
+            findLatest(dbArchive)!!.installed.removeAll { it.readModId() == modId }
         }
 
         var removedAny = false
-        Environment.fileSystem.list(archive.readPath()).forEach {
+        Environment.fileSystem.list(dbArchive.readPath()).forEach {
             if (it.isArchiveFile() && ModFile.modIdFromPath(it) == modId) {
                 removedAny = true
                 Environment.fileSystem.delete(path = it, mustExist = false)
@@ -215,11 +215,11 @@ class Archive(val name: String) {
     }
 
     suspend fun prepareRefresh() {
-        val archive = realm.findArchive()
+        val dbArchive = realm.findArchive()
         realm.write {
-            findLatest(archive)!!.installed.removeAll { it.dependency }
+            findLatest(dbArchive)!!.installed.removeAll { it.dependency }
         }
-        Environment.fileSystem.list(archive.readPath()).forEach {
+        Environment.fileSystem.list(dbArchive.readPath()).forEach {
             if (it.isArchiveFile()) {
                 Environment.fileSystem.delete(it, mustExist = false)
             }
