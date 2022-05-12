@@ -14,14 +14,19 @@ fun <T> Terminal.choose(
         print("$message (provide the number): ")
         val input = readlnOrNull() ?: return null
 
+        if (input.isEmpty()) {
+            warning("Please enter a number")
+            continue
+        }
+
         val index = input.toIntOrNull()?.minus(1)
         if (index == null) {
-            warning("$input is not a valid number")
+            warning("'$input' is not a valid number")
             continue
         }
 
         if (index !in entries.indices) {
-            warning("$input is not a valid choice")
+            warning("'$input' is not a valid choice")
             continue
         }
 
