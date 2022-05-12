@@ -31,7 +31,7 @@ data class CommonProjectResult(
             name = mod.name,
             author = mod.authors.first().name,
             description = mod.summary,
-            iconUrl = mod.logo.thumbnailUrl,
+            iconUrl = mod.logo?.thumbnailUrl,
             latestVersion = mod.latestFilesIndexes.mapNotNull { MinecraftVersion.fromString(it.gameVersion) }.maxOrNull(),
         )
     }

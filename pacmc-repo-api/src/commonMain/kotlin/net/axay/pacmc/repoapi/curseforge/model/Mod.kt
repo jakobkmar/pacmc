@@ -9,6 +9,6 @@ data class Mod(
     val slug: String,
     val summary: String,
     val authors: List<ModAuthor>,
-    val logo: ModAsset,
+    val logo: ModAsset? = null,
     val latestFilesIndexes: List<FileIndex>,
 )
