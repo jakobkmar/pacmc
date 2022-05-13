@@ -1,22 +1,22 @@
 {
-  "version": "${version}",
-  "description": "${description}",
-  "homepage": "${githubUrl}",
-  "license": "${license}",
-  "suggest": {
-    "JDK": [
-      "java/openjdk"
-    ]
-  },
-  "url": "${githubUrl}/releases/download/${version}/pacmc-${version}.zip",
-  "hash": "${zipHashSha256}",
-  "extract_dir": "pacmc-${version}",
-  "bin": "bin/pacmc.bat",
-  "checkver": {
-    "github": "${githubUrl}"
-  },
-  "autoupdate": {
-    "url": "${githubUrl}/releases/download/$version/pacmc-$version.zip",
-    "extract_dir": "pacmc-$version"
-  }
+    "version": "${version}",
+    "description": "${description}",
+    "homepage": "${githubUrl}",
+    "license": "${license}",
+    "suggest": {
+        "JDK": [
+            "java/openjdk"
+        ]
+    },
+    "url": "${githubUrl}/releases/download/${version}/pacmc-${version}.zip",
+    "hash": "${zipHashSha256}",
+    "extract_dir": "pacmc-${version}",
+    "bin": "bin/pacmc.bat",
+    "checkver": {
+        "github": "${githubUrl}"
+    },
+    "autoupdate": {
+        "url": "${githubUrl}/releases/download/$version/pacmc-$version.zip",
+        "extract_dir": "pacmc-$version"
+    }
 }
