@@ -15,6 +15,6 @@ class Pacmc < Formula
   end
 
   test do
-    assert_includes shell_output("#{bin}/pacmc debug test"), "Hello user! pacmc works."
+    assert_match(/Hello user! pacmc works./, shell_output("#{bin}/pacmc debug test"))
   end
 end

@@ -1,6 +1,6 @@
 allprojects {
     group = "net.axay"
-    version = "0.5.1"
+    version = "0.5.2"
     description = "An easy-to-use Minecraft package manager and launcher"
 }
 
