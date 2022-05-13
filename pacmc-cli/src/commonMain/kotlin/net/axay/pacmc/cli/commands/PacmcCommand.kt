@@ -16,6 +16,7 @@ class PacmcCommand : CliktCommand(
             UpdateCommand(),
             ListCommand(),
             RefreshCommand(),
+            DebugCommand(),
         )
     }
 
