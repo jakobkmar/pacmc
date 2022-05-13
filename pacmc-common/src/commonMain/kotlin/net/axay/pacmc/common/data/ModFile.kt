@@ -16,7 +16,7 @@ class ModFile(
             val fileName = path.name.removeSuffix(".pacmc.$extension")
 
             val idPart = fileName.takeLastWhile { it != '_' }
-            val repositoryPart = fileName.removeSuffix("_${idPart}")
+            val repositoryPart = fileName.removeSuffix("_${idPart}").takeLastWhile { it != '_' }
 
             return ModId(
                 Repository.values().find { it.shortForm == repositoryPart } ?: return null,
