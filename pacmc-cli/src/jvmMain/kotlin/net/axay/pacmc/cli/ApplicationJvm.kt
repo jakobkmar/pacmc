@@ -8,6 +8,6 @@ actual suspend fun main(args: Array<String>) {
     } catch (exc: Exception) {
         exc.printStackTrace()
     } finally {
-        exitProcess(1) // TODO this shouldn't be necessary but realm currently does not close correctly
+        exitProcess(0) // TODO this shouldn't be necessary but realm currently does not close correctly
     }
 }
