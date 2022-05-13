@@ -30,7 +30,7 @@ class CurseforgeApi(
     private suspend fun RequestContext.resolveId(idOrSlug: IdOrSlug): String? {
         return when (idOrSlug) {
             is ModId -> idOrSlug.id
-            is ModSlug -> searchProjects(idOrSlug.slug, sortOrder = ModsSearchSortField.NAME)
+            is ModSlug -> searchProjects(idOrSlug.slug, isSlug = true)
                 ?.find { it.slug == idOrSlug.slug }?.id?.toString()
         }
     }
@@ -39,9 +39,10 @@ class CurseforgeApi(
         searchFilter: String,
         pageSize: Int? = null,
         sortOrder: ModsSearchSortField? = null,
+        isSlug: Boolean = false,
     ): List<Mod>? = repoRequest<CurseforgeDataWrapper<List<Mod>>>("/mods/search") {
         parameter("gameId", 432) // TODO request this value
-        parameter("searchFilter", searchFilter)
+        parameter(if (isSlug) "slug" else "searchFilter", searchFilter)
         parameter("pageSize", pageSize)
         parameter("sortOrder", sortOrder?.ordinal?.plus(1))
     }?.data
