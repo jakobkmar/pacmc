@@ -47,7 +47,7 @@ class ArchiveCommand : CliktCommand(
 
         private val gameVersionString by option("-g", "--game-version", help = "The game version content installed to this archive must be made for")
         private val archiveDisplayName by option("-d", "--display-name", help = "Display name for the archive allowing more characters than the identifier")
-        private val loaderNameString by option("-l", "--load", help = "The loader mods installed to this archive must support")
+        private val loaderNameString by option("-l", "--loader", help = "The loader mods installed to this archive must support")
 
         companion object {
             suspend fun create(
