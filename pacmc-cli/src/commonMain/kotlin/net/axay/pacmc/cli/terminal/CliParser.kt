@@ -37,7 +37,10 @@ object CliParser {
         class Invalid(val slug: String, val notFound: Boolean = false) : SlugResolveResult()
     }
 
-    suspend fun resolveSlugs(rawSlugs: List<String>): Set<ModId>? {
+    suspend fun resolveSlugs(
+        rawSlugs: List<String>,
+        archive: Archive? = null,
+    ): Set<ModId>? {
         val spinner = SpinnerAnimation()
         spinner.start()
 
@@ -56,7 +59,16 @@ object CliParser {
                     } else if (ids.isEmpty()) {
                         SlugResolveResult.Invalid(rawSlug, notFound = true)
                     } else {
-                        SlugResolveResult.Ambiguous(ids)
+                        val modId = archive?.getInstalled()?.singleOrNull {
+                            val installedModId = it.readModId()
+                            ids.any { (_, id) -> id == installedModId }
+                        }?.readModId()
+
+                        if (modId != null) {
+                            SlugResolveResult.Resolved(modId)
+                        } else {
+                            SlugResolveResult.Ambiguous(ids)
+                        }
                     }
                 }
                 2 -> {

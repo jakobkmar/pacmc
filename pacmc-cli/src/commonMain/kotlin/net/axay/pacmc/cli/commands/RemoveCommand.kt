@@ -26,7 +26,7 @@ class RemoveCommand : CliktCommand(
         terminal.println("Resolving effects of removal...")
         val archive = Archive.terminalFromString(archiveName) ?: return@launchJob
 
-        val modIds = CliParser.resolveSlugs(modSlugNames) ?: return@launchJob
+        val modIds = CliParser.resolveSlugs(modSlugNames, archive) ?: return@launchJob
 
         val spinner = SpinnerAnimation()
         spinner.start()
