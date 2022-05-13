@@ -34,7 +34,7 @@ object CliParser {
     private sealed class SlugResolveResult {
         class Resolved(val id: ModId) : SlugResolveResult()
         class Ambiguous(val possibleSlugs: List<Pair<ModSlug, ModId>>) : SlugResolveResult()
-        class Invalid(val slug: String) : SlugResolveResult()
+        class Invalid(val slug: String, val notFound: Boolean = false) : SlugResolveResult()
     }
 
     suspend fun resolveSlugs(rawSlugs: List<String>): Set<ModId>? {
@@ -54,7 +54,7 @@ object CliParser {
                     if (singleResult != null) {
                         SlugResolveResult.Resolved(singleResult.second)
                     } else if (ids.isEmpty()) {
-                        SlugResolveResult.Invalid(rawSlug)
+                        SlugResolveResult.Invalid(rawSlug, notFound = true)
                     } else {
                         SlugResolveResult.Ambiguous(ids)
                     }
@@ -71,10 +71,12 @@ object CliParser {
                         val id = ModSlug(repo, slug).resolveId()
                         if (id != null) {
                             return@resolve SlugResolveResult.Resolved(id)
+                        } else {
+                            SlugResolveResult.Invalid(rawSlug, notFound = true)
                         }
+                    } else {
+                        SlugResolveResult.Invalid(rawSlug)
                     }
-
-                    SlugResolveResult.Invalid(rawSlug)
                 }
                 else -> SlugResolveResult.Invalid(rawSlug)
             }
@@ -85,7 +87,11 @@ object CliParser {
         val invalidSlugs = slugResolveResults.filterIsInstance<SlugResolveResult.Invalid>()
         if (invalidSlugs.isNotEmpty()) {
             invalidSlugs.forEach {
-                terminal.warning("The slug ${TextColors.brightRed(it.slug)} is invalid")
+                if (it.notFound) {
+                    terminal.warning("The project ${TextColors.brightRed(it.slug)} could not be found")
+                } else {
+                    terminal.warning("The slug ${TextColors.brightRed(it.slug)} is invalid")
+                }
             }
             return null
         }
