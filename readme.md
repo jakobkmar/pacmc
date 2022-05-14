@@ -3,8 +3,7 @@
 **`pacmc`** is a package manager (and soon to be launcher) for Minecraft mods.
 
 The aim of this project is to massively reduce the effort you have to put in to installing - and most importantly -
-keeping your mods up to date. Install Fabric, Quilt and Forge mods from Modrinth and Curseforge
-(temporarily disabled)!
+keeping your mods up to date. Install Fabric, Quilt and Forge mods from Modrinth and Curseforge!
 
 To install pacmc, visit the [**Installation** section](#installation).
 
