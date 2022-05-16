@@ -120,6 +120,12 @@ public data class Version(
      * **Example**: `false`
      */
     public val primary: Boolean,
+    /**
+     * The size of the file in bytes
+     *
+     * **Example**: `1097270`
+     */
+    public val size: Int,
   ) {
     @Serializable
     public data class Hashes(
