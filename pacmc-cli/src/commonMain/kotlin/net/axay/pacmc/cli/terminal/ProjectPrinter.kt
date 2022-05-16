@@ -21,7 +21,7 @@ private val Repository.textColor
 
 private fun repoEntry(repository: Repository, entry: String): String {
     return repository.run { textColor(displayName.lowercase() + "/") } +
-        TextColors.white(TextStyles.bold(TextStyles.underline(entry)))
+        TextColors.brightWhite(TextStyles.bold(TextStyles.underline(entry)))
 }
 
 val ModSlug.terminalString get() = repoEntry(repository, slug)
@@ -41,7 +41,7 @@ suspend fun ModId.optimalTerminalString() = terminalStringOrNull() ?: repoEntry(
 suspend fun CommonProjectVersion.optimalTerminalString(): String {
     // TODO sometimes, only the request using slugs has been pre-cached
     val projectString = modId.terminalStringOrNull() ?: terminalString
-    return projectString + " " + TextColors.gray("($number)")
+    return projectString + " " + TextColors.brightCyan(number)
 }
 
 suspend fun DbInstalledProject.optimalTerminalString(): String = coroutineScope {
@@ -54,7 +54,7 @@ suspend fun DbInstalledProject.optimalTerminalString(): String = coroutineScope 
             ?.number ?: "version id: $version"
     }
 
-    projectString.await() + " " + TextColors.gray("(${versionString.await()})")
+    projectString.await() + " " + TextColors.brightCyan(versionString.await())
 }
 
 fun Terminal.printProject(project: CommonProjectResult) = println(buildString {

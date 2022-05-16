@@ -37,7 +37,7 @@ class RemoveCommand : CliktCommand(
         if (removalResolveResult.stillNeeded.isNotEmpty() || removalResolveResult.notInstalled.isNotEmpty()) {
             terminal.println("The following content cannot be uninstalled:")
             removalResolveResult.stillNeeded.forEach {
-                terminal.println("  ${it.optimalTerminalString()} ${TextColors.brightCyan("(required as a dependency)")}")
+                terminal.println("  ${it.optimalTerminalString()} ${TextColors.cyan("(required as a dependency)")}")
             }
             removalResolveResult.notInstalled.forEach {
                 terminal.println("  ${it.optimalTerminalString()} ${TextColors.brightYellow("(not installed)")}")

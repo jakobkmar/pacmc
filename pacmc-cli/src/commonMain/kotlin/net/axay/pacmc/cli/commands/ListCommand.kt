@@ -36,7 +36,7 @@ class ListCommand : CliktCommand(
                         buildString {
                             append(project.optimalTerminalString())
                             if (project.dependency) {
-                                append(" ${TextColors.brightCyan("(dependency)")}")
+                                append(" ${TextColors.cyan("(dependency)")}")
                             }
                         }
                     }

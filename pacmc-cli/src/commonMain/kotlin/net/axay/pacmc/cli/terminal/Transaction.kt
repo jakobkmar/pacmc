@@ -20,7 +20,7 @@ fun Terminal.printAndConfirmTransaction(
     yesFlag: Boolean,
 ): Boolean {
     val upSymbol = if (OperatingSystem.notWindows) "↑" else "u"
-    val dep = TextColors.brightCyan("(dependency)")
+    val dep = TextColors.cyan("(dependency)")
 
     println(headline)
 
@@ -40,7 +40,7 @@ fun Terminal.printAndConfirmTransaction(
         println("${TextColors.brightRed("-")} remove ${modStrings[it]}")
     }
     transaction.removeDependencies.forEach {
-        println("${TextColors.brightRed("-")} remove ${modStrings[it]} ${TextColors.brightCyan("(unused dependency)")}")
+        println("${TextColors.brightRed("-")} remove ${modStrings[it]} ${TextColors.cyan("(unused dependency)")}")
     }
     transaction.makeDependency.forEach {
         println("${TextColors.brightYellow("!")} downgrade status to dependency ${modStrings[it]} $dep")
