@@ -318,29 +318,26 @@ fun ArchiveScreen() = Box(Modifier.fillMaxSize()) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ArchiveItem(archive: DbArchive) {
-    Row(
-        Modifier
-            .clip(RoundedCornerShape(10.dp))
-            .background(Color.White)
-            .padding(16.dp)
-            .fillMaxWidth()
-    ) {
-        Box(
-            Modifier
-                .size(60.dp)
-                .align(Alignment.CenterVertically)
-                .background(RGBInt(archive.color.toUInt()).toSRGB().run { Color(redInt, greenInt, blueInt) }, RoundedCornerShape(15.dp))
-                .border(BorderStroke(4.dp, Color.Black), RoundedCornerShape(15.dp))
-        )
-        Spacer(Modifier.width(16.dp))
-        SelectionContainer {
-            Column {
-                Text(archive.displayName, fontWeight = FontWeight.Bold)
-                Text(archive.name)
-                Text(archive.path)
-                Text(archive.readLoaders().joinToString())
+    ElevatedCard(Modifier.fillMaxWidth()) {
+        Row(Modifier.padding(16.dp)) {
+            Box(
+                Modifier
+                    .size(60.dp)
+                    .align(Alignment.CenterVertically)
+                    .background(RGBInt(archive.color.toUInt()).toSRGB().run { Color(redInt, greenInt, blueInt) }, RoundedCornerShape(15.dp))
+                    .border(BorderStroke(4.dp, Color.Black), RoundedCornerShape(15.dp))
+            )
+            Spacer(Modifier.width(16.dp))
+            SelectionContainer {
+                Column {
+                    Text(archive.displayName, fontWeight = FontWeight.Bold)
+                    Text(archive.name)
+                    Text(archive.path)
+                    Text(archive.readLoaders().joinToString())
+                }
             }
         }
     }

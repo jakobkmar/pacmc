@@ -9,17 +9,14 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material.Button
-import androidx.compose.material.Icon
-import androidx.compose.material.LinearProgressIndicator
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -32,10 +29,11 @@ import compose.icons.tablericons.Download
 import compose.icons.tablericons.MoodCry
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import net.axay.pacmc.common.data.Repository
 import net.axay.pacmc.app.repoapi.model.CommonProjectResult
 import net.axay.pacmc.app.repoapi.repoApiContext
+import net.axay.pacmc.common.data.Repository
 import net.axay.pacmc.gui.cache.producePainterCached
+import net.axay.pacmc.gui.util.currentBaseTextColor
 import net.axay.pacmc.repoapi.CachePolicy
 
 private sealed interface SearchResponse
@@ -83,14 +81,14 @@ fun SearchScreen() {
     }
 
     if (loading) {
-        LinearProgressIndicator(Modifier.fillMaxWidth().height(3.dp), color = Color.DarkGray, )
+        LinearProgressIndicator(Modifier.fillMaxWidth().height(3.dp))
     }
 
     Column {
         Row(
             Modifier
                 .fillMaxWidth().padding(20.dp).height(40.dp)
-                .background(Color.White, RoundedCornerShape(10.dp)),
+                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(10.dp)),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(Icons.Default.Search, "Search", Modifier.padding(start = 8.dp).padding(vertical = 4.dp))
@@ -102,7 +100,10 @@ fun SearchScreen() {
                         fetchResults(true)
                     },
                     modifier = Modifier.fillMaxWidth().padding(start = 4.dp, end = 8.dp).padding(vertical = 4.dp),
-                    textStyle = TextStyle(fontSize = TextUnit(18f, TextUnitType.Sp)),
+                    textStyle = TextStyle(
+                        fontSize = TextUnit(18f, TextUnitType.Sp),
+                        color = currentBaseTextColor()
+                    ),
                     maxLines = 1,
                 )
                 if (searchTerm.isEmpty()) {
@@ -152,16 +153,13 @@ fun SearchScreen() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProjectItem(project: CommonProjectResult, modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .height(125.dp)
-            .clip(RoundedCornerShape(10.dp))
-            .background(Color.White)
-            .padding(16.dp)
+    ElevatedCard(
+        modifier = modifier.height(135.dp),
     ) {
-        Row(Modifier.fillMaxHeight(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(Modifier.fillMaxHeight().padding(16.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             ProjectIconImage(
                 project,
                 Modifier.clip(RoundedCornerShape(8.dp)).fillMaxHeight().aspectRatio(1f).align(Alignment.CenterVertically)
@@ -176,13 +174,20 @@ fun ProjectItem(project: CommonProjectResult, modifier: Modifier = Modifier) {
                         Spacer(Modifier.width(4.dp))
                         Text("by ${project.author}", Modifier.align(Alignment.CenterVertically))
                     }
-                    Text(project.description, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                    Text(project.description, maxLines = 2, overflow = TextOverflow.Ellipsis, lineHeight = 0.1.sp)
                 }
 
-                Box {
-                    Row(Modifier.background(Color(232, 232, 232), RoundedCornerShape(5.dp)).padding(4.dp)) {
-                        Icon(TablerIcons.Download, "Download", Modifier.align(Alignment.CenterVertically))
-                        Text("Install", Modifier.padding(5.dp))
+                ElevatedButton(
+                    onClick = {},
+                    modifier = Modifier.height(30.dp),
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(horizontal = 15.dp)
+                    ) {
+                        Icon(TablerIcons.Download, "Download", Modifier.size(20.dp).padding(end = 5.dp))
+                        Text("Install")
                     }
                 }
             }
