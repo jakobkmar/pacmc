@@ -5,13 +5,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,35 +19,75 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.ExperimentalUnitApi
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import net.axay.pacmc.gui.cache.producePainterCached
 import net.axay.pacmc.server.model.JsonMarkup
 import okio.ByteString.Companion.toByteString
 import java.awt.Desktop
 import java.net.URI
 
-@Composable
-fun JsonMarkup(node: JsonMarkup.RootNode) = JsonMarkup(node, MarkupStyle(20f))
+private class MarkupBuilder {
+    private var stringBuilder: AnnotatedString.Builder? = null
+    val baseFontSize = 17
 
-@OptIn(ExperimentalMaterialApi::class)
+    private val styles = ArrayDeque<SpanStyle>()
+
+    inline fun withStyle(style: SpanStyle, block: () -> Unit) {
+        styles.addLast(style)
+        stringBuilder?.pushStyle(style)
+        block()
+        stringBuilder?.pop()
+        styles.removeLast()
+    }
+
+    fun getOrCreateString(): AnnotatedString.Builder {
+        if (stringBuilder == null) {
+            stringBuilder = AnnotatedString.Builder().apply {
+                pushStyle(SpanStyle(fontSize = baseFontSize.sp))
+                styles.forEach { pushStyle(it) }
+            }
+        }
+        return stringBuilder!!
+    }
+
+    @Composable
+    fun endString() {
+        stringBuilder?.let { builder ->
+            builder.pop() // pop base font size
+            repeat(styles.size) {
+                builder.pop()
+            }
+            val annotatedString = builder.toAnnotatedString()
+            if (annotatedString.isNotEmpty())
+                Text(annotatedString)
+        }
+        stringBuilder = null
+    }
+}
+
+private val LocalListLevel = compositionLocalOf { 0 }
+
 @Composable
-private fun JsonMarkup(node: JsonMarkup.Node, style: MarkupStyle) {
+fun JsonMarkup(node: JsonMarkup.RootNode) = MarkupBuilder().JsonMarkup(node)
+
+@Composable
+private fun MarkupBuilder.JsonMarkup(node: JsonMarkup.Node) {
+    if (node !is JsonMarkup.StyleNode && node !is JsonMarkup.TextNode) {
+        endString()
+    }
+
     when (node) {
         is JsonMarkup.RootNode -> {
             Column {
-                renderNodes(node.contents, style)
+                renderNodes(node.contents)
+                endString()
             }
-        }
-        is JsonMarkup.HeadingNode -> {
-            val newStyle = style.copy(heading = node.size)
-            renderNodes(node.contents, newStyle)
         }
         is JsonMarkup.ImageNode -> {
             val imageUrl = node.url.let { if (it.startsWith("/content")) "https://www.minecraft.net${it}" else it }
@@ -68,7 +108,7 @@ private fun JsonMarkup(node: JsonMarkup.Node, style: MarkupStyle) {
                     Desktop.getDesktop().browse(URI(node.url))
                 }
             ) {
-                renderNodes(node.contents, style)
+                renderNodes(node.contents)
                 if (node.video) {
                     Box(Modifier.align(Alignment.Center).size(70.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.8f))) {
                         Icon(
@@ -82,132 +122,93 @@ private fun JsonMarkup(node: JsonMarkup.Node, style: MarkupStyle) {
             }
         }
         is JsonMarkup.ListNode -> {
+            val listLevel = LocalListLevel.current
+
             Column {
-                node.elements.forEach { element ->
+                node.elements.forEach { listPart ->
                     Row {
-                        Text("●")
-                        renderNodes(element, style)
+                        Text(
+                            text = listOf("•", "◦", "▸", "▹").run { getOrNull(listLevel) ?: last() } + " ",
+                            modifier = Modifier.padding(start = (3 * listLevel).dp),
+                        )
+                        Column {
+                            CompositionLocalProvider(LocalListLevel provides listLevel + 1) {
+                                renderNodes(listPart)
+                                endString()
+                            }
+                        }
                     }
                 }
             }
         }
         is JsonMarkup.ParagraphNode -> {
-            Box(Modifier.padding(vertical = 10.dp)) {
-                renderNodes(node.contents, style)
-            }
-        }
-        is JsonMarkup.QuoteNode -> Row {
-            Box(Modifier.fillMaxHeight().width(4.dp).background(Color.Black))
-            renderNodes(node.contents, style)
-        }
-        is JsonMarkup.StyleNode -> error("Unhandled style node")
-        is JsonMarkup.TextNode -> error("Unhandled text node")
-    }
-}
-
-@OptIn(ExperimentalUnitApi::class)
-@Composable
-private fun JsonMarkupText(
-    node: JsonMarkup.TextNode,
-    style: MarkupStyle,
-    builder: AnnotatedString.Builder,
-) {
-    val fontSize = if (style.heading != null && style.heading in 1..6) {
-        TextUnit(style.fontSize + ((6f * 2 + 2) - style.heading * 2), TextUnitType.Sp)
-    } else if (style.small) {
-        TextUnit(style.fontSize - 4, TextUnitType.Sp)
-    } else TextUnit(style.fontSize, TextUnitType.Sp)
-
-    val decoration = if (style.strikethrough || style.deleted)
-        TextDecoration.LineThrough
-    else if (style.underline || style.inserted || node is JsonMarkup.TextNode.Link)
-        TextDecoration.Underline
-    else null
-
-    builder.withStyle(SpanStyle(
-        fontWeight = if (style.bold || style.emphasized || style.important) FontWeight.Bold else null,
-        textDecoration = decoration,
-        fontStyle = if (style.italic) FontStyle.Italic else null,
-        fontSize = fontSize,
-        background = if (style.marked) Color.Yellow else Color.Unspecified,
-        color = if (node is JsonMarkup.TextNode.Link) MaterialTheme.colors.secondary else Color.Unspecified,
-    )) {
-        if (builder.length == 0)
-            append(node.text.trimStart())
-        else
-            append(node.text)
-    }
-}
-
-@Composable
-private fun renderNodes(
-    nodes: List<JsonMarkup.Node>,
-    style: MarkupStyle,
-    stringBuilder: AnnotatedString.Builder? = null,
-): Boolean {
-    var currentStringBuilder: AnnotatedString.Builder = stringBuilder ?: AnnotatedString.Builder()
-
-    @Composable
-    fun endString() {
-        currentStringBuilder.toAnnotatedString().let { if (it.isNotEmpty()) Text(it) }
-        currentStringBuilder = AnnotatedString.Builder()
-    }
-
-    nodes.forEach { node ->
-        when (node) {
-            is JsonMarkup.TextNode -> {
-                JsonMarkupText(node, style, currentStringBuilder)
-            }
-            is JsonMarkup.StyleNode -> {
-                renderNodes(node.contents, style.copyWith(node), currentStringBuilder)
-            }
-            else -> {
+            Column(Modifier.padding(vertical = 10.dp)) {
+                renderNodes(node.contents)
                 endString()
-                JsonMarkup(node, style)
             }
         }
-    }
-
-    return if (currentStringBuilder != stringBuilder) {
-        endString()
-        false // the string builder has changed
-    } else {
-        true // the string builder is still the same
+        is JsonMarkup.QuoteNode -> {
+            Row {
+                Box(Modifier.fillMaxHeight().width(4.dp).background(Color.Black))
+                Column {
+                    renderNodes(node.contents)
+                    endString()
+                }
+            }
+        }
+        is JsonMarkup.HeadingNode -> {
+            withStyle(SpanStyle(fontSize = (baseFontSize + (node.size * 3)).sp)) {
+                renderNodes(node.contents)
+            }
+        }
+        is JsonMarkup.Preformatted -> {
+            Column(
+                Modifier
+                    .background(Color.LightGray.copy(alpha = .5f))
+                    .padding(5.dp)
+            ) {
+                withStyle(SpanStyle(fontFamily = FontFamily.Monospace)) {
+                    renderNodes(node.contents)
+                }
+            }
+        }
+        is JsonMarkup.StyleNode -> {
+            withStyle(node.getSpanStyle()) {
+                renderNodes(node.contents)
+            }
+        }
+        is JsonMarkup.TextNode -> {
+            getOrCreateString().append(node.text)
+        }
     }
 }
 
-private data class MarkupStyle(
-    val fontSize: Float,
-    val heading: Int? = null,
-    val bold: Boolean = false,
-    val code: Boolean = false,
-    val deleted: Boolean = false,
-    val emphasized: Boolean = false,
-    val important: Boolean = false,
-    val inserted: Boolean = false,
-    val italic: Boolean = false,
-    val marked: Boolean = false,
-    val preformatted: Boolean = false,
-    val small: Boolean = false,
-    val strikethrough: Boolean = false,
-    val subscript: Boolean = false,
-    val superscript: Boolean = false,
-    val underline: Boolean = false,
-) {
-    fun copyWith(node: JsonMarkup.StyleNode) = when (node) {
-        is JsonMarkup.StyleNode.Bold -> copy(bold = true)
-        is JsonMarkup.StyleNode.Code -> copy(code = true)
-        is JsonMarkup.StyleNode.Deleted -> copy(deleted = true)
-        is JsonMarkup.StyleNode.Emphasized -> copy(emphasized = true)
-        is JsonMarkup.StyleNode.Important -> copy(important = true)
-        is JsonMarkup.StyleNode.Inserted -> copy(inserted = true)
-        is JsonMarkup.StyleNode.Italic -> copy(italic = true)
-        is JsonMarkup.StyleNode.Marked -> copy(marked = true)
-        is JsonMarkup.StyleNode.Preformatted -> copy(preformatted = true)
-        is JsonMarkup.StyleNode.Small -> copy(small = true)
-        is JsonMarkup.StyleNode.Strikethrough -> copy(strikethrough = true)
-        is JsonMarkup.StyleNode.Subscript -> copy(subscript = true)
-        is JsonMarkup.StyleNode.Superscript -> copy(superscript = true)
-        is JsonMarkup.StyleNode.Underline -> copy(underline = true)
+@Composable
+private fun MarkupBuilder.renderNodes(nodes: Iterable<JsonMarkup.Node>) {
+    nodes.forEach {
+        JsonMarkup(it)
     }
+}
+
+private fun JsonMarkup.StyleNode.getSpanStyle() = when (this) {
+    is JsonMarkup.StyleNode.Bold, is JsonMarkup.StyleNode.Emphasized, is JsonMarkup.StyleNode.Important -> SpanStyle(fontWeight = FontWeight.Bold)
+    is JsonMarkup.StyleNode.Code -> SpanStyle(
+        fontFamily = FontFamily.Monospace,
+        fontWeight = FontWeight.Medium,
+        background = Color.LightGray.copy(alpha = .5f)
+    )
+    is JsonMarkup.StyleNode.Strikethrough, is JsonMarkup.StyleNode.Deleted -> SpanStyle(textDecoration = TextDecoration.LineThrough)
+    is JsonMarkup.StyleNode.Underline -> SpanStyle(textDecoration = TextDecoration.Underline)
+    is JsonMarkup.StyleNode.Italic, is JsonMarkup.StyleNode.Inserted -> SpanStyle(fontStyle = FontStyle.Italic)
+    is JsonMarkup.StyleNode.Marked -> SpanStyle(background = Color.Yellow.copy(alpha = .5f))
+    is JsonMarkup.StyleNode.Subscript -> SpanStyle(
+        baselineShift = BaselineShift(-0.2f),
+        // TODO this should be relative to current font size
+        fontSize = 10.sp
+    )
+    is JsonMarkup.StyleNode.Superscript -> SpanStyle(
+        baselineShift = BaselineShift.Superscript,
+        fontSize = 10.sp
+    )
+    is JsonMarkup.StyleNode.Small -> TODO()
 }

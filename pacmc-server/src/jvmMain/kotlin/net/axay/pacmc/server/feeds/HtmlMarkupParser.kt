@@ -13,6 +13,7 @@ object HtmlMarkupParser {
                     // wrappers
                     "p" -> ParagraphNode(parseNodes(child))
                     "blockquote" -> QuoteNode(parseNodes(child))
+                    "pre" -> Preformatted(parseNodes(child))
                     // elements
                     "img" -> child.attr("src").ifBlank { null }?.let { ImageNode(it.trim()) }
                     // style
@@ -26,7 +27,6 @@ object HtmlMarkupParser {
                     "del" -> StyleNode.Deleted(parseNodes(child))
                     "mark" -> StyleNode.Marked(parseNodes(child))
                     "code" -> StyleNode.Code(parseNodes(child))
-                    "pre" -> StyleNode.Preformatted(parseNodes(child))
                     "small" -> StyleNode.Small(parseNodes(child))
                     "sub" -> StyleNode.Subscript(parseNodes(child))
                     "sup" -> StyleNode.Superscript(parseNodes(child))

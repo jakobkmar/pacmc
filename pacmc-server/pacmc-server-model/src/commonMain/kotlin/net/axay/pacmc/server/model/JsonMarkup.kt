@@ -42,7 +42,6 @@ class JsonMarkup {
         @Serializable @SerialName("style.inserted") class Inserted(override val contents: List<Node>) : StyleNode()
         @Serializable @SerialName("style.subscript") class Subscript(override val contents: List<Node>) : StyleNode()
         @Serializable @SerialName("style.superscript") class Superscript(override val contents: List<Node>) : StyleNode()
-        @Serializable @SerialName("style.preformatted") class Preformatted(override val contents: List<Node>) : StyleNode()
         @Serializable @SerialName("style.code") class Code(override val contents: List<Node>) : StyleNode()
     }
 
@@ -90,5 +89,10 @@ class JsonMarkup {
         val contents: List<Node>,
         val url: String,
         val video: Boolean = false,
+    ) : Node()
+
+    @Serializable
+    class Preformatted(
+        val contents: List<Node>,
     ) : Node()
 }
