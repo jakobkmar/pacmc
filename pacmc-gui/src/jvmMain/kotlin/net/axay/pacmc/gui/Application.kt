@@ -1,13 +1,16 @@
 package net.axay.pacmc.gui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Icon
-import androidx.compose.material.NavigationRail
-import androidx.compose.material.NavigationRailItem
 import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,12 +55,12 @@ fun main() {
             title = "pacmc",
             state = rememberWindowState(width = 1200.dp, height = 800.dp),
         ) {
-            Row(
-                Modifier.fillMaxSize().background(Color(232, 232, 232)),
-            ) {
+            Row {
                 var currentScreen by remember { mutableStateOf(Screen.SEARCH) }
 
-                NavigationRail {
+                NavigationRail(
+                    containerColor = Color.Unspecified,
+                ) {
                     Screen.values().forEach {
                         NavigationRailItem(
                             currentScreen == it,

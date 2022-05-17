@@ -22,6 +22,8 @@ kotlin {
         named("jvmMain") {
             dependencies {
                 implementation(compose.desktop.currentOs)
+                @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
+                implementation(compose.material3)
 
                 implementation(libs.devsrsouza.icons.tablericons)
                 implementation(libs.colormath.compose)

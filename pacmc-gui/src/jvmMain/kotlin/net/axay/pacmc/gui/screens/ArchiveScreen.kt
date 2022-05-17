@@ -8,7 +8,9 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.*
+import androidx.compose.material.CursorDropdownMenu
+import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,20 +36,20 @@ import io.realm.realmListOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import net.axay.pacmc.common.data.ContentType
-import net.axay.pacmc.common.data.MinecraftVersion
-import net.axay.pacmc.common.data.ModLoader
 import net.axay.pacmc.app.database.model.DbArchive
 import net.axay.pacmc.app.database.realm
 import net.axay.pacmc.app.features.Archive
 import net.axay.pacmc.app.repoapi.repoApiContext
+import net.axay.pacmc.common.data.ContentType
+import net.axay.pacmc.common.data.MinecraftVersion
+import net.axay.pacmc.common.data.ModLoader
 import net.axay.pacmc.gui.screens.state.IdentifierState
 import net.axay.pacmc.gui.util.FileChooser
 import okio.Path.Companion.toPath
 import java.awt.Toolkit
 import java.util.*
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class, ExperimentalUnitApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalUnitApi::class)
 @Composable
 fun ArchiveScreen() = Box(Modifier.fillMaxSize()) {
     val archiveScope = rememberCoroutineScope { Dispatchers.Default }
@@ -134,7 +136,7 @@ fun ArchiveScreen() = Box(Modifier.fillMaxSize()) {
                 Spacer(Modifier.width(10.dp))
                 TabRow(
                     0,
-                    backgroundColor = Color.Unspecified,
+                    containerColor = Color.Unspecified,
                     modifier = Modifier.width(300.dp),
                     divider = {},
                 ) {
@@ -219,7 +221,7 @@ fun ArchiveScreen() = Box(Modifier.fillMaxSize()) {
                     onClick = {
                         newArchiveDialog = false
                     },
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colors.error)
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
                 ) {
                     Text("Cancel")
                 }
