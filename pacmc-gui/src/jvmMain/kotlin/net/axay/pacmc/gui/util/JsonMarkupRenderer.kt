@@ -71,7 +71,7 @@ private class MarkupBuilder {
     }
 }
 
-private val LocalListLevel = compositionLocalOf { 0 }
+private val LocalListLevel = compositionLocalOf { 1 }
 
 @Composable
 fun JsonMarkup(node: JsonMarkup.RootNode) = MarkupBuilder().JsonMarkup(node)
@@ -126,11 +126,8 @@ private fun MarkupBuilder.JsonMarkup(node: JsonMarkup.Node) {
 
             Column {
                 node.elements.forEach { listPart ->
-                    Row {
-                        Text(
-                            text = listOf("•", "◦", "▸", "▹").run { getOrNull(listLevel) ?: last() } + " ",
-                            modifier = Modifier.padding(start = (3 * listLevel).dp),
-                        )
+                    Row(modifier = Modifier.padding(start = (30 * listLevel).dp),) {
+                        Text(listOf("•", "◦", "▸", "▹").run { getOrNull(listLevel - 1) ?: last() } + " ")
                         Column {
                             CompositionLocalProvider(LocalListLevel provides listLevel + 1) {
                                 renderNodes(listPart)
@@ -157,8 +154,13 @@ private fun MarkupBuilder.JsonMarkup(node: JsonMarkup.Node) {
             }
         }
         is JsonMarkup.HeadingNode -> {
-            withStyle(SpanStyle(fontSize = (baseFontSize + (node.size * 3)).sp)) {
-                renderNodes(node.contents)
+            Column(
+                Modifier.padding(vertical = (4 + (node.size * 2)).dp)
+            ) {
+                withStyle(SpanStyle(fontSize = (baseFontSize + (node.size * 3)).sp)) {
+                    renderNodes(node.contents)
+                }
+                endString()
             }
         }
         is JsonMarkup.Preformatted -> {
@@ -170,6 +172,7 @@ private fun MarkupBuilder.JsonMarkup(node: JsonMarkup.Node) {
                 withStyle(SpanStyle(fontFamily = FontFamily.Monospace)) {
                     renderNodes(node.contents)
                 }
+                endString()
             }
         }
         is JsonMarkup.StyleNode -> {
