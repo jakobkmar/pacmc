@@ -9,6 +9,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
@@ -17,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -26,6 +28,7 @@ import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import co.touchlab.kermit.Logger
 import net.axay.pacmc.gui.cache.producePainterCached
 import net.axay.pacmc.server.model.JsonMarkup
 import okio.ByteString.Companion.toByteString
@@ -46,10 +49,11 @@ private class MarkupBuilder {
         styles.removeLast()
     }
 
+    @Composable
     fun getOrCreateString(): AnnotatedString.Builder {
         if (stringBuilder == null) {
             stringBuilder = AnnotatedString.Builder().apply {
-                pushStyle(SpanStyle(fontSize = baseFontSize.sp))
+                pushStyle(SpanStyle(fontSize = baseFontSize.sp, color = currentBaseTextColor()))
                 styles.forEach { pushStyle(it) }
             }
         }
@@ -59,7 +63,7 @@ private class MarkupBuilder {
     @Composable
     fun endString() {
         stringBuilder?.let { builder ->
-            builder.pop() // pop base font size
+            builder.pop() // pop base font style
             repeat(styles.size) {
                 builder.pop()
             }
@@ -99,24 +103,30 @@ private fun MarkupBuilder.JsonMarkup(node: JsonMarkup.Node) {
             )
 
             if (painter != null) {
-                Image(painter, node.url, Modifier.fillMaxWidth())
+                Image(painter, node.url, Modifier.fillMaxWidth().background(Color.Red))
             }
         }
         is JsonMarkup.LinkNode -> {
-            Box(
-                modifier = Modifier.clickable {
-                    Desktop.getDesktop().browse(URI(node.url))
+            Box {
+                Column {
+                    renderNodes(node.contents)
                 }
-            ) {
-                renderNodes(node.contents)
                 if (node.video) {
                     Box(Modifier.align(Alignment.Center).size(70.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.8f))) {
-                        Icon(
-                            Icons.Default.PlayArrow,
-                            "Play video",
-                            Modifier.align(Alignment.Center).size(50.dp),
-                            tint = Color.Red
-                        )
+                        val uriHandler = LocalUriHandler.current
+                        IconButton(
+                            onClick = {
+                                Logger.i("Opening ${node.url} in browser")
+                                uriHandler.openUri(node.url)
+                            },
+                            modifier = Modifier.align(Alignment.Center).size(50.dp),
+                        ) {
+                            Icon(
+                                Icons.Default.PlayArrow,
+                                "Play video",
+                                tint = Color.Red
+                            )
+                        }
                     }
                 }
             }
@@ -126,7 +136,7 @@ private fun MarkupBuilder.JsonMarkup(node: JsonMarkup.Node) {
 
             Column {
                 node.elements.forEach { listPart ->
-                    Row(modifier = Modifier.padding(start = (30 * listLevel).dp),) {
+                    Row(modifier = Modifier.padding(start = (15 * listLevel).dp),) {
                         Text(listOf("•", "◦", "▸", "▹").run { getOrNull(listLevel - 1) ?: last() } + " ")
                         Column {
                             CompositionLocalProvider(LocalListLevel provides listLevel + 1) {
@@ -154,8 +164,9 @@ private fun MarkupBuilder.JsonMarkup(node: JsonMarkup.Node) {
             }
         }
         is JsonMarkup.HeadingNode -> {
+            val padding = 4 + (node.size * 2)
             Column(
-                Modifier.padding(vertical = (4 + (node.size * 2)).dp)
+                Modifier.padding(top = (padding * 2).dp, bottom = padding.dp)
             ) {
                 withStyle(SpanStyle(fontSize = (baseFontSize + (node.size * 3)).sp)) {
                     renderNodes(node.contents)
