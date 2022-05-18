@@ -23,7 +23,6 @@ import org.jetbrains.skia.AnimationFrameInfo
 import org.jetbrains.skia.Bitmap
 import org.jetbrains.skia.Codec
 import org.jetbrains.skia.Data
-import kotlin.time.ExperimentalTime
 
 private fun cachePath(group: String, name: String) =
     Environment.cacheDir.resolve("gui/images/${group}/${name}")
@@ -37,7 +36,8 @@ private class AnimationPainterHolder(
     val framesInfo: Array<AnimationFrameInfo>,
 ) : PainterHolder()
 
-@OptIn(ExperimentalTime::class)
+private object InvalidPainterHolder : PainterHolder()
+
 @Composable
 fun producePainterCached(
     url: String,
@@ -76,27 +76,32 @@ fun producePainterCached(
 
             Environment.fileSystem.read(filePath) {
                 val stream = inputStream().buffered()
-                when (extension) {
-                    "svg" -> SinglePainterHolder(loadSvgPainter(stream, density))
-                    "gif" -> {
-                        val bytes = stream.readAllBytes()
-                        val codec = Codec.makeFromData(Data.makeFromBytes(bytes))
+                try {
+                    when (extension) {
+                        "svg" -> SinglePainterHolder(loadSvgPainter(stream, density))
+                        "gif" -> {
+                            val bytes = stream.readAllBytes()
+                            val codec = Codec.makeFromData(Data.makeFromBytes(bytes))
 
-                        if (codec.frameCount > 1) {
-                            AnimationPainterHolder(
-                                (0 until codec.frameCount).map { frameIndex ->
-                                    val bitmap = Bitmap()
-                                    bitmap.allocPixels(codec.imageInfo)
-                                    codec.readPixels(bitmap, frameIndex)
-                                    BitmapPainter(bitmap.asComposeImageBitmap())
-                                },
-                                codec.framesInfo
-                            )
-                        } else {
-                            SinglePainterHolder(BitmapPainter(loadImageBitmap(bytes.inputStream())))
+                            if (codec.frameCount > 1) {
+                                AnimationPainterHolder(
+                                    (0 until codec.frameCount).map { frameIndex ->
+                                        val bitmap = Bitmap()
+                                        bitmap.allocPixels(codec.imageInfo)
+                                        codec.readPixels(bitmap, frameIndex)
+                                        BitmapPainter(bitmap.asComposeImageBitmap())
+                                    },
+                                    codec.framesInfo
+                                )
+                            } else {
+                                SinglePainterHolder(BitmapPainter(loadImageBitmap(bytes.inputStream())))
+                            }
                         }
+                        else -> SinglePainterHolder(BitmapPainter(loadImageBitmap(stream)))
                     }
-                    else -> SinglePainterHolder(BitmapPainter(loadImageBitmap(stream)))
+                } catch (exc: Exception) {
+                    Logger.e("Failed to load image $url (${exc::class.simpleName}) (${exc.message})")
+                    InvalidPainterHolder
                 }
             }
         }
@@ -123,6 +128,6 @@ fun producePainterCached(
 
             currentPainterHolder.painters[frameIndex]
         }
-        else -> null
+        is InvalidPainterHolder, null -> null
     }
 }
