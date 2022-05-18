@@ -180,7 +180,8 @@ fun ProjectItem(project: CommonProjectResult, modifier: Modifier = Modifier) {
                 ElevatedButton(
                     onClick = {},
                     modifier = Modifier.height(30.dp),
-                    contentPadding = PaddingValues(0.dp)
+                    contentPadding = PaddingValues(0.dp),
+                    elevation = ButtonDefaults.elevatedButtonElevation(defaultElevation = 3.dp, hoveredElevation = 4.dp),
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
