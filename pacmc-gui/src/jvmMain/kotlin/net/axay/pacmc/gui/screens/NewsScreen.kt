@@ -1,23 +1,28 @@
 package net.axay.pacmc.gui.screens
 
-import androidx.compose.foundation.*
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.Text
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.ExperimentalUnitApi
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import kotlinx.serialization.decodeFromString
@@ -43,37 +48,62 @@ fun NewsScreen() {
                 columns = GridCells.Adaptive(500.dp),
             ) {
                 items(currentNews) { searchResult ->
-                    Box(
-                        contentAlignment = Alignment.TopCenter,
-                        modifier = Modifier.clickable {
+                    ArticleResult(
+                        searchResult,
+                        onClick = {
                             currentArticle = searchResult.id
                         }
-                    ) {
-                        ArticleResult(searchResult)
-                    }
+                    )
                 }
             }
         }
     } else {
-        val scrollState = rememberScrollState()
+        val articleState by produceState<MinecraftArticle?>(null, key1 = currentArticle) {
+            value = ktorClient.get("http://localhost:8080/news/minecraft/$currentArticle").body()
+        }
+        val article = articleState
 
-        Box(
-            modifier = Modifier.fillMaxSize().verticalScroll(scrollState),
-            contentAlignment = Alignment.TopCenter
-        ) {
-            ArticleView(currentArticle!!)
+        if (article != null) {
+            Column {
+                SmallTopAppBar(
+                    title = {
+                        Row {
+                            Text(article.title, fontWeight = FontWeight.Bold)
+                            Spacer(Modifier.width(5.dp))
+                            Text("by ${article.author}")
+                        }
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = { currentArticle = null }) {
+                            Icon(Icons.Filled.ArrowBack, "go back")
+                        }
+                    }
+                )
+
+                val scrollState = rememberScrollState()
+                Box(
+                    modifier = Modifier.fillMaxSize().verticalScroll(scrollState),
+                    contentAlignment = Alignment.TopCenter
+                ) {
+                    ArticleView(article)
+                }
+            }
         }
     }
 }
 
 private const val headerImageRatio = 1170f / 500f
 
-@OptIn(ExperimentalUnitApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ArticleResult(result: MinecraftArticle.SearchResult) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(horizontal = 6.dp, vertical = 10.dp).width(600.dp),
+private fun ArticleResult(
+    result: MinecraftArticle.SearchResult,
+    onClick: () -> Unit,
+) {
+    Card(
+        onClick = onClick,
+        modifier = Modifier.padding(10.dp),
+        border = ButtonDefaults.outlinedButtonBorder,
     ) {
         val imageUrl = result.headerImage ?: result.previewImage
         val resolvedImageUrl = remember(imageUrl) {
@@ -81,52 +111,49 @@ private fun ArticleResult(result: MinecraftArticle.SearchResult) {
                 ?.let { if (it.startsWith("/content")) "https://www.minecraft.net${it}" else it }
         }
 
-        if (resolvedImageUrl != null) {
-            val imagePainter = producePainterCached(
-                resolvedImageUrl,
-                "minecraft_net_content",
-                remember(resolvedImageUrl) { resolvedImageUrl.takeLastWhile { it != '/' } },
-                24 * 7 * 4
-            )
-
-            if (imagePainter != null) {
-                Image(
-                    imagePainter,
-                    result.title,
-                    Modifier.fillMaxWidth().aspectRatio(headerImageRatio),
-                    contentScale = ContentScale.FillWidth,
+        Box(modifier = Modifier.clip(RoundedCornerShape(12.0.dp))) {
+            if (resolvedImageUrl != null) {
+                val imagePainter = producePainterCached(
+                    resolvedImageUrl,
+                    "minecraft_net_content",
+                    remember(resolvedImageUrl) { resolvedImageUrl.takeLastWhile { it != '/' } },
+                    24 * 7 * 4
                 )
+
+                if (imagePainter != null) {
+                    Image(
+                        imagePainter,
+                        result.title,
+                        Modifier.fillMaxWidth().aspectRatio(headerImageRatio),
+                        contentScale = ContentScale.FillWidth,
+                    )
+                } else {
+                    Spacer(Modifier.fillMaxWidth().aspectRatio(headerImageRatio))
+                }
             } else {
-                Spacer(Modifier.fillMaxWidth().aspectRatio(headerImageRatio))
+                Spacer(Modifier.fillMaxWidth().aspectRatio(headerImageRatio).background(Color.Black))
             }
-        } else {
-            Spacer(Modifier.fillMaxWidth().aspectRatio(headerImageRatio).background(Color.Black))
         }
 
-        Spacer(Modifier.height(5.dp))
-        Text(
-            result.title,
-            fontWeight = FontWeight.ExtraBold,
-            fontSize = TextUnit(22f, TextUnitType.Sp),
-            textAlign = TextAlign.Center,
-        )
-        result.description?.let { Text(it, textAlign = TextAlign.Center) }
+        Column(Modifier.padding(vertical = 15.dp, horizontal = 10.dp)) {
+            Text(
+                result.title,
+                fontWeight = FontWeight.Bold,
+                fontSize = 22.sp,
+                fontFamily = FontFamily.Default
+            )
+            Spacer(Modifier.height(8.dp))
+            result.description?.let { Text(it) }
+        }
     }
 }
 
 @Composable
-private fun ArticleView(articleId: String) {
-    val articleState by produceState<MinecraftArticle?>(null, key1 = articleId) {
-        value = ktorClient.get("http://localhost:8080/news/minecraft/$articleId").body()
-    }
-    val article = articleState
-
-    if (article != null) {
-        val rootNode = remember { Json.decodeFromString<JsonMarkup.RootNode>(article.contentJson) }
-        Box(Modifier.width(800.dp)) {
-            SelectionContainer {
-                JsonMarkup(rootNode)
-            }
+private fun ArticleView(article: MinecraftArticle) {
+    val rootNode = remember { Json.decodeFromString<JsonMarkup.RootNode>(article.contentJson) }
+    Box(Modifier.width(800.dp)) {
+        SelectionContainer {
+            JsonMarkup(rootNode)
         }
     }
 }
