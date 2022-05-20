@@ -55,7 +55,7 @@ class Archive(val name: String) {
 
     private suspend fun TypedRealm.findArchiveOrNull() = queryArchive().asFlow().first().obj
 
-    private suspend fun TypedRealm.findArchive() = queryArchive().asFlow().first().obj
+    private suspend fun TypedRealm.findArchive() = findArchiveOrNull()
         ?: error("The archive '$name' is not present in the database")
 
     sealed class TransactionProgress<U> {
