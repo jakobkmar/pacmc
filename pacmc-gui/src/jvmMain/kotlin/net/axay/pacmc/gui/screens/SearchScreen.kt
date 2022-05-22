@@ -16,7 +16,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -35,6 +34,7 @@ import net.axay.pacmc.common.data.Repository
 import net.axay.pacmc.gui.cache.producePainterCached
 import net.axay.pacmc.gui.util.currentBaseTextColor
 import net.axay.pacmc.repoapi.CachePolicy
+import java.util.*
 
 private sealed interface SearchResponse
 
@@ -178,7 +178,9 @@ fun ProjectItem(project: CommonProjectResult, modifier: Modifier = Modifier) {
                 }
 
                 ElevatedButton(
-                    onClick = {},
+                    onClick = {
+                        println(Base64.getDecoder().decode("YmFzdGlmYXN0aSByYW1hZGFu").decodeToString())
+                    },
                     modifier = Modifier.height(30.dp),
                     contentPadding = PaddingValues(0.dp),
                     elevation = ButtonDefaults.elevatedButtonElevation(defaultElevation = 3.dp, hoveredElevation = 4.dp),
