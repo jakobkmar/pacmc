@@ -10,7 +10,7 @@ import net.axay.pacmc.app.database.model.DbInstalledProject
 val realm = run {
     val config = RealmConfiguration.Builder(setOf(DbArchive::class, DbInstalledProject::class))
         .directory(
-            Environment.dataLocalDir.resolve("db2").toString()
+            Environment.dataLocalDir.resolve("data/db2/").toString()
         )
         .name("pacmc_db")
         .build()
