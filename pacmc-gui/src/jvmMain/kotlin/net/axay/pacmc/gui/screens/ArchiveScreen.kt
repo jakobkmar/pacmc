@@ -328,7 +328,7 @@ fun ArchiveItem(archive: DbArchive) {
                     .size(60.dp)
                     .align(Alignment.CenterVertically)
                     .background(RGBInt(archive.color.toUInt()).toSRGB().run { Color(redInt, greenInt, blueInt) }, RoundedCornerShape(15.dp))
-                    .border(BorderStroke(4.dp, Color.Black), RoundedCornerShape(15.dp))
+                    .border(BorderStroke(4.dp, MaterialTheme.colorScheme.onSurface), RoundedCornerShape(15.dp))
             )
             Spacer(Modifier.width(16.dp))
             SelectionContainer {
