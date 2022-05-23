@@ -5,9 +5,10 @@ import net.axay.pacmc.app.Environment
 enum class OperatingSystem(
     val prefix: String,
     val displayName: String,
+    val mojangName: String = prefix,
 ) {
     LINUX("linux", "Linux"),
-    MACOS("mac", "macOS"),
+    MACOS("mac", "macOS", "osx"),
     WINDOWS("windows", "Microsoft Windows");
 
     companion object {
