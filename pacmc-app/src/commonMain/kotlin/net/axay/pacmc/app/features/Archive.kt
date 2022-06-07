@@ -262,8 +262,12 @@ class Archive(val name: String) {
         }?.first
 
     private fun Path.isArchiveFile(): Boolean {
-        return Environment.fileSystem.metadata(this).isRegularFile &&
-            name.removeSuffix(".jar").endsWith(".pacmc")
+        return try {
+            Environment.fileSystem.metadata(this).isRegularFile &&
+                name.removeSuffix(".jar").endsWith(".pacmc")
+        } catch (exc: okio.IOException) {
+            false
+        }
     }
 
     class Transaction(
