@@ -47,7 +47,8 @@ tasks {
 
         filesMatching("**") {
             expandProps.forEach { (propertyName, propertyValue) ->
-                filter { Regex("\\\${1}\\{{1}($propertyName)\\}{1}").replace(it, propertyValue.toString()) }
+                val regex = Regex("""\$\{${propertyName}\}""")
+                filter { regex.replace(it, propertyValue.toString()) }
             }
         }
     }
