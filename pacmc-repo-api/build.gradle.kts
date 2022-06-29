@@ -14,7 +14,6 @@ buildscript {
 
 kotlin {
     jvm()
-    linuxX64()
 
     sourceSets {
         named("commonMain") {
