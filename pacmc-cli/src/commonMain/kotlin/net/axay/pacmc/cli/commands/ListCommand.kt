@@ -1,6 +1,8 @@
 package net.axay.pacmc.cli.commands
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.mordant.rendering.TextColors
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -20,10 +22,33 @@ class ListCommand : CliktCommand(
     help = "List content installed to an archive",
 ) {
     private val archiveName by archiveIdOption("The archive which contains the content that should be listed")
+    private val simpleFlag by option("-s", "--simple", help = "Simple, machine-parsable output").flag()
 
     override fun run() = launchJob {
-        terminal.println("The archive '$archiveName' contains the following content:")
         val archive = Archive.terminalFromString(archiveName) ?: return@launchJob
+
+        if (simpleFlag) {
+            val installedSlugs = mutableListOf<String>()
+            val installedMutex = Mutex()
+
+            coroutineScope {
+                archive.getInstalled().forEach { project ->
+                    launch {
+                        val projectLine = repoApiContext {
+                            it.getBasicProjectInfo(project.readModId())
+                        }?.slug?.toString() ?: project.readModId().toString()
+                        installedMutex.withLock { installedSlugs += projectLine }
+                    }
+                }
+            }
+
+            installedSlugs.forEach {
+                terminal.println(it)
+            }
+            return@launchJob
+        }
+
+        terminal.println("The archive '$archiveName' contains the following content:")
 
         val installed = mutableListOf<Pair<String, String>>()
         val installedDependencies = mutableListOf<Pair<String, String>>()
