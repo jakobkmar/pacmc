@@ -5,6 +5,7 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.mordant.rendering.TextColors
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -28,19 +29,12 @@ class ListCommand : CliktCommand(
         val archive = Archive.terminalFromString(archiveName) ?: return@launchJob
 
         if (simpleFlag) {
-            val installedSlugs = mutableListOf<String>()
-            val installedMutex = Mutex()
-
-            coroutineScope {
-                archive.getInstalled().forEach { project ->
-                    launch {
-                        val projectLine = repoApiContext {
-                            it.getBasicProjectInfo(project.readModId())
-                        }?.slug?.toString() ?: project.readModId().toString()
-                        installedMutex.withLock { installedSlugs += projectLine }
-                    }
-                }
-            }
+            val installedSlugs = archive.getInstalled().map { project ->
+                async {
+                    repoApiContext {
+                        it.getBasicProjectInfo(project.readModId())
+                    }?.slug?.toString() ?: project.readModId().toString()
+                }}.awaitAll()
 
             installedSlugs.forEach {
                 terminal.println(it)
