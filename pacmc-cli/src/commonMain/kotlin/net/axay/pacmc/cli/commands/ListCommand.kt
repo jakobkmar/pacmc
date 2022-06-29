@@ -34,7 +34,8 @@ class ListCommand : CliktCommand(
                     repoApiContext {
                         it.getBasicProjectInfo(project.readModId())
                     }?.slug?.toString() ?: project.readModId().toString()
-                }}.awaitAll()
+                }
+            }.awaitAll()
 
             installedSlugs.forEach {
                 terminal.println(it)
