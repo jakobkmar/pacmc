@@ -90,6 +90,8 @@ public data class BaseVersion(
       Optional,
       @SerialName("incompatible")
       Incompatible,
+      @SerialName("embedded")
+      Embedded,
     }
   }
 

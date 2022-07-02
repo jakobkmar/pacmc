@@ -65,7 +65,7 @@ data class CommonProjectVersion(
             files = version.files.map { File(it.filename, it.url, it.primary) },
             gameVersions = version.gameVersions.mapNotNull { MinecraftVersion.fromString(it) },
             dependencies = version.dependencies.orEmpty().mapNotNull {
-                val optional = it.dependencyType == BaseVersion.Dependencies.DependencyType.Optional
+                val optional = it.dependencyType == BaseVersion.Dependencies.DependencyType.Optional || it.dependencyType == BaseVersion.Dependencies.DependencyType.Embedded
                 when {
                     it.dependencyType == BaseVersion.Dependencies.DependencyType.Incompatible -> null
                     it.projectId != null -> Dependency.ProjectDependency(ModId(Repository.MODRINTH, it.projectId!!), optional)
