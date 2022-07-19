@@ -2,8 +2,8 @@
 
 **`pacmc`** is a package manager (and soon to be launcher) for Minecraft mods.
 
-The aim of this project is to massively reduce the effort you have to put in to installing - and most importantly -
-keeping your mods up to date. Install Fabric, Quilt and Forge mods from Modrinth and Curseforge!
+The aim of this project is to massively reduce the effort that goes in to installing - and most importantly - keeping your mods up to date. 
+Install Fabric, Quilt and Forge mods from Modrinth and Curseforge!
 
 To install pacmc, visit the [**Installation** section](#installation).
 
@@ -51,12 +51,12 @@ pacmc install lithium
 
 ### Archives
 
-Archives are the places (folders) where your mods are stored. Your `.minecraft` folder is an archive by default, but you
+Archives are the places (folders) where your mods are stored. Your `.minecraft/mods` folder is the default archive, but you
 can add more (for example to manage mods on a server, which `pacmc` is designed for as well).
 
 #### Init the default archive
 
-To add the `.minecraft` folder as an archive:
+To add the `.minecraft/mods` folder as an archive:
 
 ```zsh
 pacmc archive init
@@ -64,8 +64,10 @@ pacmc archive init
 
 #### Add an archive
 
+To add a custom folder as an `[Fabric|Forge|Rift]` archive: 
+
 ```zsh
-pacmc archive create myarchive ./path/to/my/archive
+pacmc archive create --loader fabric myarchive ./path/to/my/archive
 ```
 
 #### List all existing archives
