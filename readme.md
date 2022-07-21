@@ -64,7 +64,7 @@ pacmc archive init
 
 #### Add an archive
 
-To add a custom folder as an `[Fabric|Forge|Rift]` archive: 
+To add a custom folder as an `[Fabric|Forge|Quilt]` archive: 
 
 ```zsh
 pacmc archive create --loader fabric myarchive ./path/to/my/archive
