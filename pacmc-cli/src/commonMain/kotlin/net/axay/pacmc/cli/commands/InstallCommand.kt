@@ -34,11 +34,12 @@ class InstallCommand : CliktCommand(
         spinner.stop("resolved install transaction")
         terminal.println()
 
-        val modStrings = transaction.resolveModStrings()
-        if (modStrings.isEmpty()) {
+        if (transaction.isEmpty()) {
             terminal.println(TextColors.brightRed("No files matching your archive version and loader were found"))
             return@launchJob
         }
+
+        val modStrings = transaction.resolveModStrings()
 
         if (
             !terminal.printAndConfirmTransaction(
