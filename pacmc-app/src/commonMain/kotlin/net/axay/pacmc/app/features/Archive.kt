@@ -85,12 +85,6 @@ class Archive(val name: String) {
     ) {
         coroutineScope {
             fun Collection<CommonProjectVersion>.installAll(isDependency: Boolean = false) {
-                if (isEmpty()) {
-                    launch {
-                        progressCallback(TransactionProgress.Finished("idk what to put here" as U, TransactionPartResult.NO_FILE))
-                    }
-                    return
-                }
                 forEach { version ->
                     launch {
                         val key = progressKeyMap[version.modId]!!
