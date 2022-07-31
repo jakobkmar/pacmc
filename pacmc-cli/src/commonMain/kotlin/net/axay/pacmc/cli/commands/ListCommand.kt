@@ -43,7 +43,7 @@ class ListCommand : CliktCommand(
             return@launchJob
         }
 
-        terminal.println("The archive '$archiveName' contains the following content:")
+        terminal.println("The archive '$archiveName' contains the following content (${archive.getInstalled().size} mods):")
 
         val installed = mutableListOf<Pair<String, String>>()
         val installedDependencies = mutableListOf<Pair<String, String>>()
