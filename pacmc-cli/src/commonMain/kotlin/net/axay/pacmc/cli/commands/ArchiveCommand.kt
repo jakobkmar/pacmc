@@ -9,6 +9,7 @@ import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.colormath.model.RGBInt
 import com.github.ajalt.mordant.rendering.TextColors
 import com.github.ajalt.mordant.rendering.TextStyles
+import io.ktor.http.content.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -187,6 +188,14 @@ class ArchiveCommand : CliktCommand(
             }
             terminal.println()
 
+            if (archive.isDefault) {
+                terminal.println(TextColors.yellow("You are trying to delete the default archive. To avoid issues, you have to set a new default archive"))
+                val newDefaultArchive = terminal.choose(
+                    "Please provide a new default archive",
+                    Archive.getArchivesList().filter { it.name != archive.name }.map { it to TextColors.color(RGBInt(it.color.toUInt())).invoke(it.displayName) }
+                ) ?: return@launchJob
+                Archive.setDefault(newDefaultArchive.name)
+            }
             archive.delete(keepFiles)
 
             terminal.println("${TextColors.brightRed("Removed")} archive '$archiveName'")
