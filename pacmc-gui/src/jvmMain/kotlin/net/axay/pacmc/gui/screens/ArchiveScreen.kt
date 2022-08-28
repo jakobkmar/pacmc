@@ -31,9 +31,8 @@ import compose.icons.TablerIcons
 import compose.icons.tablericons.Brush
 import compose.icons.tablericons.Plant2
 import compose.icons.tablericons.Tool
-import io.realm.query
-import io.realm.realmListOf
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.axay.pacmc.app.database.model.DbArchive
@@ -48,11 +47,13 @@ import net.axay.pacmc.gui.util.FileChooser
 import okio.Path.Companion.toPath
 import java.awt.Toolkit
 import java.util.*
+import io.realm.kotlin.ext.realmListOf
+import io.realm.kotlin.ext.query
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalUnitApi::class)
 @Composable
 fun ArchiveScreen() = Box(Modifier.fillMaxSize()) {
-    val archiveScope = rememberCoroutineScope { Dispatchers.Default }
+    val archiveScope = rememberCoroutineScope { Dispatchers.Default + SupervisorJob() }
 
     var archives by produceState(emptyList()) {
         value = withContext(Dispatchers.IO) {

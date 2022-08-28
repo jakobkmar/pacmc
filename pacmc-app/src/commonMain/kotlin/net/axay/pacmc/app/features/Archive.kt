@@ -1,7 +1,7 @@
 package net.axay.pacmc.app.features
 
-import io.realm.TypedRealm
-import io.realm.query
+import io.realm.kotlin.TypedRealm
+import io.realm.kotlin.ext.query
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
