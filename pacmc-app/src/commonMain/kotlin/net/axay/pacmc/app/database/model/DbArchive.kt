@@ -1,20 +1,18 @@
 package net.axay.pacmc.app.database.model
 
-import io.realm.kotlin.ext.realmListOf
-import io.realm.kotlin.ext.toRealmList
-import io.realm.kotlin.types.RealmList
-import io.realm.kotlin.types.RealmObject
-import io.realm.kotlin.types.annotations.Index
-import io.realm.kotlin.types.annotations.PrimaryKey
+import io.realm.RealmList
+import io.realm.RealmObject
+import io.realm.annotations.Index
+import io.realm.annotations.PrimaryKey
+import io.realm.realmListOf
+import io.realm.toRealmList
 import net.axay.pacmc.app.repoapi.model.CommonProjectVersion
 import net.axay.pacmc.common.data.*
 import okio.Path
 import okio.Path.Companion.toPath
 
 class DbArchive() : RealmObject {
-    @PrimaryKey
-    @Index
-    var name: String = ""
+    @PrimaryKey @Index var name: String = ""
     var displayName: String = ""
     var path: String = ""
     var minecraftVersion: String = ""

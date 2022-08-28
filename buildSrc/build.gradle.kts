@@ -7,9 +7,9 @@ repositories {
     mavenCentral()
 }
 
-val kotlinVersion = "1.7.10"
+val kotlinVersion = "1.6.21"
 
 dependencies {
     implementation(kotlin("gradle-plugin", kotlinVersion))
-    implementation(kotlin("serialization", kotlinVersion))
+    implementation("org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion")
 }
