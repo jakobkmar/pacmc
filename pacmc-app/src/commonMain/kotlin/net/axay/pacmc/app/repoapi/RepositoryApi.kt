@@ -20,6 +20,7 @@ import net.axay.pacmc.repoapi.CachePolicy
 import net.axay.pacmc.repoapi.RequestContext
 import net.axay.pacmc.repoapi.curseforge.CurseforgeApi
 import net.axay.pacmc.repoapi.modrinth.ModrinthApi
+import net.axay.pacmc.repoapi.modrinth.model.ServerRenderedProject
 import net.axay.pacmc.repoapi.mojang.LauncherMetaApi
 import net.axay.pacmc.repoapi.mojang.model.VersionManifest
 import kotlin.time.Duration.Companion.days
@@ -43,8 +44,7 @@ object RepositoryApi {
             },
             deserializer = { readUtf8() },
             serializer = { writeUtf8(it) },
-        ),
-        validationConfig = CacheValidationConfig(
+        ), validationConfig = CacheValidationConfig(
             expireAfterWrite = 7.days,
             expireAfterAccess = null,
         )
@@ -61,6 +61,7 @@ object RepositoryApi {
             val modrinthRequest = async {
                 if (repository == null || repository == Repository.MODRINTH) {
                     with(modrinthApi) { searchProjects(searchTerm, limit = 8) }?.hits.orEmpty()
+                        .filter { it.projectType == ServerRenderedProject.ProjectType.Mod }
                         .map(CommonProjectResult.Companion::fromModrinthProjectResult)
                 } else emptyList()
             }
@@ -84,17 +85,20 @@ object RepositoryApi {
         Repository.CURSEFORGE -> TODO()
     }
 
-    suspend fun RequestContext.getBasicProjectInfo(idOrSlug: IdOrSlug): CommonBasicProject? = when (idOrSlug.repository) {
-        Repository.MODRINTH -> with(modrinthApi) { getProject(idOrSlug.idOrSlug) }?.let(CommonBasicProject::fromModrinthProject)
-        Repository.CURSEFORGE -> with(curseforgeApi) { getProject(idOrSlug) }?.let(CommonBasicProject::fromCurseforgeMod)
-    }
+    suspend fun RequestContext.getBasicProjectInfo(idOrSlug: IdOrSlug): CommonBasicProject? =
+        when (idOrSlug.repository) {
+            Repository.MODRINTH -> with(modrinthApi) { getProject(idOrSlug.idOrSlug) }?.let(CommonBasicProject::fromModrinthProject)
+            Repository.CURSEFORGE -> with(curseforgeApi) { getProject(idOrSlug) }?.let(CommonBasicProject::fromCurseforgeMod)
+        }
 
     suspend fun RequestContext.getProjectVersion(
         projectIdOrSlug: IdOrSlug,
         versionId: String,
     ): CommonProjectVersion? = when (projectIdOrSlug.repository) {
         Repository.MODRINTH -> with(modrinthApi) { getProjectVersion(versionId) }?.let(CommonProjectVersion::fromModrinthProjectVersion)
-        Repository.CURSEFORGE -> with (curseforgeApi) { getProjectVersion(projectIdOrSlug, versionId) }?.let(CommonProjectVersion::fromCurseforgeFile)
+        Repository.CURSEFORGE -> with(curseforgeApi) { getProjectVersion(projectIdOrSlug, versionId) }?.let(
+            CommonProjectVersion::fromCurseforgeFile
+        )
     }
 
     suspend fun RequestContext.getProjectVersions(
@@ -102,11 +106,17 @@ object RepositoryApi {
         loaders: List<ModLoader>? = null,
     ) = when (idOrSlug.repository) {
         Repository.MODRINTH -> {
-            with(modrinthApi) { getProjectVersions(idOrSlug.idOrSlug, loaders?.map { it.identifier }) }
-                ?.map(CommonProjectVersion::fromModrinthProjectVersion)
+            with(modrinthApi) { getProjectVersions(idOrSlug.idOrSlug, loaders?.map { it.identifier }) }?.map(
+                    CommonProjectVersion::fromModrinthProjectVersion
+                )
         }
-        Repository.CURSEFORGE -> with(curseforgeApi) { getProjectVersions(idOrSlug, loaders) }
-            ?.map(CommonProjectVersion::fromCurseforgeFile)
+
+        Repository.CURSEFORGE -> with(curseforgeApi) {
+            getProjectVersions(
+                idOrSlug,
+                loaders
+            )
+        }?.map(CommonProjectVersion::fromCurseforgeFile)
     }
 
     suspend fun RequestContext.getMinecraftReleases(): List<MinecraftVersion>? {
