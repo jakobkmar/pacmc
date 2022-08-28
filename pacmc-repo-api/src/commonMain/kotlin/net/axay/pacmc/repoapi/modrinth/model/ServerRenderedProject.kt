@@ -72,5 +72,7 @@ public data class ServerRenderedProject(
     Mod,
     @SerialName("modpack")
     Modpack,
+    @SerialName("resourcepack")
+    Resourcepack
   }
 }
