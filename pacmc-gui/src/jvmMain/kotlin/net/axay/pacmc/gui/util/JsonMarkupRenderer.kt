@@ -2,14 +2,13 @@ package net.axay.pacmc.gui.util
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
@@ -32,8 +31,6 @@ import co.touchlab.kermit.Logger
 import net.axay.pacmc.gui.cache.producePainterCached
 import net.axay.pacmc.server.model.JsonMarkup
 import okio.ByteString.Companion.toByteString
-import java.awt.Desktop
-import java.net.URI
 
 private class MarkupBuilder {
     private var stringBuilder: AnnotatedString.Builder? = null
@@ -53,7 +50,7 @@ private class MarkupBuilder {
     fun getOrCreateString(): AnnotatedString.Builder {
         if (stringBuilder == null) {
             stringBuilder = AnnotatedString.Builder().apply {
-                pushStyle(SpanStyle(fontSize = baseFontSize.sp, color = currentBaseTextColor()))
+                pushStyle(SpanStyle(fontSize = baseFontSize.sp))
                 styles.forEach { pushStyle(it) }
             }
         }
