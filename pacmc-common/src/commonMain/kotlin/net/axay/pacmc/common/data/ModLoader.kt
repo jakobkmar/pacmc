@@ -5,9 +5,8 @@ enum class ModLoader(
     val curseforgeId: Int?,
     val compatibleLoaders: List<ModLoader> = emptyList(),
 ) {
-    QUILT("Quilt", null),
     FABRIC("Fabric", 4),
-    FORGE("Forge", 1);
+    QUILT("Quilt", 5, listOf(FABRIC)),
     FORGE("Forge", 1),
     LITELOADER("LiteLoader", 3),
     RIFT("Rift", null),
