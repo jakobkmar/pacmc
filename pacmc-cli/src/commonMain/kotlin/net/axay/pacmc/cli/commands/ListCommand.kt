@@ -43,14 +43,16 @@ class ListCommand : CliktCommand(
             return@launchJob
         }
 
-        terminal.println("The archive '$archiveName' contains the following content:")
+        val installedSlugs = archive.getInstalled()
+
+        terminal.println("The archive '$archiveName' contains the following content (${installedSlugs.size} mods):")
 
         val installed = mutableListOf<Pair<String, String>>()
         val installedDependencies = mutableListOf<Pair<String, String>>()
         val installedMutex = Mutex()
 
         coroutineScope {
-            archive.getInstalled().forEach { project ->
+            installedSlugs.forEach { project ->
                 launch {
                     val projectLine = async {
                         buildString {
