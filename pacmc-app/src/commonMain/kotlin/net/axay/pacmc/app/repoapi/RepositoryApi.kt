@@ -54,20 +54,21 @@ object RepositoryApi {
     private val curseforgeApi = CurseforgeApi(ktorClient, ktorClientJson, cache)
     private val launcherMetaApi = LauncherMetaApi(ktorClient, ktorClientJson, cache)
 
-    suspend fun RequestContext.search(searchTerm: String, repository: Repository?): List<CommonProjectResult> {
+    suspend fun RequestContext.search(searchTerm: String,
+                                      repository: Repository?, limit: Int): List<CommonProjectResult> {
         val results = mutableListOf<CommonProjectResult>()
 
         coroutineScope {
             val modrinthRequest = async {
                 if (repository == null || repository == Repository.MODRINTH) {
-                    with(modrinthApi) { searchProjects(searchTerm, limit = 8) }?.hits.orEmpty()
+                    with(modrinthApi) { searchProjects(searchTerm, limit = limit) }?.hits.orEmpty()
                         .map(CommonProjectResult.Companion::fromModrinthProjectResult)
                 } else emptyList()
             }
 
             val curseforgeRequest = async {
                 if (repository == null || repository == Repository.CURSEFORGE) {
-                    with(curseforgeApi) { searchProjects(searchTerm, pageSize = 8) }.orEmpty()
+                    with(curseforgeApi) { searchProjects(searchTerm, pageSize = limit) }.orEmpty()
                         .map(CommonProjectResult.Companion::fromCurseforgeMod)
                 } else emptyList()
             }
