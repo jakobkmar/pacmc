@@ -480,4 +480,7 @@ class Archive(val name: String) {
     suspend fun getGameVersion(): MinecraftVersion {
         return realm.findArchive().readGameVersion()
     }
+
+    val isDefault: Boolean
+        get() = getDefault() == name
 }
